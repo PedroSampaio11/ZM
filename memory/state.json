@@ -1,0 +1,14 @@
+{
+  "project": "CoreBrain",
+  "version": "2.0.0",
+  "last_sync": "",
+  "active_tasks": [],
+  "completed_tasks_count": 0,
+  "strategic_alignment": "FourCoders Studio - Pedro Identity",
+  "critical_paths": [
+    "dashboard/src/app",
+    "scripts/",
+    ".claude/agents"
+  ],
+  "session_tokens_optimized": true
+}

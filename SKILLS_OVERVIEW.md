@@ -1,40 +1,40 @@
-# 🗺️ Mapa de Skills | CoreBrain
+# 🗺️ Mapa de Skills | CoreBrain V2
 
-Um resumo rápido do que cada especialista do seu ecossistema faz.
+Guia de referência para orquestração. Use este arquivo para roteamento semântico.
 
 ---
 
-### 🧠 Estratégia e Identidade
-- **pedro-identity**: O seu "DNA". Garante que tudo siga o seu gosto e objetivos.
-- **ceo-advisor**: Consultoria para decisões de alto nível, investimentos e conselho.
-- **thought-organizer**: Triagem de ideias. Transforma bagunça mental em tarefas.
-- **handoff-protocol**: O "aperto de mão" que passa a tarefa de uma skill para outra.
+### 🧠 Estratégia e Orquestração
+- **pedro-identity**: DNA e alinhamento estratégico pessoal.
+- **ceo-advisor**: Estratégia C-Level, capital e decisões críticas.
+- **thought-organizer**: Refinamento de ideias e priorização macro.
+- **handoff-protocol**: Padronização de transição entre skills.
 
-### 🏗️ Arquitetura e Engenharia
-- **senior-architect**: Desenha sistemas grandes e escolhe a melhor tecnologia.
-- **clean-code**: Audita o código para garantir que seja limpo e fácil de ler.
-- **database-architect**: Planeja como os dados serão salvos (SQL/NoSQL).
-- **eschema**: Otimização profunda e segura para PostgreSQL.
-- **api**: Integração com serviços externos (Stripe, etc) com segurança.
-- **typescript-pro**: Tipagem avançada para evitar bugs antes mesmo de rodar o código.
-- **senior-backend**: Scaffolding e lógica robusta de servidor (Node/Go/Python).
+### 🏗️ Engenharia e Dados
+- **senior-architect**: Topologia de sistemas e escalabilidade.
+- **clean-code**: Auditoria de legibilidade e padrões SOLID.
+- **database**: Persistência, sharding e performance de dados.
+- **eschema**: Especialista em PostgreSQL, indexação e constraints.
+- **api**: Integrações externas resilientes (OAuth/Webhooks).
+- **typescript-pro**: Tipagem avançada e segurança end-to-end.
+- **senior-backend**: Lógica de servidor, segurança e performance.
 
-### 🎨 Design e UI/UX
-- **ui-ux-pro-max**: A biblioteca de inteligência visual para interfaces de luxo.
-- **ckm-design-system**: Criação de tokens, cores e componentes reutilizáveis.
-- **ckm-design**: Branding, logos, banners e identidade visual unificada.
-- **ckm-ui-styling**: Implementação prática com Tailwind CSS e shadcn/ui.
-- **frontend-design**: Garante que o visual não pareça "IA genérica".
+### 🎨 Design e User Experience
+- **ui-ux-pro-max**: Inteligência de design, acessibilidade e micro-interações.
+- **ckm-design-system**: Arquitetura de tokens e design sistemático.
+- **ckm-design**: Logos (AI), CIP, banners e branding integrado.
+- **ckm-ui-styling**: Implementação Tailwind/shadcn e componentes.
+- **frontend-design**: Estética premium e refinamento visual.
 
-### 🚀 Crescimento e Marketing
-- **content-ads-pro**: Engenharia reversa de posts virais e estratégia de tráfego pago.
-- **social**: Criação de conteúdo estratégico para LinkedIn e redes sociais.
-- **product-manager**: Priorização de features (RICE) e análise de mercado.
-- **analytics-expert**: Rastreamento de usuários e métricas de conversão.
+### 🚀 Business e Crescimento
+- **content-ads-pro**: Viralidade, tráfego pago e conversão.
+- **social**: Estratégia de conteúdo e autoridade digital.
+- **product-manager**: Priorização RICE, discovery e PRDs.
+- **analytics-expert**: Tracking, métricas e análise de funil.
 
-### 🛡️ Qualidade e Infra
-- **devops-engineer**: Automação de deploy, Docker e infraestrutura na nuvem.
-- **test-master**: Estratégia de testes para o código nunca quebrar em produção.
-- **security-auditor**: Auditoria contra hackers e proteção de dados sensíveis.
-- **code-reviewer**: Revisão de PRs focada em bugs e performance.
-- **task-decomposition**: Quebra objetivos complexos em passos simples.
+### 🛡️ QA, Segurança e Infra
+- **devops-engineer**: CI/CD, Docker e automação de infra.
+- **test-master**: Cobertura de testes e prevenção de regressão.
+- **security-auditor**: Modelagem de ameaças e auditoria ofensiva.
+- **code-reviewer**: Revisão de PRs e detecção de code smells.
+- **task-decomposition**: Decomposição de metas e orquestração.

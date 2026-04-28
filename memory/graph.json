@@ -1,0 +1,155 @@
+{
+  "files": {
+    "CLAUDE.md": {
+      "size": 506,
+      "type": "md"
+    },
+    "COREBRAIN_GUIDE.md": {
+      "size": 2894,
+      "type": "md"
+    },
+    "README.md": {
+      "size": 926,
+      "type": "md"
+    },
+    "SKILLS_OVERVIEW.md": {
+      "size": 1967,
+      "type": "md"
+    },
+    "task.md": {
+      "size": 820,
+      "type": "md"
+    },
+    "walkthrough_v2.md": {
+      "size": 1586,
+      "type": "md"
+    },
+    ".obsidian/templates/adr-template.md": {
+      "size": 318,
+      "type": "md"
+    },
+    ".obsidian/templates/context-template.md": {
+      "size": 687,
+      "type": "md"
+    },
+    ".obsidian/templates/task-template.md": {
+      "size": 309,
+      "type": "md"
+    },
+    "dashboard/next-env.d.ts": {
+      "size": 216,
+      "type": "ts"
+    },
+    "dashboard/postcss.config.js": {
+      "size": 82,
+      "type": "js"
+    },
+    "dashboard/tailwind.config.ts": {
+      "size": 699,
+      "type": "ts"
+    },
+    "dashboard/src/app/layout.tsx": {
+      "size": 446,
+      "type": "tsx"
+    },
+    "dashboard/src/app/page.tsx": {
+      "size": 28179,
+      "type": "tsx"
+    },
+    "dashboard/src/app/api/agents/route.ts": {
+      "size": 1454,
+      "type": "ts"
+    },
+    "dashboard/src/app/api/skills/route.ts": {
+      "size": 1816,
+      "type": "ts"
+    },
+    "scripts/cb-export.ps1": {
+      "size": 2523,
+      "type": "ps1"
+    },
+    "scripts/cb-graph.py": {
+      "size": 3437,
+      "type": "py"
+    },
+    "scripts/cb-init.ps1": {
+      "size": 5036,
+      "type": "ps1"
+    },
+    "scripts/cb-state.py": {
+      "size": 621,
+      "type": "py"
+    },
+    "scripts/cb-sync.py": {
+      "size": 1759,
+      "type": "py"
+    }
+  },
+  "folders": [
+    ".obsidian",
+    ".obsidian\\templates",
+    ".trash",
+    "dashboard",
+    "dashboard\\src",
+    "dashboard\\src\\app",
+    "dashboard\\src\\app\\api",
+    "dashboard\\src\\app\\api\\agents",
+    "dashboard\\src\\app\\api\\skills",
+    "scripts"
+  ],
+  "dependencies": [
+    {
+      "from": "dashboard/tailwind.config.ts",
+      "to": "tailwindcss"
+    },
+    {
+      "from": "dashboard/src/app/layout.tsx",
+      "to": "next"
+    },
+    {
+      "from": "dashboard/src/app/page.tsx",
+      "to": "react"
+    },
+    {
+      "from": "dashboard/src/app/page.tsx",
+      "to": "lucide-react"
+    },
+    {
+      "from": "dashboard/src/app/api/agents/route.ts",
+      "to": "next/server"
+    },
+    {
+      "from": "dashboard/src/app/api/agents/route.ts",
+      "to": "fs"
+    },
+    {
+      "from": "dashboard/src/app/api/agents/route.ts",
+      "to": "path"
+    },
+    {
+      "from": "dashboard/src/app/api/skills/route.ts",
+      "to": "next/server"
+    },
+    {
+      "from": "dashboard/src/app/api/skills/route.ts",
+      "to": "fs"
+    },
+    {
+      "from": "dashboard/src/app/api/skills/route.ts",
+      "to": "path"
+    }
+  ],
+  "generated_at": "2026-04-28T12:53:35.577793",
+  "health": {
+    "score": 95,
+    "issues": [
+      "\ud83d\udd34 Arquivo muito grande: dashboard/src/app/page.tsx (27KB)"
+    ],
+    "metrics": {
+      "total_files": 21,
+      "large_files": 1,
+      "missing_types": 0,
+      "todo_count": 0
+    }
+  }
+}
