@@ -1,19 +1,24 @@
-# 🏁 CoreBrain V1.0 - Checklist de Finalização
+# 📋 Lista de Tarefas: CoreBrain V2 (Otimização & Escala)
 
-- [x] **Fase 1: O Cérebro (Orquestração)**
-    - [x] Criar Agente Maestro `.claude/agents/brain.md`
-    - [x] Configurar lógica de roteamento de skills
-    - [x] Integrar protocolo de handoff no fluxo principal
+## 🧠 Orquestração & Memória
+- [x] Implementar a **Regra dos 3 (Flush de Contexto)**: Automatizar o arquivamento de `logs.md` para `decisions.md` a cada 3 tarefas concluídas via `scripts/cb-flush.py`.
+- [ ] Validar a sincronização do `state.json` via `scripts/cb-state.py`.
+- [ ] Testar a indexação semântica no ChromaDB usando o `scripts/cb-sync.py`.
 
-- [x] **Fase 2: Estrutura de Memória (Obsidian)**
-    - [x] Criar templates de nota (`.obsidian/templates/`)
-    - [x] Criar template de ADR (Architectural Decision Record)
-    - [x] Criar template de Task/Sprint
+## 🖥️ Dashboard (UX/UI)
+- [ ] Adicionar funcionalidade de **Exportação de Regras** na UI (gerar `.cursorrules` e `.antigravityrules` via Dashboard).
+- [ ] Implementar um indicador visual de "Token Usage" ou "Context Density" no Overview.
+- [ ] Corrigir o fetch de agentes para garantir que todos os `.md` em `.claude/agents/` sejam listados.
 
-- [x] **Fase 3: Automação (Scripts CLI)**
-    - [x] Criar `scripts/cb-init.ps1` (Script de inicialização)
-    - [x] Criar `scripts/cb-sync.py` (Script de sincronização RAG/ChromaDB)
+## 🛠️ Automação & Infra
+- [ ] Teste de Stress do `cb-init.ps1`: Simular a criação de um novo projeto do zero e validar se o Handoff Protocol funciona.
+- [ ] Auditar as 20+ skills para garantir que nenhuma ultrapasse o limite de 2KB por arquivo (Zero-Waste).
 
-- [x] **Fase 4: Polimento e Documentação**
-    - [x] Atualizar `COREBRAIN_GUIDE.md` com novos comandos
-    - [x] Criar README final para o GitHub
+## ✅ Concluído
+- [x] Compressão de Skills (de 150KB para 30KB).
+- [x] Estrutura de Memória JSON (`graph.json`, `state.json`).
+- [x] Dashboard funcional com 5 abas principais.
+- [x] Script `cb-init.ps1` portável.
+
+---
+*Gerado por: CoreBrain Orchestrator | PedroSampaio Ecosystem*

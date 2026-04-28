@@ -52,3 +52,37 @@ Registro imutável de decisões arquiteturais. Adicionar, nunca editar entradas 
 
 ---
 *Assine toda nova decisão: `## ADR-00N: Título | Data | Status`*
+
+## 📦 Arquivo de Sessão (Auto-Flush)
+**[2026-04-28] SETUP | ✅ CONCLUÍDO**
+- Criados: brain.md, 20+ skills, templates Obsidian, cb-init.ps1, cb-sync.py
+- Resultado: CoreBrain V1.0 estrutura base criada
+
+**[2026-04-28] BUG_FIX | ✅ CONCLUÍDO**
+- Corrigidos 5 gaps críticos: nomes de skills no brain.md, tool memory-compressor inexistente, cb-sync.py sem ChromaDB real, hardcoded path no cb-init.ps1, template de context ausente
+- Arquivos: brain.md, cb-init.ps1, cb-sync.py, context-template.md
+
+**[2026-04-28] DASHBOARD | ✅ CONCLUÍDO**
+- Dashboard Next.js completamente reescrito com 4 tabs funcionais (Overview, Skills, Memória, Agentes)
+- Bug corrigido: `endswith` → `endsWith` em api/skills/route.ts
+- Nova rota: api/agents/route.ts — lê e parseia frontmatter do brain.md
+- Skills route: categorias mapeadas para todos os 25+ skills
+- Arquivo: dashboard/src/app/page.tsx, api/skills/route.ts, api/agents/route.ts
+
+**[2026-04-28] MEMORY_SEED | ✅ CONCLUÍDO**
+- Criados: memory/context.md, memory/decisions.md, memory/logs.md, memory/000-INDEX.md
+- Obsidian vault agora tem estrutura navegável
+
+---
+
+**[2026-04-28] ORCHESTRATION | ✅ CONCLUÍDO**
+- Analisado `context.md` e gerada a lista de tarefas V2 para otimização e escala.
+- Arquivo: `task.md`
+- Próximo passo: Iniciar a implementação da "Regra dos 3" para flush automático de contexto.
+
+---
+
+*Próxima compressão pendente (Atualmente: 1 tarefa nova neste ciclo).*
+
+
+---
