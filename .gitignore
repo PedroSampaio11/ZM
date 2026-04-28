@@ -45,12 +45,14 @@ desktop.ini
 .settings/
 
 # Project Specific
-.claude/
 .trash/
 .obsidian/workspace
 .obsidian/workspace.json
 .obsidian/backups
 .obsidian/plugins/obsidian-git/
+
+# TypeScript build info
+*.tsbuildinfo
 
 # Temporary files
 *.log
