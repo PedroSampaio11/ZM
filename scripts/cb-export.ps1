@@ -49,13 +49,15 @@ $skills
 "@
 
 # Escreve os arquivos
-Set-Content -Path ".cursorrules"    -Value $rules -Encoding UTF8
-Set-Content -Path ".windsurfrules"  -Value $rules -Encoding UTF8
-Set-Content -Path "SYSTEM_PROMPT.md" -Value $rules -Encoding UTF8
+Set-Content -Path ".cursorrules"       -Value $rules -Encoding UTF8
+Set-Content -Path ".windsurfrules"     -Value $rules -Encoding UTF8
+Set-Content -Path ".antigravityrules"  -Value $rules -Encoding UTF8
+Set-Content -Path "SYSTEM_PROMPT.md"   -Value $rules -Encoding UTF8
 
 Write-Host ""
 Write-Host "  Arquivos gerados:" -ForegroundColor Cyan
-Write-Host "  .cursorrules     -> Cursor (ativo automaticamente)" -ForegroundColor White
-Write-Host "  .windsurfrules   -> Windsurf (ativo automaticamente)" -ForegroundColor White
-Write-Host "  SYSTEM_PROMPT.md -> Cole como system prompt em qualquer outra ferramenta" -ForegroundColor White
+Write-Host "  .cursorrules       -> Cursor (ativo automaticamente)" -ForegroundColor White
+Write-Host "  .windsurfrules     -> Windsurf (ativo automaticamente)" -ForegroundColor White
+Write-Host "  .antigravityrules  -> Antigravity (ativo automaticamente)" -ForegroundColor White
+Write-Host "  SYSTEM_PROMPT.md   -> Cole como system prompt em qualquer outra ferramenta" -ForegroundColor White
 Write-Host ""

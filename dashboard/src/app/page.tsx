@@ -108,6 +108,7 @@ function GuiaTab() {
 
   const tools = [
     { name: 'Claude Code', tag: '✅ Nativo',     tagColor: 'text-green-400',  desc: 'Brain + Skills + memória com roteamento automático. Zero configuração extra.' },
+    { name: 'Antigravity', tag: '⚡ Com export', tagColor: 'text-purple-400', desc: 'Gere o .antigravityrules com o script e eu passarei a seguir as regras do Brain.' },
     { name: 'Cursor',      tag: '⚡ Com export', tagColor: 'text-yellow-400', desc: 'Gere o .cursorrules com o script e o Brain passa a rodar nas regras do projeto.' },
     { name: 'Windsurf',    tag: '⚡ Com export', tagColor: 'text-yellow-400', desc: 'Gere o .windsurfrules com o script. Mesma lógica do Cursor.' },
     { name: 'Qualquer outro', tag: '📋 Manual',  tagColor: 'text-zinc-400',   desc: 'Copie SYSTEM_PROMPT.md (gerado pelo export) como system prompt da ferramenta.' },
@@ -201,7 +202,7 @@ function GuiaTab() {
         </div>
         <p className="text-xs text-zinc-600 mb-1">Para gerar os arquivos de outros apps, rode na pasta do projeto:</p>
         <CodeBlock code={'.\\scripts\\cb-export.ps1'} />
-        <p className="text-xs text-zinc-700 mt-2">Gera <code className="text-purple-400">.cursorrules</code>, <code className="text-purple-400">.windsurfrules</code> e <code className="text-purple-400">SYSTEM_PROMPT.md</code> automaticamente.</p>
+        <p className="text-xs text-zinc-700 mt-2">Gera <code className="text-purple-400">.antigravityrules</code>, <code className="text-purple-400">.cursorrules</code> e <code className="text-purple-400">SYSTEM_PROMPT.md</code> automaticamente.</p>
       </div>
 
     </section>
@@ -270,6 +271,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Desktop pill nav */}
         <div className="hidden md:flex glass px-2 py-1.5 rounded-xl">
           {TABS.map(t => (
             <button
@@ -282,6 +284,23 @@ export default function Home() {
               {t.label}
             </button>
           ))}
+        </div>
+
+        {/* Mobile tab selector */}
+        <div className="flex md:hidden w-full order-last">
+          <div className="glass rounded-xl p-1 flex w-full gap-1 overflow-x-auto scrollbar-hide">
+            {TABS.map(t => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`flex-1 min-w-0 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                  tab === t.key ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-4">

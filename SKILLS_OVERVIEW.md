@@ -12,10 +12,10 @@ Um resumo rápido do que cada especialista do seu ecossistema faz.
 
 ### 🏗️ Arquitetura e Engenharia
 - **senior-architect**: Desenha sistemas grandes e escolhe a melhor tecnologia.
-- **clean-code-expert**: Audita o código para garantir que seja limpo e fácil de ler.
+- **clean-code**: Audita o código para garantir que seja limpo e fácil de ler.
 - **database-architect**: Planeja como os dados serão salvos (SQL/NoSQL).
-- **postgres-schema-design**: Otimização profunda e segura para PostgreSQL.
-- **api-expert**: Integração com serviços externos (Stripe, etc) com segurança.
+- **eschema**: Otimização profunda e segura para PostgreSQL.
+- **api**: Integração com serviços externos (Stripe, etc) com segurança.
 - **typescript-pro**: Tipagem avançada para evitar bugs antes mesmo de rodar o código.
 - **senior-backend**: Scaffolding e lógica robusta de servidor (Node/Go/Python).
 
@@ -28,7 +28,7 @@ Um resumo rápido do que cada especialista do seu ecossistema faz.
 
 ### 🚀 Crescimento e Marketing
 - **content-ads-pro**: Engenharia reversa de posts virais e estratégia de tráfego pago.
-- **social-content**: Criação de conteúdo estratégico para LinkedIn e redes sociais.
+- **social**: Criação de conteúdo estratégico para LinkedIn e redes sociais.
 - **product-manager**: Priorização de features (RICE) e análise de mercado.
 - **analytics-expert**: Rastreamento de usuários e métricas de conversão.
 
