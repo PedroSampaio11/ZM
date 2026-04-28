@@ -86,3 +86,29 @@ Registro imutável de decisões arquiteturais. Adicionar, nunca editar entradas 
 
 
 ---
+
+## 📦 Arquivo de Sessão (Auto-Flush)
+**[2026-04-28] AUTOMATION | ✅ CONCLUÍDO**
+- Criado e executado `scripts/cb-flush.py` (Regra dos 3).
+- 5 tarefas arquivadas automaticamente em `decisions.md`.
+- Arquivo: `scripts/cb-flush.py`
+- Próximo passo: Validar sincronização do `state.json` via `cb-state.py`.
+
+**[2026-04-28] DASHBOARD_SYNC | ✅ CONCLUÍDO**
+- Criada API `/api/state` para servir dados do `state.json`.
+- Interface do Dashboard atualizada para exibir a versão do projeto e timestamp de sincronização.
+- Arquivos: `dashboard/src/app/api/state/route.ts`, `dashboard/src/app/page.tsx`.
+- Próximo passo: Testar indexação semântica via `cb-sync.py`.
+
+**[2026-04-28] FULL_INTEGRATION | ✅ CONCLUÍDO**
+- Instalado `chromadb` no ambiente Python e ativada a busca semântica real (RAG).
+- Implementada funcionalidade de "Exportar Agora" no Dashboard para gerar `.cursorrules`, `.windsurfrules` e `.antigravityrules`.
+- Corrigido e otimizado o mapeamento de agentes no Dashboard.
+- Arquivos: `dashboard/src/app/api/export/route.ts`, `dashboard/src/app/page.tsx`.
+- Próximo passo: Implementar indicador de densidade de contexto (Tokens) no Dashboard.
+
+---
+
+*Próxima compressão pendente (Atualmente: 0 tarefas novas - Auto-flush pode ser disparado em breve).*
+
+---

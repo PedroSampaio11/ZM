@@ -2,13 +2,13 @@
 
 ## 🧠 Orquestração & Memória
 - [x] Implementar a **Regra dos 3 (Flush de Contexto)**: Automatizar o arquivamento de `logs.md` para `decisions.md` a cada 3 tarefas concluídas via `scripts/cb-flush.py`.
-- [ ] Validar a sincronização do `state.json` via `scripts/cb-state.py`.
-- [ ] Testar a indexação semântica no ChromaDB usando o `scripts/cb-sync.py`.
+- [x] Validar a sincronização do `state.json` via `scripts/cb-state.py`.
+- [x] Testar a indexação semântica no ChromaDB usando o `scripts/cb-sync.py`.
 
 ## 🖥️ Dashboard (UX/UI)
-- [ ] Adicionar funcionalidade de **Exportação de Regras** na UI (gerar `.cursorrules` e `.antigravityrules` via Dashboard).
+- [x] Adicionar funcionalidade de **Exportação de Regras** na UI (gerar `.cursorrules` e `.antigravityrules` via Dashboard).
 - [ ] Implementar um indicador visual de "Token Usage" ou "Context Density" no Overview.
-- [ ] Corrigir o fetch de agentes para garantir que todos os `.md` em `.claude/agents/` sejam listados.
+- [x] Corrigir o fetch de agentes para garantir que todos os `.md` em `.claude/agents/` sejam listados.
 
 ## 🛠️ Automação & Infra
 - [ ] Teste de Stress do `cb-init.ps1`: Simular a criação de um novo projeto do zero e validar se o Handoff Protocol funciona.

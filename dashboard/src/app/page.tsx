@@ -201,7 +201,26 @@ function GuiaTab() {
           ))}
         </div>
         <p className="text-xs text-zinc-600 mb-1">Para gerar os arquivos de outros apps, rode na pasta do projeto:</p>
-        <CodeBlock code={'.\\scripts\\cb-export.ps1'} />
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <CodeBlock code={'.\\scripts\\cb-export.ps1'} />
+          </div>
+          <button 
+            onClick={async () => {
+              try {
+                const res = await fetch('/api/export', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) alert('✅ ' + data.message);
+                else alert('❌ ' + (data.error || 'Erro ao exportar'));
+              } catch (e) {
+                alert('❌ Erro de conexão com a API');
+              }
+            }}
+            className="h-12 px-6 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-all flex items-center gap-2 mt-2 shadow-lg shadow-purple-900/20"
+          >
+            <Zap size={16} /> Exportar Agora
+          </button>
+        </div>
         <p className="text-xs text-zinc-700 mt-2">Gera <code className="text-purple-400">.antigravityrules</code>, <code className="text-purple-400">.cursorrules</code> e <code className="text-purple-400">SYSTEM_PROMPT.md</code> automaticamente.</p>
       </div>
 
@@ -218,6 +237,7 @@ export default function Home() {
   const [skills, setSkills]     = useState<Skill[]>([])
   const [memory, setMemory]     = useState<MemFile[]>([])
   const [agents, setAgents]     = useState<Agent[]>([])
+  const [state, setState]       = useState<any>(null)
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState('')
   const [catFilter, setCat]     = useState('Todos')
@@ -226,13 +246,14 @@ export default function Home() {
   const fetchAll = useCallback(async () => {
     setLoading(true); setError('')
     try {
-      const [sr, mr, ar] = await Promise.all([
-        fetch('/api/skills'), fetch('/api/memory'), fetch('/api/agents')
+      const [sr, mr, ar, str] = await Promise.all([
+        fetch('/api/skills'), fetch('/api/memory'), fetch('/api/agents'), fetch('/api/state')
       ])
-      const [sd, md, ad] = await Promise.all([sr.json(), mr.json(), ar.json()])
+      const [sd, md, ad, std] = await Promise.all([sr.json(), mr.json(), ar.json(), str.json()])
       setSkills(Array.isArray(sd) ? sd : [])
       setMemory(Array.isArray(md) ? md : [])
       setAgents(Array.isArray(ad) ? ad : [])
+      setState(std)
       setLastSync(new Date())
     } catch {
       setError('Não foi possível carregar os dados. Verifique se o servidor Next.js está rodando.')
@@ -264,9 +285,16 @@ export default function Home() {
             <Brain className="text-white w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-black tracking-tighter">
-              CORE<span className="gradient-text">BRAIN</span>
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-black tracking-tighter">
+                CORE<span className="gradient-text">BRAIN</span>
+              </h1>
+              {state?.version && (
+                <span className="text-[9px] px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-zinc-500 font-mono">
+                  v{state.version}
+                </span>
+              )}
+            </div>
             <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">PedroSampaio Ecosystem</p>
           </div>
         </div>
