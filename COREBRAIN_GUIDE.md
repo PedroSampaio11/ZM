@@ -36,16 +36,25 @@ Para levar o CoreBrain para um novo projeto (ex: um novo SaaS):
 
 ---
 
-## 🛠️ 4. Gestão de Memória Dinâmica (Obsidian)
+## 🛠️ 4. Automação & CLI
 
-O agente deve manter o Obsidian atualizado automaticamente:
-- **`memory/context.md`**: O que estamos fazendo agora?
-- **`memory/decisions.md`**: Por que escolhemos a tecnologia X e não a Y? (Essencial para não repetir erros).
-- **`memory/identity.md`**: Atalho para a skill `pedro-identity`.
+O CoreBrain inclui ferramentas para facilitar a gestão:
+- **`scripts/cb-init.ps1`**: Rode este script para inicializar o CoreBrain em um novo projeto.
+  `.\cb-init.ps1 "C:\Caminho\Do\Projeto"`
+- **`scripts/cb-sync.py`**: Use para verificar a integridade das skills e preparar a indexação.
 
 ---
 
-## 🎯 5. RAG Local & Custo Zero
+## 📋 5. Templates do Obsidian
+
+Toda nota na pasta `/memory` deve seguir os modelos em `.obsidian/templates/`:
+- **ADR**: Para registros de decisões técnicas.
+- **Task**: Para gestão de tarefas e logs de execução.
+- **Context**: Para definições de escopo de projeto.
+
+---
+
+## 🎯 6. RAG Local & Custo Zero
 
 O CoreBrain prioriza o uso de ferramentas locais (ChromaDB) para:
 - Pesquisar em toda a sua base de conhecimento de todos os projetos.

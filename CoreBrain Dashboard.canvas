@@ -1,0 +1,15 @@
+{
+	"nodes":[
+		{"id":"5795b8dc1ec7c58f","x":2655,"y":783,"width":250,"height":60,"type":"text","text":""},
+		{"id":"brain","type":"file","file":".claude/agents/brain.md","x":0,"y":0,"width":400,"height":500},
+		{"id":"identity","type":"file","file":".claude/commands/pedro-identity.md","x":450,"y":0,"width":400,"height":300},
+		{"id":"tasks","type":"file","file":"memory/tasks.md","x":0,"y":550,"width":400,"height":400},
+		{"id":"logs","type":"file","file":"memory/logs.md","x":450,"y":350,"width":400,"height":600},
+		{"id":"guide","type":"file","file":"COREBRAIN_GUIDE.md","x":900,"y":0,"width":500,"height":950}
+	],
+	"edges":[
+		{"id":"e1","fromNode":"brain","fromSide":"right","toNode":"identity","toSide":"left"},
+		{"id":"e2","fromNode":"brain","fromSide":"bottom","toNode":"tasks","toSide":"top"},
+		{"id":"e3","fromNode":"identity","fromSide":"bottom","toNode":"logs","toSide":"top"}
+	]
+}
