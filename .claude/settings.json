@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const icons = require\\('@hugeicons/core-free-icons'\\); const names = Object.keys\\(icons\\); const heartIcons = names.filter\\(n => n.toLowerCase\\(\\).includes\\('heart'\\)\\); const shieldIcons = names.filter\\(n => n.toLowerCase\\(\\).includes\\('shield'\\)\\); const giftIcons = names.filter\\(n => n.toLowerCase\\(\\).includes\\('gift'\\)\\); console.log\\('HEART:', heartIcons.join\\(', '\\)\\); console.log\\('SHIELD:', shieldIcons.join\\(', '\\)\\); console.log\\('GIFT:', giftIcons.join\\(', '\\)\\);\")"
+    ]
+  }
+}
