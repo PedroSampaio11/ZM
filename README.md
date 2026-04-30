@@ -1,27 +1,65 @@
-# 🧠 CoreBrain
+# 🚗 Super Loja — Plataforma Automotiva
 
-**O Cérebro Central da FourCoders.**
+> Marketplace automotivo no modelo Asset-Light com IA para qualificação de leads e F&I engine.
 
-CoreBrain é um framework de IA agêntica focado em automação de desenvolvimento, gestão de conhecimento e escala de negócios. Ele transforma o Claude em um parceiro estratégico completo.
+## 🏗️ Stack
 
-## 🚀 Principais Recursos
-- **20+ Skills Especializadas**: Da arquitetura ao tráfego pago.
-- **Memória Persistente**: Integração nativa com Obsidian para contexto infinito.
-- **Handoff Protocol**: Transição suave entre agentes especializados.
-- **Local RAG**: Busca semântica local com ChromaDB.
+| Camada | Tecnologia |
+|---|---|
+| Framework | Next.js 15 (App Router) |
+| Linguagem | TypeScript 5.7 |
+| Estilo | Tailwind CSS v3 |
+| Banco de Dados | PostgreSQL via Supabase |
+| ORM | Prisma v5 |
+| Validação | Zod |
+| WhatsApp | Evolution API |
 
-## 📦 Como Instalar
-```powershell
-# Vá para a pasta do CoreBrain
-cd CoreBrain/scripts
-# Rode o init no seu novo projeto
-.\cb-init.ps1 "C:\Caminho\Do\Seu\Projeto"
+## 📁 Estrutura
+
+```
+src/
+├── app/
+│   ├── (platform)/   # Vitrine pública para o cliente final
+│   ├── (admin)/      # Dashboard interno (parceiros, leads, inventário)
+│   └── api/          # API routes (leads, vehicles, simulations, webhooks)
+├── modules/          # Domínios de negócio (inventory, leads, finance, shared)
+└── lib/              # Utilitários compartilhados (prisma, schemas, utils)
+
+intelligence/         # Infra de IA (separada do código de produto)
+├── memory/           # Contexto, backlog, decisões arquiteturais
+└── strategy/         # Masterplan e documentos estratégicos
+
+prisma/
+└── schema.prisma     # Schema do banco de dados
 ```
 
-## 🏗️ Estrutura
-- `/.claude`: Agentes e comandos.
-- `/memory`: Base de conhecimento (Markdown).
-- `/scripts`: Ferramentas de automação.
+## 🚀 Instalação
+
+```powershell
+# 1. Clone e instale dependências
+npm install
+
+# 2. Configure as variáveis de ambiente
+cp .env.example .env.local
+# Edite .env.local com suas credenciais
+
+# 3. Gere o Prisma Client
+npx prisma generate
+
+# 4. Execute as migrations (após configurar o banco)
+npx prisma migrate dev --name init
+
+# 5. Inicie o servidor de desenvolvimento
+npm run dev
+```
+
+## 👥 Equipe
+
+| Papel | Responsável |
+|---|---|
+| 💻 Tecnologia | Pedro |
+| 🚀 Crescimento | Vitor |
+| 🤝 Operações | Lico |
 
 ---
-*Powered by PedroSampaio - Pro-Grade Engineering.*
+*Confidencial — Sócios: Pedro, Vitor e Lico.*

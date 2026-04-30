@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum VehicleStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  ARCHIVED
+}
+
+enum LeadStatus {
+  NEW
+  AI_QUALIFYING
+  QUALIFIED
+  HANDOFF_HUMAN
+  LOST
+  CONVERTED
+}
+
+enum SimulationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum LeadOrigin {
+  FACEBOOK_ADS
+  GOOGLE_ADS
+  ORGANIC
+  WHATSAPP
+  REFERRAL
+  PARTNER
+  PLATFORM_WEB
+}
+
+enum InteractionChannel {
+  WHATSAPP
+  EMAIL
+  PHONE
+  INTERNAL
+}
+
+enum InteractionDirection {
+  INBOUND
+  OUTBOUND
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. PARTNERS — Lojas e Concessionárias
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Partner {
+  id          String  @id @default(cuid())
+  name        String
+  document    String  @unique // CNPJ
+  email       String?
+  phone       String?
+  address     String?
+  city        String
+  state       String
+  commission  Float   @default(0.0) // % de success fee negociada
+  isActive    Boolean @default(true)
+  scrapingUrl String? // URL base para o robô de inventário
+
+  vehicles  Vehicle[]
+  leads     Lead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([state, city])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. VEHICLES — Inventário Sincronizado
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Vehicle {
+  id        String  @id @default(cuid())
+  partnerId String
+  partner   Partner @relation(fields: [partnerId], references: [id])
+
+  // Dados Gerais
+  brand        String
+  model        String
+  version      String? // Versão/Trim (ex: "Carrera S", "M Competition")
+  year         Int
+  mileage      Int
+  price        Decimal @db.Decimal(12, 2)
+  fuel         String? // Flex, Diesel, Elétrico, Gasolina
+  transmission String? // Manual, Automático, PDK, CVT
+  color        String?
+
+  // Conteúdo & Mídia
+  description String?  @db.Text
+  images      String[] // Array de URLs das fotos
+  videoUrl    String?
+
+  // Status & Controle de Sync
+  status     VehicleStatus @default(AVAILABLE)
+  externalId String?       @unique // ID na loja original (evita duplicatas no scraping)
+  lastSyncAt DateTime      @default(now())
+
+  leads Lead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([partnerId])
+  @@index([status])
+  @@index([brand, model])
+  @@index([price])
+  @@index([year])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. LEADS — Captura e Qualificação
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Lead {
+  id    String @id @default(cuid())
+  name  String
+  phone String // Formato: 5511999999999 (para Evolution API)
+  email String?
+
+  // Origem do lead (UTM / canal)
+  origin LeadOrigin?
+
+  // Contexto de Interesse
+  vehicleId String?
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
+  partnerId String?
+  partner   Partner? @relation(fields: [partnerId], references: [id])
+
+  // Qualificação pelo Agente de IA
+  status  LeadStatus @default(NEW)
+  score   Int        @default(0) // 0–100: potencial de crédito/interesse
+  summary String?    @db.Text   // Resumo da triagem feita pelo agente
+
+  interactions Interaction[]
+  simulations  Simulation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([phone])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. INTERACTIONS — Histórico de Conversas
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Interaction {
+  id        String @id @default(cuid())
+  leadId    String
+  lead      Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  channel   InteractionChannel
+  direction InteractionDirection
+  content   String @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. SIMULATIONS — F&I Engine
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Simulation {
+  id     String @id @default(cuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  // Dados do veículo no momento da simulação (snapshot)
+  vehiclePrice    Decimal @db.Decimal(12, 2)
+  downPayment     Decimal @db.Decimal(12, 2)
+  financedAmount  Decimal @db.Decimal(12, 2)
+  installments    Int
+  monthlyRate     Float
+  monthlyPayment  Decimal @db.Decimal(12, 2)
+  totalAmount     Decimal @db.Decimal(12, 2)
+  totalInterest   Decimal @db.Decimal(12, 2)
+
+  bankName String?
+
+  status    SimulationStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+
+  @@index([leadId])
+}

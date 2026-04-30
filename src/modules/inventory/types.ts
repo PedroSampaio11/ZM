@@ -1,26 +1,9 @@
+import type { Vehicle as PrismaVehicle, Partner as PrismaPartner } from '@prisma/client';
+
 export type VehicleStatus = 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'ARCHIVED';
 
-export interface Vehicle {
-  id: string;
-  partnerId: string;
-  brand: string;
-  model: string;
-  version?: string;
-  year: number;
-  mileage: number;
-  price: number;
-  fuel?: string;
-  transmission?: string;
-  color?: string;
-  description?: string;
-  images: string[];
-  videoUrl?: string;
-  status: VehicleStatus;
-  externalId?: string;
-  lastSyncAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Tipo derivado do Prisma com price convertido para number (Decimal → number)
+export type Vehicle = Omit<PrismaVehicle, 'price'> & { price: number };
 
 export interface Partner {
   id: string;
@@ -30,5 +13,5 @@ export interface Partner {
   state: string;
   commission: number;
   isActive: boolean;
-  scrapingUrl?: string;
+  scrapingUrl: string | null;
 }
