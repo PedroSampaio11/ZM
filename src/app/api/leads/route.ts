@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { CreateLeadSchema } from '@/lib/schemas';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit';
 import { LeadStatus } from '@prisma/client';
 import { ZodError, z } from 'zod';
 
@@ -9,6 +10,9 @@ const leadStatusSchema = z.nativeEnum(LeadStatus);
 
 // POST /api/leads — Captura um novo lead
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, { maxRequests: 10, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const data = CreateLeadSchema.parse(body);

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import type { Vehicle } from '@/modules/inventory/types';
+import { ExternalVehicleSchema } from '@/lib/schemas';
 import { AutoCertoAdapter } from './autocerto-adapter';
 
 export interface InventoryAdapter {
@@ -49,9 +50,10 @@ export class SyncEngine {
 
     // ── Dry-run: retorna preview sem gravar no banco ──────────────────────────
     if (options.dryRun) {
+      const validated = externalVehicles.map((v) => ExternalVehicleSchema.safeParse(v));
+      result.upserted = validated.filter((r) => r.success).length;
+      result.errors = validated.filter((r) => !r.success).length;
       result.preview = externalVehicles;
-      result.upserted = externalVehicles.filter((v) => !!v.externalId).length;
-      result.errors = externalVehicles.filter((v) => !v.externalId).length;
       console.log(
         `[SyncEngine][DRY-RUN] ${adapter.providerName} — ${result.upserted} veículos encontrados (nada gravado)`
       );
@@ -60,51 +62,57 @@ export class SyncEngine {
 
     // ── Upsert real ───────────────────────────────────────────────────────────
     for (const v of externalVehicles) {
-      if (!v.externalId) {
+      const parsed = ExternalVehicleSchema.safeParse(v);
+      if (!parsed.success) {
+        console.warn(
+          `[SyncEngine] Veículo inválido (externalId=${v.externalId ?? 'N/A'}):`,
+          parsed.error.flatten().fieldErrors
+        );
         result.errors++;
         continue;
       }
 
+      const d = parsed.data;
       try {
         await prisma.vehicle.upsert({
-          where: { externalId: v.externalId },
+          where: { externalId: d.externalId },
           create: {
             partnerId,
-            brand:        v.brand        ?? 'N/A',
-            model:        v.model        ?? 'N/A',
-            year:         v.year         ?? new Date().getFullYear(),
-            mileage:      v.mileage      ?? 0,
-            price:        v.price        ?? 0,
-            version:      v.version,
-            fuel:         v.fuel,
-            transmission: v.transmission,
-            color:        v.color,
-            description:  v.description,
-            images:       v.images       ?? [],
-            videoUrl:     v.videoUrl,
-            externalId:   v.externalId,
+            brand:        d.brand,
+            model:        d.model,
+            year:         d.year,
+            mileage:      d.mileage,
+            price:        d.price,
+            version:      d.version ?? null,
+            fuel:         d.fuel ?? null,
+            transmission: d.transmission ?? null,
+            color:        d.color ?? null,
+            description:  d.description ?? null,
+            images:       d.images,
+            videoUrl:     d.videoUrl ?? null,
+            externalId:   d.externalId,
             status:       'AVAILABLE',
             lastSyncAt:   new Date(),
           },
           update: {
-            brand:        v.brand        ?? 'N/A',
-            model:        v.model        ?? 'N/A',
-            year:         v.year         ?? new Date().getFullYear(),
-            mileage:      v.mileage      ?? 0,
-            price:        v.price        ?? 0,
-            version:      v.version,
-            fuel:         v.fuel,
-            transmission: v.transmission,
-            color:        v.color,
-            description:  v.description,
-            images:       v.images       ?? [],
-            videoUrl:     v.videoUrl,
+            brand:        d.brand,
+            model:        d.model,
+            year:         d.year,
+            mileage:      d.mileage,
+            price:        d.price,
+            version:      d.version ?? null,
+            fuel:         d.fuel ?? null,
+            transmission: d.transmission ?? null,
+            color:        d.color ?? null,
+            description:  d.description ?? null,
+            images:       d.images,
+            videoUrl:     d.videoUrl ?? null,
             lastSyncAt:   new Date(),
           },
         });
         result.upserted++;
       } catch (err) {
-        console.error(`[SyncEngine] Erro ao upsert externalId=${v.externalId}:`, err);
+        console.error(`[SyncEngine] Erro ao upsert externalId=${d.externalId}:`, err);
         result.errors++;
       }
     }

@@ -76,3 +76,25 @@ export const CreatePartnerSchema = z.object({
 });
 
 export type CreatePartnerInput = z.infer<typeof CreatePartnerSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXTERNAL VEHICLE (validação do adapter antes do upsert no banco)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const ExternalVehicleSchema = z.object({
+  externalId: z.string().min(1, 'externalId obrigatório'),
+  brand: z.string().min(1).default('N/A'),
+  model: z.string().min(1).default('N/A'),
+  version: z.string().nullable().optional(),
+  year: z.number().int().min(1980).max(new Date().getFullYear() + 2),
+  mileage: z.number().int().min(0),
+  price: z.number().positive('Preço deve ser positivo'),
+  fuel: z.string().nullable().optional(),
+  transmission: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  images: z.array(z.string()).default([]),
+  videoUrl: z.string().nullable().optional(),
+});
+
+export type ExternalVehicleInput = z.infer<typeof ExternalVehicleSchema>;
