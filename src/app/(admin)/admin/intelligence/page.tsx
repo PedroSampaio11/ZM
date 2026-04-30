@@ -10,9 +10,10 @@ import {
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-interface Skill    { id: string; name: string; file: string; category: string }
-interface MemFile  { filename: string; title: string; preview: string }
-interface Agent    { id: string; name: string; description: string; color: string; tools: string[] }
+interface Skill      { id: string; name: string; file: string; category: string }
+interface MemFile    { filename: string; title: string; preview: string }
+interface Agent      { id: string; name: string; description: string; color: string; tools: string[] }
+interface SystemState { version?: string }
 
 // ── Category config ───────────────────────────────────────────────────────────
 
@@ -237,7 +238,7 @@ export default function Home() {
   const [skills, setSkills]     = useState<Skill[]>([])
   const [memory, setMemory]     = useState<MemFile[]>([])
   const [agents, setAgents]     = useState<Agent[]>([])
-  const [state, setState]       = useState<any>(null)
+  const [state, setState]       = useState<SystemState | null>(null)
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState('')
   const [catFilter, setCat]     = useState('Todos')

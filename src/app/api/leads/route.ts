@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { CreateLeadSchema } from '@/lib/schemas';
+import { requireAuth } from '@/lib/auth-guard';
 import { LeadStatus } from '@prisma/client';
 import { ZodError, z } from 'zod';
 
@@ -54,8 +55,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/leads — Lista leads com filtros opcionais
+// GET /api/leads — Lista leads com filtros opcionais (requer autenticação)
 export async function GET(req: NextRequest) {
+  const { error } = await requireAuth();
+  if (error) return error;
+
   try {
     const { searchParams } = new URL(req.url);
     const statusParam = searchParams.get('status');
