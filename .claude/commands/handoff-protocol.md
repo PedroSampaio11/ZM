@@ -14,10 +14,18 @@ A skill atual deve gerar um bloco de texto contendo:
 - **Pendências**: O que ainda precisa ser feito.
 - **Próximo Especialista**: Qual skill deve assumir agora.
 
-## 2. A Gravação em Memória
-- Escrever o status no arquivo `memory/logs.md`.
-- Se for uma decisão arquitetural, atualizar `memory/decisions.md`.
+## 2. Marcas de Rastreabilidade (Traceability)
+Para garantir a fidelidade da informação, cada ponto crítico do handoff deve ser marcado com:
+- 🟢 **CONFIRMED**: Informação extraída diretamente do código ou documentos (sempre que possível, citar o arquivo e linha).
+- 🟡 **INFERRED**: Dedução lógica baseada em padrões, mas não validada explicitamente.
+- 🔴 **GAP**: Ponto de dúvida ou informação faltante que requer validação humana (Pedro).
 
-## 3. A Chamada do Próximo
+## 3. A Gravação em Memória
+- Escrever o status no arquivo `memory/logs.md`.
+- Se for uma decisão arquitetural, usar o template de ADR em `memory/decisions.md`.
+- Manter o `memory/context.md` atualizado com o progresso macro.
+
+## 4. A Chamada do Próximo
 A skill atual deve terminar sua resposta sugerindo a próxima ação:
 *"Tarefa de Banco de Dados concluída. Recomendo ativar agora a skill **senior-backend** para implementar as rotas CRUD baseadas neste esquema."*
+
