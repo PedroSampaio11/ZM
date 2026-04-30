@@ -7,6 +7,7 @@ import { ZodError, z } from 'zod';
 const SyncRequestSchema = z.object({
   partnerId: z.string().cuid('partnerId deve ser um CUID válido'),
   adapterKey: z.string().min(1, 'adapterKey é obrigatório'),
+  dryRun: z.boolean().default(true), // true por padrão — seguro para testes
 });
 
 // POST /api/admin/sync — Dispara a sincronização de estoque de um parceiro
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { partnerId, adapterKey } = SyncRequestSchema.parse(body);
+    const { partnerId, adapterKey, dryRun } = SyncRequestSchema.parse(body);
 
     const partner = await prisma.partner.findUnique({
       where: { id: partnerId },
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await syncEngine.syncPartner(partnerId, adapterKey, partner.scrapingUrl);
+    const result = await syncEngine.syncPartner(partnerId, adapterKey, partner.scrapingUrl, { dryRun });
 
     return NextResponse.json({
       success: true,

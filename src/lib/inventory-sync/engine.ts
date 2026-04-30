@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import type { Vehicle } from '@/modules/inventory/types';
+import { AutoCertoAdapter } from './autocerto-adapter';
 
 export interface InventoryAdapter {
   providerName: string;
@@ -11,28 +12,8 @@ export interface SyncResult {
   upserted: number;
   archived: number;
   errors: number;
-}
-
-export class AutoCertoAdapter implements InventoryAdapter {
-  providerName = 'Auto Certo';
-
-  async fetchVehicles(apiUrl: string): Promise<Partial<Vehicle>[]> {
-    console.log(`[${this.providerName}] Consumindo API: ${apiUrl}`);
-    // TODO Task 2.2: substituir por fetch real da API do parceiro
-    return [
-      {
-        externalId: 'AC-123',
-        brand: 'Mercedes-Benz',
-        model: 'C300',
-        year: 2023,
-        price: 350000,
-        mileage: 8000,
-        fuel: 'Gasolina',
-        transmission: 'Automático',
-        images: [],
-      },
-    ];
-  }
+  dryRun: boolean;
+  preview?: Partial<Vehicle>[];  // somente quando dryRun=true
 }
 
 export class SyncEngine {
@@ -47,16 +28,37 @@ export class SyncEngine {
   async syncPartner(
     partnerId: string,
     adapterKey: string,
-    url: string
+    url: string,
+    options: { dryRun?: boolean } = {}
   ): Promise<SyncResult> {
     const adapter = this.adapters[adapterKey];
     if (!adapter) {
-      throw new Error(`Adapter '${adapterKey}' não encontrado. Disponíveis: ${this.getAdapterKeys().join(', ')}`);
+      throw new Error(
+        `Adapter '${adapterKey}' não encontrado. Disponíveis: ${this.getAdapterKeys().join(', ')}`
+      );
     }
 
     const externalVehicles = await adapter.fetchVehicles(url);
-    const result: SyncResult = { provider: adapter.providerName, upserted: 0, archived: 0, errors: 0 };
+    const result: SyncResult = {
+      provider: adapter.providerName,
+      upserted: 0,
+      archived: 0,
+      errors: 0,
+      dryRun: options.dryRun ?? false,
+    };
 
+    // ── Dry-run: retorna preview sem gravar no banco ──────────────────────────
+    if (options.dryRun) {
+      result.preview = externalVehicles;
+      result.upserted = externalVehicles.filter((v) => !!v.externalId).length;
+      result.errors = externalVehicles.filter((v) => !v.externalId).length;
+      console.log(
+        `[SyncEngine][DRY-RUN] ${adapter.providerName} — ${result.upserted} veículos encontrados (nada gravado)`
+      );
+      return result;
+    }
+
+    // ── Upsert real ───────────────────────────────────────────────────────────
     for (const v of externalVehicles) {
       if (!v.externalId) {
         result.errors++;
@@ -68,36 +70,36 @@ export class SyncEngine {
           where: { externalId: v.externalId },
           create: {
             partnerId,
-            brand: v.brand ?? 'N/A',
-            model: v.model ?? 'N/A',
-            year: v.year ?? new Date().getFullYear(),
-            mileage: v.mileage ?? 0,
-            price: v.price ?? 0,
-            version: v.version,
-            fuel: v.fuel,
+            brand:        v.brand        ?? 'N/A',
+            model:        v.model        ?? 'N/A',
+            year:         v.year         ?? new Date().getFullYear(),
+            mileage:      v.mileage      ?? 0,
+            price:        v.price        ?? 0,
+            version:      v.version,
+            fuel:         v.fuel,
             transmission: v.transmission,
-            color: v.color,
-            description: v.description,
-            images: v.images ?? [],
-            videoUrl: v.videoUrl,
-            externalId: v.externalId,
-            status: 'AVAILABLE',
-            lastSyncAt: new Date(),
+            color:        v.color,
+            description:  v.description,
+            images:       v.images       ?? [],
+            videoUrl:     v.videoUrl,
+            externalId:   v.externalId,
+            status:       'AVAILABLE',
+            lastSyncAt:   new Date(),
           },
           update: {
-            brand: v.brand ?? 'N/A',
-            model: v.model ?? 'N/A',
-            year: v.year ?? new Date().getFullYear(),
-            mileage: v.mileage ?? 0,
-            price: v.price ?? 0,
-            version: v.version,
-            fuel: v.fuel,
+            brand:        v.brand        ?? 'N/A',
+            model:        v.model        ?? 'N/A',
+            year:         v.year         ?? new Date().getFullYear(),
+            mileage:      v.mileage      ?? 0,
+            price:        v.price        ?? 0,
+            version:      v.version,
+            fuel:         v.fuel,
             transmission: v.transmission,
-            color: v.color,
-            description: v.description,
-            images: v.images ?? [],
-            videoUrl: v.videoUrl,
-            lastSyncAt: new Date(),
+            color:        v.color,
+            description:  v.description,
+            images:       v.images       ?? [],
+            videoUrl:     v.videoUrl,
+            lastSyncAt:   new Date(),
           },
         });
         result.upserted++;
@@ -107,7 +109,7 @@ export class SyncEngine {
       }
     }
 
-    // Archiva veículos que sumiram do feed externo
+    // ── Arquiva veículos que sumiram do feed ──────────────────────────────────
     const externalIds = externalVehicles
       .map((v) => v.externalId)
       .filter((id): id is string => !!id);
@@ -124,7 +126,10 @@ export class SyncEngine {
       result.archived = count;
     }
 
-    console.log(`[SyncEngine] ${adapter.providerName} — parceiro ${partnerId}: upserted=${result.upserted}, archived=${result.archived}, errors=${result.errors}`);
+    console.log(
+      `[SyncEngine] ${adapter.providerName} — parceiro ${partnerId}: ` +
+      `upserted=${result.upserted}, archived=${result.archived}, errors=${result.errors}`
+    );
     return result;
   }
 }
