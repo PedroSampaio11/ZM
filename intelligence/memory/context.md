@@ -1,38 +1,35 @@
-# Contexto: CoreBrain
+# Contexto: Super Loja 2026
 
-**Data de Início**: 2026-04-01
-**Status**: 🟢 Em Desenvolvimento
-**Stack Principal**: Claude Code, Next.js 15, Tailwind CSS, TypeScript, ChromaDB (Python), Obsidian, PowerShell
+**Data de Início**: 2026-04-30
+**Status**: 🟢 Em Desenvolvimento Ativo (Fase 2)
+**Stack Principal**: Next.js 15 (App Router), TypeScript 5.7, Prisma, PostgreSQL (Supabase), Tailwind CSS, Zod, Evolution API.
 
 ---
 
 ## Objetivo
-CoreBrain é o sistema operacional de inteligência da FourCoders Studio. Transforma o Claude em um parceiro estratégico completo com memória persistente, 20+ skills especializadas e automação de workflows de desenvolvimento.
+A **Super Loja 2026** é uma plataforma marketplace automotiva projetada para operar no modelo *asset-light*. O objetivo é centralizar o estoque de múltiplos parceiros, automatizar a captura e qualificação de leads via WhatsApp com agentes de IA, e facilitar a conversão de F&I (Financiamento e Seguros).
 
-## Escopo V1
-- Agente Orquestrador central (brain.md)
-- 20+ Skills especializadas em `.claude/commands/`
-- Dashboard de visualização em Next.js
-- Scripts de automação (cb-init, cb-sync)
-- Templates de memória no Obsidian
-- RAG local via ChromaDB
+## Escopo e Arquitetura
+- **Modular Design**: Divisão clara entre `modules/` (negócio) e `lib/` (infra).
+- **Inventory Engine**: Sincronização automática via adaptadores (AutoCerto, etc).
+- **Lead Management**: Fluxo de captura com rate limiting e dashboard administrativo.
+- **IA Layer**: Agentes Claude para qualificação de leads com RAG baseado no estoque real.
+- **F&I Integration**: Calculadora de financiamento integrada.
 
 ## Decisões Técnicas Chave
 > Ver `decisions.md` para detalhes completos.
 
-| Decisão | Alternativa | Motivo |
-|---|---|---|
-| Claude Code como runtime | LangChain | Zero infra, custo = 0 |
-| ChromaDB local | Pinecone/Weaviate | Privacidade + custo zero |
-| Next.js 15 App Router | React SPA | SSR + API routes no mesmo projeto |
-| Obsidian como memória episódica | Notion | Local-first, sem dependência de cloud |
+| Decisão | Motivo |
+|---|---|
+| Next.js 15 App Router | Performance, SSR e facilidade de rotas API. |
+| Prisma + Supabase | Escalabilidade, facilidade de migração e suporte nativo a RLS. |
+| Adapter Pattern (Inventory) | Flexibilidade para integrar qualquer fornecedor sem mudar o core. |
+| Zod everywhere | Garantia de integridade de dados do scraping até a API. |
 
 ## Estado Atual
-- V1.0 finalizada e funcional
-- Dashboard com 4 tabs (Overview, Skills, Memória, Agentes)
-- Skills validadas e com nomes corrigidos no brain.md
-- cb-init.ps1 portável (sem hardcoded paths)
-- cb-sync.py com suporte ChromaDB + fallback JSON
+- **Fase 1 (Fundação)** concluída com sucesso.
+- **Fase 2 (Inventário)** em estágio avançado: `SyncEngine` funcional, adaptador `AutoCerto` implementado e validado com Zod.
+- **Infra de Segurança**: Rate limiting e Guards de autenticação operacionais.
 
 ---
-*Última atualização: 2026-04-28 · CoreBrain Orchestrator*
+*Última atualização: 2026-05-01 · Super Loja Intelligence (Brain)*

@@ -1,6 +1,6 @@
 # 📋 Backlog Mestre: Super Loja 2026
 
-**Status Global**: 🟡 Fase 2 em Andamento (Inventory)
+**Status Global**: 🟢 Fase 2 Completa → Fase 3 em Andamento
 **Última Atualização**: 2026-04-30
 **Responsável**: Brain (Orchestrator)
 
@@ -25,16 +25,16 @@
 ## 🕵️ Fase 2: Inventory Intelligence (Scraping) — [30%] 🟡
 *Foco: Garantir que o ativo (estoque) seja automatizado e confiável.*
 
-- [ ] **Task 2.1**: Engine de Scraping Genérica — Interface + SyncEngine completo. [90% feito]
-  - [x] Interface `InventoryAdapter` definida
-  - [x] `SyncEngine.syncPartner()` com Prisma upsert real + archive automático
-  - [x] `POST /api/admin/sync` + `GET /api/admin/sync` (lista adapters)
-  - [ ] Adapter real plugado a uma fonte externa (depende de Task 2.2)
-- [ ] **Task 2.2**: Implementação do primeiro Adaptador de Scraping (Lojista Âncora 1).
-  - Substitui o stub `AutoCertoAdapter.fetchVehicles()` por fetch real
-- [ ] **Task 2.3**: Sistema de Validação de Dados e Deduplicação.
-  - Validação de campos via Zod antes do upsert
-  - Deduplicação por `externalId`
+- [x] **Task 2.1**: Engine de Scraping Genérica — Interface + SyncEngine completo. [2026-04-30] ✅
+  - Interface `InventoryAdapter` + `SyncEngine.syncPartner()` com dry-run
+  - `POST /api/admin/sync` + `GET /api/admin/sync`
+- [x] **Task 2.2**: Implementação do primeiro Adaptador de Scraping (AutoCerto). [2026-04-30] ✅
+  - `autocerto-client.ts`: OAuth2 password grant + cache + retry em 401
+  - `autocerto-adapter.ts`: mapeamento completo de campos AutoCerto → Vehicle
+  - Credenciais Via Brasil em `.env.local` (read-only, GET /api/Veiculo/ObterEstoque)
+- [x] **Task 2.3**: Sistema de Validação de Dados e Deduplicação. [2026-04-30] ✅
+  - `ExternalVehicleSchema` em `schemas.ts` valida adapter output antes do upsert
+  - engine.ts: `safeParse` por veículo, log de erros, skip de registros inválidos
 - [x] **Task 2.4**: UI de Gestão de Inventário conectada ao Prisma (dados reais + seed). [2026-04-30]
 
 ## 🤖 Fase 3: Lead Engine & IA (Expert Layer) — [40%]
@@ -55,8 +55,8 @@
 ---
 
 ## 🔒 Dívida Técnica (Prioridade Alta)
-- [ ] Rate limiting em `POST /api/leads` (endpoint público — risco de spam)
-- [ ] PATCH/DELETE em `/api/leads/[id]` (atualização de status, score, summary)
+- [x] Rate limiting em `POST /api/leads` (in-memory, 10 req/min/IP) [2026-04-30] ✅
+- [x] PATCH/DELETE em `/api/leads/[id]` (status, score, summary) [2026-04-30] ✅
 - [ ] `POST /api/admin/vehicles` (cadastro manual de veículo pelo admin)
 - [ ] `POST /api/admin/partners` (cadastro de parceiro pelo admin)
 

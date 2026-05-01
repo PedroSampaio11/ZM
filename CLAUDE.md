@@ -1,6 +1,6 @@
-# Super Loja — CLAUDE.md
+# Super Loja 2026 — CLAUDE.md
 
-Projeto: Marketplace automotivo asset-light com IA para leads e F&I.
+Projeto: Marketplace automotivo inteligente e modular (Asset-Light).
 Sócios: Pedro (Tech), Vitor (Growth), Lico (Operações/Bancário).
 
 ## Memória
