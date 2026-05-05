@@ -26,19 +26,32 @@ export async function createLead(formData: FormData) {
       return { error: 'Você já possui uma solicitação em andamento com este telefone.' };
     }
 
+    // storeId vem do form ou cai no primeiro store ativo (dev fallback)
+    let storeId = data.storeId;
+    if (!storeId) {
+      const defaultStore = await prisma.store.findFirst({
+        where: { isActive: true },
+        select: { id: true },
+        orderBy: { createdAt: 'asc' },
+      });
+      if (!defaultStore) throw new Error('Nenhuma store ativa encontrada');
+      storeId = defaultStore.id;
+    }
+
     await prisma.lead.create({
       data: {
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        origin: data.origin,
+        storeId,
+        name:      data.name,
+        phone:     data.phone,
+        email:     data.email,
+        origin:    data.origin,
         vehicleId: data.vehicleId,
         interactions: data.message
           ? {
               create: {
-                channel: 'WHATSAPP' as const,
+                channel:   'WHATSAPP' as const,
                 direction: 'INBOUND' as const,
-                content: data.message,
+                content:   data.message,
               },
             }
           : undefined,

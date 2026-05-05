@@ -112,3 +112,29 @@ Registro imutável de decisões arquiteturais. Adicionar, nunca editar entradas 
 *Próxima compressão pendente (Atualmente: 0 tarefas novas - Auto-flush pode ser disparado em breve).*
 
 ---
+
+## ADR-005: Multi-Tenancy com Instância Compartilhada (RLS)
+**Data**: 2026-05-05 | **Status**: Aceita
+
+**Contexto**: A plataforma precisar suportar N lojas (1 a centenas) sem reescrever o core. Avaliamos schema-por-tenant (isolamento total, complexidade alta) vs. instância compartilhada com RLS (simples, escalável, Supabase-native).
+
+**Decisão**: Instância compartilhada no mesmo PostgreSQL/Supabase. Isolamento via `storeId` denormalizado em todas as tabelas (`Store`, `Partner`, `Vehicle`, `Lead`, `IntegrationConfig`). RLS do Supabase como última linha de defesa.
+
+**Prós**: Queries simples por `storeId`, zero overhead operacional por novo tenant, Supabase RLS como guardrail, slugs prontos para subdomínio.
+**Contras**: Todas as lojas compartilham o mesmo banco — a chave `storeId` deve sempre estar presente nas queries de negócio.
+
+**Invariante obrigatória**: Toda query de dados deve filtrar por `storeId`. O `storeId` deve ser injetado pelo contexto de autenticação, nunca pela request body.
+
+---
+
+## ADR-006: Adapter Registry para Integrações de Mercado
+**Data**: 2026-05-05 | **Status**: Aceita
+
+**Contexto**: O sistema precisa suportar AutoCerto, Cockpit, Revenda Mais, Motor21, WebMotors, OLX Autos, Mobiauto, iCarros, Repasse e cadastro Manual. Cada sistema tem protocolo diferente (OAuth2, REST, XML).
+
+**Decisão**: `ADAPTER_REGISTRY` em `src/lib/inventory-sync/adapter-registry.ts` mapeia `AdapterType` (enum Prisma) para a classe que implementa `InventoryAdapter`. Credenciais armazenadas por `IntegrationConfig` no banco (JSON, encriptar em produção). Cada `Partner` pode ter múltiplos `IntegrationConfig`.
+
+**Para adicionar novo adapter**: implementar `InventoryAdapter`, registrar no `ADAPTER_REGISTRY`. Zero mudança no `SyncEngine` ou nas rotas.
+
+**Prós**: Open/Closed principle — adicionar Cockpit não toca o core. `syncStore(storeId)` itera automaticamente sobre todas as integrações ativas da loja.
+**Contras**: Credenciais em JSON requerem encriptação na camada de aplicação antes do GA (usar KMS ou Vault).

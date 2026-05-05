@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit -m 'feat: auth guard + SyncEngine Prisma real + Task 2.1 *)",
+      "WebFetch(domain:integracao.autocerto.com)",
+      "Bash(git commit -m 'feat: AutoCerto adapter - OAuth2 client, field mapping, dry-run sync endpoint *)",
+      "Bash(curl -s http://localhost:3000/api/health)",
+      "Bash(git commit -m 'feat: Task 2.3 + technical debt - Zod validation, rate limiting, leads CRUD *)",
+      "PowerShell(Get-Process *)"
+    ]
+  }
+}

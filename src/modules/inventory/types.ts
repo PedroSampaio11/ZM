@@ -1,17 +1,28 @@
-import type { Vehicle as PrismaVehicle, Partner as PrismaPartner } from '@prisma/client';
+import type {
+  Vehicle as PrismaVehicle,
+  Partner as PrismaPartner,
+  Store as PrismaStore,
+  IntegrationConfig as PrismaIntegrationConfig,
+  AdapterType,
+  StorePlan,
+} from '@prisma/client';
 
-export type VehicleStatus = 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'ARCHIVED';
-
-// Tipo derivado do Prisma com price convertido para number (Decimal → number)
+// Vehicle com price convertido de Decimal para number
 export type Vehicle = Omit<PrismaVehicle, 'price'> & { price: number };
 
-export interface Partner {
-  id: string;
-  name: string;
-  document: string;
-  city: string;
-  state: string;
-  commission: number;
-  isActive: boolean;
-  scrapingUrl: string | null;
-}
+export type Partner = Pick<
+  PrismaPartner,
+  'id' | 'storeId' | 'name' | 'document' | 'city' | 'state' | 'commission' | 'isActive'
+>;
+
+export type Store = Pick<
+  PrismaStore,
+  'id' | 'name' | 'slug' | 'document' | 'plan' | 'isActive' | 'createdAt'
+>;
+
+export type IntegrationConfig = Omit<PrismaIntegrationConfig, 'credentials'> & {
+  credentials: Record<string, string>; // JSON tipado
+  config:      Record<string, unknown>;
+};
+
+export type { AdapterType, StorePlan };

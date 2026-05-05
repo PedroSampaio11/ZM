@@ -1,16 +1,19 @@
 import { prisma } from '@/lib/prisma';
 
 /**
- * Extensão do Prisma para suportar RLS (Row Level Security) no Supabase.
- * Injeta o ID do parceiro via set_config() antes de cada query,
- * usando queries parametrizadas (sem interpolação de string).
+ * Extensão do Prisma para RLS (Row Level Security) multi-tenant no Supabase.
+ * Injeta o storeId via set_config() antes de cada query — sem interpolação de string.
+ *
+ * Política SQL correspondente no Supabase (exemplo para vehicles):
+ *   CREATE POLICY "tenant_isolation" ON "Vehicle"
+ *   USING ("storeId" = current_setting('app.current_store_id', true));
  */
-export const prismaRLS = (partnerId: string) => {
+export const prismaRLS = (storeId: string) => {
   return prisma.$extends({
     query: {
       $allModels: {
         async $allOperations({ args, query }) {
-          await prisma.$executeRaw`SELECT set_config('app.current_partner_id', ${partnerId}, false)`;
+          await prisma.$executeRaw`SELECT set_config('app.current_store_id', ${storeId}, false)`;
           return query(args);
         },
       },
@@ -19,9 +22,10 @@ export const prismaRLS = (partnerId: string) => {
 };
 
 /**
- * Exemplo de uso no Route Handler ou Server Action:
+ * Uso em Route Handlers e Server Actions:
  *
- * const user = await getSessionUser();
- * const db = prismaRLS(user.partnerId);
- * const leads = await db.lead.findMany(); // retorna apenas leads do parceiro
+ *   const { user } = await requireAuth();
+ *   const storeId  = await getStoreIdForUser(user.id); // via user_metadata ou StoreUser
+ *   const db = prismaRLS(storeId);
+ *   const leads = await db.lead.findMany(); // retorna apenas leads da store
  */

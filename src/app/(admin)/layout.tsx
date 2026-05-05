@@ -3,8 +3,8 @@ import "./globals.css";
 import { AdminSidebar } from "@/components/admin-sidebar";
 
 export const metadata: Metadata = {
-  title: "Super Loja | Admin",
-  description: "Painel de controle da plataforma Super Loja",
+  title: "zmove | Admin",
+  description: "Painel de controle da plataforma zmove",
 };
 
 export default function AdminLayout({

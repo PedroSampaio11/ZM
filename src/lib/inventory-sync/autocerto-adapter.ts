@@ -1,10 +1,7 @@
 import { fetchEstoque, type AutoCertoVehicle } from './autocerto-client';
-import type { InventoryAdapter } from './engine';
-import type { Vehicle } from '@/modules/inventory/types';
+import type { InventoryAdapter, AdapterFetchConfig } from './adapter-registry';
 
-// ── Mapeamento AutoCerto → Super Loja ─────────────────────────────────────────
-
-function mapVehicle(v: AutoCertoVehicle): Partial<Vehicle> {
+function mapVehicle(v: AutoCertoVehicle): Record<string, unknown> {
   const images = (v.Fotos ?? [])
     .sort((a, b) => a.Posicao - b.Posicao)
     .map((f) => f.URL)
@@ -15,7 +12,7 @@ function mapVehicle(v: AutoCertoVehicle): Partial<Vehicle> {
     brand:        v.Marca,
     model:        v.Modelo,
     version:      v.Versao    || null,
-    year:         v.AnoModelo,            // ano do modelo (relevante para comprador)
+    year:         v.AnoModelo,
     mileage:      v.Km,
     price:        v.Preco,
     fuel:         v.Combustivel  || null,
@@ -27,13 +24,15 @@ function mapVehicle(v: AutoCertoVehicle): Partial<Vehicle> {
   };
 }
 
-// ── Adapter ───────────────────────────────────────────────────────────────────
-
 export class AutoCertoAdapter implements InventoryAdapter {
-  providerName = 'AutoCerto';
+  readonly providerName = 'AutoCerto';
 
-  async fetchVehicles(_url: string): Promise<Partial<Vehicle>[]> {
-    const raw = await fetchEstoque();
-    return raw.map(mapVehicle);
+  async fetchVehicles(fetchConfig: AdapterFetchConfig): Promise<Record<string, unknown>[]> {
+    const { credentials } = fetchConfig
+    const creds = (credentials?.username as string)
+      ? { username: credentials.username as string, password: credentials.password as string }
+      : undefined
+    const raw = await fetchEstoque(creds)
+    return raw.map(mapVehicle)
   }
 }

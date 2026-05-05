@@ -54,6 +54,15 @@ const config: Config = {
           cyan: '#06b6d4',
           dark: '#050505',
         },
+        zmove: {
+          carbon: '#121212',
+          'carbon-elevated': '#1E1E26',
+          blue: '#2D5BFF',
+          cyan: '#00F0FF',
+          platinum: '#F1F1F1',
+          silver: '#A9ADC1',
+          gold: '#FFB800',
+        },
       },
       borderRadius: {
         lg: `var(--radius)`,

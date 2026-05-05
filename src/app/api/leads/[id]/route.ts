@@ -4,6 +4,33 @@ import { requireAuth } from '@/lib/auth-guard';
 import { LeadStatus } from '@prisma/client';
 import { ZodError, z } from 'zod';
 
+// GET /api/leads/[id] — Detalhe completo: lead + interações + simulações + veículo
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { error } = await requireAuth();
+  if (error) return error;
+
+  const { id } = await params;
+
+  const lead = await prisma.lead.findUnique({
+    where:   { id },
+    include: {
+      vehicle:      { select: { id: true, brand: true, model: true, year: true, price: true, images: true } },
+      partner:      { select: { id: true, name: true, city: true, state: true } },
+      interactions: { orderBy: { createdAt: 'asc' } },
+      simulations:  { orderBy: { createdAt: 'desc' } },
+    },
+  });
+
+  if (!lead) {
+    return NextResponse.json({ error: 'Lead não encontrado' }, { status: 404 });
+  }
+
+  return NextResponse.json({ lead });
+}
+
 const PatchLeadSchema = z.object({
   status: z.nativeEnum(LeadStatus).optional(),
   score: z.number().int().min(0).max(100).optional(),

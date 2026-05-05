@@ -1,4 +1,4 @@
-# 🚗 Super Loja 2026 — Automotive Intelligence Platform
+# 🚗 zmove — Automotive Intelligence Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=for-the-badge&logo=prisma)](https://prisma.io/)
@@ -12,7 +12,7 @@
 
 ## 🎯 O Projeto
 
-A **Super Loja 2026** redefine o marketplace automotivo através de um modelo *Asset-Light*. Em vez de possuir o estoque, a plataforma integra-se dinamicamente com múltiplos lojistas parceiros, centralizando a oferta e utilizando agentes de IA para qualificar compradores no WhatsApp antes mesmo da interação humana.
+A **zmove** redefine o marketplace automotivo através de um modelo *Asset-Light*. Em vez de possuir o estoque, a plataforma integra-se dinamicamente com múltiplos lojistas parceiros, centralizando a oferta e utilizando agentes de IA para qualificar compradores no WhatsApp antes mesmo da interação humana.
 
 ### Pilares Estratégicos
 *   **Inventory Intelligence:** SyncEngine automático com adaptadores para APIs de mercado (AutoCerto, etc).

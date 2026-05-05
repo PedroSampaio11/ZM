@@ -19,34 +19,34 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/20 mb-4">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 mb-4">
             <Brain className="text-white w-10 h-10" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tighter">
-            SUPER<span className="text-blue-500">LOJA</span>
+          <h1 className="text-2xl font-black text-foreground tracking-tighter">
+            z<span className="text-primary">move</span>
           </h1>
-          <p className="text-zinc-500 text-sm font-medium uppercase tracking-widest mt-1">
+          <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest mt-1">
             Painel de Controle
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-zinc-900/50 border border-white/5 backdrop-blur-xl rounded-[32px] p-8 md:p-10">
+        <div className="bg-card/50 border border-white/5 backdrop-blur-xl rounded-[32px] p-8 md:p-10">
           <form action={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-500 uppercase ml-1">E-mail</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase ml-1">E-mail</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   name="email"
                   type="email"
                   required
                   placeholder="seu@email.com"
-                  className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-600/50 transition-all"
+                  className="w-full bg-background border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-foreground placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 />
               </div>
             </div>
@@ -60,7 +60,7 @@ export default function LoginPage() {
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full bg-black/50 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-600/50 transition-all"
+                  className="w-full bg-background border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-foreground placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                 />
               </div>
             </div>
@@ -74,7 +74,7 @@ export default function LoginPage() {
             <button
               disabled={isPending}
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2"
+              className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
             >
               {isPending ? (
                 <>

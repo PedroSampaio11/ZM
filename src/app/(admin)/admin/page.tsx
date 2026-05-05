@@ -28,11 +28,11 @@ export default async function AdminDashboard() {
 
   const statusStyle: Record<string, string> = {
     NEW: 'bg-zinc-700/50 text-zinc-300',
-    AI_QUALIFYING: 'bg-purple-600/20 text-purple-400',
+    AI_QUALIFYING: 'bg-accent/20 text-accent',
     QUALIFIED: 'bg-green-600/20 text-green-400',
     HANDOFF_HUMAN: 'bg-orange-600/20 text-orange-400',
     LOST: 'bg-red-600/20 text-red-400',
-    CONVERTED: 'bg-blue-600/20 text-blue-400',
+    CONVERTED: 'bg-primary/20 text-primary',
   }
 
   const statusLabel: Record<string, string> = {
@@ -48,14 +48,14 @@ export default async function AdminDashboard() {
     <div className="space-y-8">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Overview</h1>
-          <p className="text-zinc-500">Painel de controle da Super Loja.</p>
+          <h1 className="text-3xl font-black text-foreground tracking-tight">Overview</h1>
+          <p className="text-muted-foreground">Painel de controle da zmove.</p>
         </div>
         <div className="flex gap-3">
           <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-zinc-400 hover:bg-white/10 transition-all flex items-center gap-2">
             <Filter size={14} /> Filtros
           </button>
-          <button className="px-4 py-2 bg-blue-600 rounded-xl text-xs font-bold text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20">
+          <button className="px-4 py-2 bg-primary rounded-xl text-xs font-bold text-white hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
             Relatório
           </button>
         </div>
@@ -64,15 +64,15 @@ export default async function AdminDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.name} className="bg-zinc-900/50 border-white/5 backdrop-blur-xl">
+          <Card key={stat.name} className="bg-card/50 border-white/5 backdrop-blur-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                 {stat.name}
               </CardTitle>
               <stat.icon className="w-4 h-4 text-zinc-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-black text-white">{stat.value}</div>
+              <div className="text-2xl font-black text-foreground">{stat.value}</div>
               <div className="flex items-center gap-1 mt-1">
                 <ArrowUpRight className="w-3 h-3 text-zinc-600" />
                 <span className="text-[10px] text-zinc-600">{stat.change}</span>
@@ -84,10 +84,10 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Leads recentes */}
-        <Card className="lg:col-span-2 bg-zinc-900/50 border-white/5 backdrop-blur-xl">
+        <Card className="lg:col-span-2 bg-card/50 border-white/5 backdrop-blur-xl">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-bold text-white">Leads Recentes</CardTitle>
-            <a href="/leads" className="text-xs font-bold text-blue-500 hover:underline">Ver Todos</a>
+            <CardTitle className="text-lg font-bold text-foreground">Leads Recentes</CardTitle>
+            <a href="/admin/leads" className="text-xs font-bold text-primary hover:underline">Ver Todos</a>
           </CardHeader>
           <CardContent>
             {recentLeads.length === 0 ? (
@@ -100,12 +100,12 @@ export default async function AdminDashboard() {
                     className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                         {lead.name[0].toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-bold text-white text-sm">{lead.name}</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="font-bold text-foreground text-sm">{lead.name}</p>
+                        <p className="text-xs text-muted-foreground">
                           {lead.vehicle ? `${lead.vehicle.brand} ${lead.vehicle.model}` : lead.phone}
                         </p>
                       </div>
@@ -126,9 +126,9 @@ export default async function AdminDashboard() {
         </Card>
 
         {/* Status do Sistema */}
-        <Card className="bg-zinc-900/50 border-white/5 backdrop-blur-xl">
+        <Card className="bg-card/50 border-white/5 backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-lg font-bold text-white">Status do Sistema</CardTitle>
+            <CardTitle className="text-lg font-bold text-foreground">Status do Sistema</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">

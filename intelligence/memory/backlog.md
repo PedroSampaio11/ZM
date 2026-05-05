@@ -1,68 +1,112 @@
-# 📋 Backlog Mestre: Super Loja 2026
+# Backlog Mestre — Super Loja 2026
 
-**Status Global**: 🟢 Fase 2 Completa → Fase 3 em Andamento
-**Última Atualização**: 2026-04-30
-**Responsável**: Brain (Orchestrator)
-
----
-
-## 🏗️ Fase 1: Fundação & Infra (The Core) — [100%] ✅
-*Foco: Estabelecer a base sólida para evitar retrabalho.*
-
-- [x] **Task 1.1**: Definição do Master Schema (Eschema) — `Vehicles`, `Partners`, `Leads`. [2026-04-30]
-- [x] **Task 1.2**: Setup do Boilerplate Next.js 15 com estrutura de diretórios modular (`/modules`). [2026-04-30]
-- [x] **Task 1.3**: Configuração de variáveis de ambiente e Integração Supabase (SSR). [2026-04-30]
-- [x] **Task 1.4**: Implementação do Layout Base (Sidebar Premium + Modular Admin). [2026-04-30]
-- [x] **Task 1.5**: Instalação e Configuração de Design System (shadcn/ui + Zod). [2026-04-30]
-- [x] **Task 1.6**: Execução do `prisma db push` + Prisma Client gerado. [2026-04-30] ✅
-- [x] **Task 1.7**: Security Hardening da Fundação. [2026-04-30] ✅
-  - SQL injection fix em `prisma-rls.ts`
-  - Auth guard (`requireAuth`) + proteção `GET /api/leads`
-  - Security headers em `next.config.mjs`
-  - Enums DB: `LeadOrigin`, `InteractionChannel`, `InteractionDirection`
-  - Zero erros TypeScript (`tsc --noEmit` → 0 errors)
-
-## 🕵️ Fase 2: Inventory Intelligence (Scraping) — [30%] 🟡
-*Foco: Garantir que o ativo (estoque) seja automatizado e confiável.*
-
-- [x] **Task 2.1**: Engine de Scraping Genérica — Interface + SyncEngine completo. [2026-04-30] ✅
-  - Interface `InventoryAdapter` + `SyncEngine.syncPartner()` com dry-run
-  - `POST /api/admin/sync` + `GET /api/admin/sync`
-- [x] **Task 2.2**: Implementação do primeiro Adaptador de Scraping (AutoCerto). [2026-04-30] ✅
-  - `autocerto-client.ts`: OAuth2 password grant + cache + retry em 401
-  - `autocerto-adapter.ts`: mapeamento completo de campos AutoCerto → Vehicle
-  - Credenciais Via Brasil em `.env.local` (read-only, GET /api/Veiculo/ObterEstoque)
-- [x] **Task 2.3**: Sistema de Validação de Dados e Deduplicação. [2026-04-30] ✅
-  - `ExternalVehicleSchema` em `schemas.ts` valida adapter output antes do upsert
-  - engine.ts: `safeParse` por veículo, log de erros, skip de registros inválidos
-- [x] **Task 2.4**: UI de Gestão de Inventário conectada ao Prisma (dados reais + seed). [2026-04-30]
-
-## 🤖 Fase 3: Lead Engine & IA (Expert Layer) — [40%]
-*Foco: Conversão e qualificação automática.*
-
-- [x] **Task 3.1**: Backend de Captura de Leads (API Endpoints implementados). [2026-04-30]
-- [ ] **Task 3.2**: Setup da Evolution API + Webhooks para WhatsApp.
-- [ ] **Task 3.3**: Agente de Qualificação (Prompting + RAG básico de estoque).
-- [x] **Task 3.4**: Dashboard de Leads conectado ao Prisma (dados reais + groupBy status). [2026-04-30]
-
-## 💳 Fase 4: F&I Engine (Finance) — [25%]
-*Foco: Rentabilização e parceria bancária.*
-
-- [x] **Task 4.1**: Calculador de Financiamento Modular (Lógica e API prontas). [2026-04-30]
-- [ ] **Task 4.2**: Integração com API de Bureau de Crédito (Simulação).
-- [ ] **Task 4.3**: Fluxo de Handoff para o correspondente bancário (Lico).
+**Status Global**: 🟢 Painel Admin funcional — próximo: testes reais + Geral melhorado
+**Última Atualização**: 2026-05-05 (Sessão 3)
 
 ---
 
-## 🔒 Dívida Técnica (Prioridade Alta)
-- [x] Rate limiting em `POST /api/leads` (in-memory, 10 req/min/IP) [2026-04-30] ✅
-- [x] PATCH/DELETE em `/api/leads/[id]` (status, score, summary) [2026-04-30] ✅
-- [ ] `POST /api/admin/vehicles` (cadastro manual de veículo pelo admin)
-- [ ] `POST /api/admin/partners` (cadastro de parceiro pelo admin)
+## ✅ Fase 0: Multi-Tenant + Adapter Registry — CONCLUÍDO
+
+- [x] ADR-005: Store como tenant top-level, `storeId` em todas as tabelas
+- [x] ADR-006: `ADAPTER_REGISTRY` + `IntegrationConfig` por parceiro
+- [x] Schema v2.0: Store, Partner, Vehicle, Lead, IntegrationConfig, enums
+- [x] API Routes: Stores CRUD, Integrations CRUD, Sync atualizado
+- [x] `syncStore(storeId)` itera automaticamente todos os IntegrationConfigs ativos
+- [x] Seed com 2 partners, veículos e leads fictícios
 
 ---
 
-## 📝 Notas de Versão e Mudanças
-- **2026-04-30**: Criação do Backlog inicial.
-- **2026-04-30**: Atualização massiva após implementação da infraestrutura Pro-Grade.
-- **2026-04-30**: Security Hardening + Task 2.1 (SyncEngine) implementada.
+## ✅ Fase 1: Fundação & Segurança — CONCLUÍDO
+
+- [x] Schema inicial, boilerplate Next.js 15, Supabase SSR
+- [x] Security hardening: SQL injection fix, auth guard, security headers, rate limiting
+- [x] Zod schemas em `src/lib/schemas.ts`
+- [x] Prisma singleton em `src/lib/prisma.ts`
+
+---
+
+## ✅ Fase 2: Inventory Engine — CONCLUÍDO
+
+- [x] `SyncEngine`: `syncPartner()` com dry-run, deduplicação por `externalId`
+- [x] `AutoCertoAdapter`: OAuth2 password grant, token cache **por usuário** (Map), retry 401
+- [x] Credenciais por parceiro: lê de `IntegrationConfig.credentials` (fallback para .env)
+- [x] `ExternalVehicleSchema`: validação Zod antes do upsert
+- [x] `syncStore(storeId)`: sync automático de todas as integrações ativas
+
+---
+
+## ✅ Fase UI Admin — CONCLUÍDO (Sessão 3)
+
+- [x] Sidebar: Geral / Estoque / Lojas / Leads (sem Inteligência)
+- [x] `/admin/lojas`: cards por loja, stats, SyncLojaButton, AddLojaDialog
+- [x] `AddLojaDialog`: formulário único — Partner + DMS + credentials
+- [x] `SyncLojaButton`: client component, chama `syncPartnerNow`, mostra resultado
+- [x] `createLoja()`: server action — cria Partner + IntegrationConfig em um passo
+- [x] `/admin/inventory`: filtros por texto/loja/marca, badge de loja nos cards, status tabs
+- [x] `InventoryFilters`: client component, debounce 400ms, URLSearchParams
+- [x] `/admin/leads/[id]`: detalhe completo (timeline, status actions, simulações)
+- [x] Forms: `NewStoreDialog`, `NewPartnerDialog`, `NewVehicleDialog`, `SyncConfigDialog`
+
+---
+
+## 🔴 Alta Prioridade — Próximas Ações
+
+- [ ] **Testar fluxo real completo**:
+  - Adicionar loja com credenciais AutoCerto reais
+  - Clicar "Sincronizar agora"
+  - Confirmar que veículos aparecem em `/admin/inventory`
+  - Verificar se filtros funcionam corretamente
+
+- [ ] **Melhorar página Geral (`/admin`)**:
+  - Stats reais: total de veículos disponíveis, leads novos hoje, lojas ativas, último sync
+  - Atividade recente (últimas interações / leads)
+
+- [ ] **User→Store mapping**:
+  - Hoje: todas as admin pages usam `findFirst({ where: { isActive: true } })` — funciona com 1 store
+  - Opção A: `user_metadata.storeId` no Supabase Auth (mais simples)
+  - Opção B: `StoreUser` junction table no Prisma (mais flexível para multi-admin)
+  - Decisão pendente com Pedro
+
+---
+
+## 🟡 Média Prioridade
+
+- [ ] **Criptografar IntegrationConfig.credentials**:
+  - Atualmente: JSON puro no banco
+  - Precisa: AES-256-GCM na camada de aplicação antes do GA
+  - Arquivo: `src/lib/inventory-sync/credentials.ts` (criar)
+
+- [ ] **RLS policies no Supabase**:
+  - Executar SQL no Supabase dashboard para Vehicle, Lead, Partner
+  - Filtrar por `current_setting('app.current_store_id')`
+  - Arquivo: `src/lib/prisma-rls.ts` já tem o helper
+
+- [ ] **Vehicle detail page**:
+  - `/admin/inventory/[id]` — editar status, ver leads vinculados, histórico
+
+- [ ] **Adicionar adapter Cockpit/Revenda Mais**:
+  - Só precisa implementar `InventoryAdapter` e registrar no `ADAPTER_REGISTRY`
+  - Zero mudança no engine ou nas rotas
+
+---
+
+## 🟢 Fase 3: Lead Engine & IA — Pausado
+
+- [ ] Evolution API client + webhook WhatsApp (`POST /api/webhooks/whatsapp`)
+- [ ] Agente de qualificação Claude com RAG no estoque real
+- [ ] Dashboard de leads melhorado (métricas, funil)
+
+---
+
+## 🟢 Fase 4: F&I — Pausado
+
+- [ ] Integração banco parceiro (simulação de financiamento real)
+- [ ] Fluxo de handoff para Lico
+
+---
+
+## 🧹 Limpeza Técnica
+
+- [ ] Remover rotas legadas CoreBrain: `/api/export`, `/api/memory`, `/api/skills`, `/api/state`, `/api/agents`
+- [ ] Revisar e limpar `/admin/partners` (substituído por `/admin/lojas`)
+- [ ] Revisar e limpar `/admin/stores` (fora do nav, pode virar Settings)

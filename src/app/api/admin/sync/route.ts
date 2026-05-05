@@ -1,51 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
-import { syncEngine } from '@/lib/inventory-sync/engine';
+import { syncStore, syncPartner, ADAPTER_DISPLAY_NAMES } from '@/lib/inventory-sync/engine';
 import { prisma } from '@/lib/prisma';
 import { ZodError, z } from 'zod';
 
-const SyncRequestSchema = z.object({
-  partnerId: z.string().cuid('partnerId deve ser um CUID válido'),
-  adapterKey: z.string().min(1, 'adapterKey é obrigatório'),
-  dryRun: z.boolean().default(true), // true por padrão — seguro para testes
+// Aceita sync por loja inteira OU por integração específica
+const SyncByStoreSchema = z.object({
+  storeId: z.string().cuid(),
+  dryRun:  z.boolean().default(true),
 });
 
-// POST /api/admin/sync — Dispara a sincronização de estoque de um parceiro
+const SyncByIntegrationSchema = z.object({
+  integrationConfigId: z.string().cuid(),
+  dryRun:              z.boolean().default(true),
+});
+
+const SyncBodySchema = z.union([SyncByStoreSchema, SyncByIntegrationSchema]);
+
+// POST /api/admin/sync
 export async function POST(req: NextRequest) {
   const { error } = await requireAuth();
   if (error) return error;
 
   try {
-    const body = await req.json();
-    const { partnerId, adapterKey, dryRun } = SyncRequestSchema.parse(body);
+    const body  = await req.json();
+    const input = SyncBodySchema.parse(body);
 
-    const partner = await prisma.partner.findUnique({
-      where: { id: partnerId },
-      select: { id: true, name: true, scrapingUrl: true, isActive: true },
-    });
+    // ── Sync por integração específica ────────────────────────────────────────
+    if ('integrationConfigId' in input) {
+      const integration = await prisma.integrationConfig.findUnique({
+        where:  { id: input.integrationConfigId },
+        select: { partnerId: true, adapter: true, credentials: true, config: true, isActive: true },
+      });
 
-    if (!partner) {
-      return NextResponse.json({ error: 'Parceiro não encontrado' }, { status: 404 });
-    }
+      if (!integration) {
+        return NextResponse.json({ error: 'IntegrationConfig não encontrada' }, { status: 404 });
+      }
+      if (!integration.isActive) {
+        return NextResponse.json({ error: 'Integração está inativa' }, { status: 400 });
+      }
 
-    if (!partner.isActive) {
-      return NextResponse.json({ error: 'Parceiro está inativo' }, { status: 400 });
-    }
-
-    if (!partner.scrapingUrl) {
-      return NextResponse.json(
-        { error: 'Parceiro não possui URL de scraping configurada' },
-        { status: 400 }
+      const result = await syncPartner(
+        integration.partnerId,
+        integration.adapter,
+        {
+          credentials: integration.credentials as Record<string, string>,
+          config:      integration.config as Record<string, unknown>,
+        },
+        { dryRun: input.dryRun }
       );
+
+      return NextResponse.json({ success: true, ...result });
     }
 
-    const result = await syncEngine.syncPartner(partnerId, adapterKey, partner.scrapingUrl, { dryRun });
-
-    return NextResponse.json({
-      success: true,
-      partner: partner.name,
-      ...result,
+    // ── Sync por store (todos os parceiros ativos) ─────────────────────────────
+    const store = await prisma.store.findUnique({
+      where:  { id: input.storeId },
+      select: { id: true, name: true, isActive: true },
     });
+
+    if (!store) {
+      return NextResponse.json({ error: 'Store não encontrada' }, { status: 404 });
+    }
+    if (!store.isActive) {
+      return NextResponse.json({ error: 'Store está inativa' }, { status: 400 });
+    }
+
+    const result = await syncStore(input.storeId, { dryRun: input.dryRun });
+    return NextResponse.json({ success: true, ...result });
+
   } catch (err) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: 'Dados inválidos', details: err.errors }, { status: 400 });
@@ -58,12 +81,34 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/admin/sync — Lista adaptadores disponíveis
-export async function GET() {
+// GET /api/admin/sync — Lista adapters disponíveis e suas integrações ativas
+export async function GET(req: NextRequest) {
   const { error } = await requireAuth();
   if (error) return error;
 
-  return NextResponse.json({
-    adapters: syncEngine.getAdapterKeys(),
+  const storeId = req.nextUrl.searchParams.get('storeId');
+
+  const adapters = Object.entries(ADAPTER_DISPLAY_NAMES).map(([key, label]) => ({
+    key,
+    label,
+  }));
+
+  if (!storeId) {
+    return NextResponse.json({ adapters });
+  }
+
+  const integrations = await prisma.integrationConfig.findMany({
+    where:   { storeId, isActive: true },
+    select:  {
+      id:             true,
+      adapter:        true,
+      isActive:       true,
+      lastSyncAt:     true,
+      lastSyncStatus: true,
+      partner:        { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: 'asc' },
   });
+
+  return NextResponse.json({ adapters, integrations });
 }

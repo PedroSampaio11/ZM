@@ -12,7 +12,7 @@ const statusConfig: Record<LeadStatus, { label: string; className: string }> = {
   QUALIFIED:      { label: 'Qualificado',    className: 'bg-green-600/20 text-green-400' },
   HANDOFF_HUMAN:  { label: 'Humano',         className: 'bg-orange-600/20 text-orange-400' },
   LOST:           { label: 'Perdido',        className: 'bg-red-600/20 text-red-400' },
-  CONVERTED:      { label: 'Convertido',     className: 'bg-blue-600/20 text-blue-400' },
+  CONVERTED:      { label: 'Convertido',     className: 'bg-primary/20 text-primary' },
 }
 
 export default async function LeadsPage() {
