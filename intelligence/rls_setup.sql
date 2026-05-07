@@ -1,5 +1,5 @@
 -- =============================================================================
--- Super Loja 2026 — RLS (Row Level Security) Policies
+-- motorz — RLS (Row Level Security) Policies
 -- Execute este script no Supabase Dashboard → SQL Editor
 -- =============================================================================
 

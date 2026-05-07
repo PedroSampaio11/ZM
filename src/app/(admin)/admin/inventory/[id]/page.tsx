@@ -96,7 +96,7 @@ export default async function VehicleDetailPage({ params }: Params) {
               {status.label}
             </Badge>
           </div>
-          <p className="text-2xl font-black text-zmove-gold mt-1">{price}</p>
+          <p className="text-2xl font-black text-motorz-gold mt-1">{price}</p>
         </div>
         <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
           <Car className="w-5 h-5 text-zinc-500" />

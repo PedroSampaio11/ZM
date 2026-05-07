@@ -3,8 +3,8 @@ import "./globals.css";
 import { AdminSidebar } from "@/components/admin-sidebar";
 
 export const metadata: Metadata = {
-  title: "zmove | Admin",
-  description: "Painel de controle da plataforma zmove",
+  title: "motorz | Admin",
+  description: "Painel de controle da plataforma motorz",
 };
 
 export default function AdminLayout({

@@ -1,4 +1,4 @@
-# 🚗 Plano Estratégico: Plataforma Super Loja
+# 🚗 Plano Estratégico: Plataforma motorz
 > **Diretrizes de Operação, Tecnologia e Expansão**
 > *Versão 1.0 | 2026*
 

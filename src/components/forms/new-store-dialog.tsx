@@ -75,7 +75,7 @@ export function NewStoreDialog() {
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Slug (URL)</Label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">superloja.com/</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">motorz.com/</span>
               <input
                 name="slug"
                 required

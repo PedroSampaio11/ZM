@@ -82,7 +82,7 @@ enum InteractionDirection {
 model Store {
   id       String    @id @default(cuid())
   name     String
-  slug     String    @unique // subdomínio-ready: viabrasil.superloja.com
+  slug     String    @unique // subdomínio-ready: viabrasil.motorz.com
   document String?           // CNPJ do operador (opcional)
   plan     StorePlan @default(STARTER)
   isActive Boolean   @default(true)

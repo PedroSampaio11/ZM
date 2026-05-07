@@ -1,4 +1,4 @@
-# 🚗 zmove — Automotive Intelligence Platform
+# 🚗 motorz — Automotive Intelligence Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=for-the-badge&logo=prisma)](https://prisma.io/)

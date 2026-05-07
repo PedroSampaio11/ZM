@@ -1,4 +1,4 @@
-# Contexto: Super Loja 2026
+# Contexto: motorz
 
 **Data de Início**: 2026-04-30
 **Última Atualização**: 2026-05-07 (Sessão 4)
@@ -71,7 +71,7 @@ Campo novo na Sessão 4: `Partner.monthlyGoal Decimal? @db.Decimal(12,2)`
 - Store lookup: sempre via `getActiveStore()` em `src/lib/get-store.ts` (nunca `prisma.store.findFirst` direto)
 - Credenciais: sempre `encryptCredentials()` ao salvar, `decryptCredentials()` ao ler
 - UI: Tailwind + `cn()` — dark theme `bg-zinc-900`, bordas `border-white/5`
-- Cores: `text-primary` (azul), `text-zmove-gold`, `text-zmove-cyan`
+- Cores: `text-primary` (azul), `text-motorz-gold`, `text-motorz-cyan`
 - Mutations: Server Actions em `src/lib/*-actions.ts`
 - Validação: Zod em `src/lib/schemas.ts`
 - Soft deletes: Partner `isActive=false`, Vehicle `status=ARCHIVED`

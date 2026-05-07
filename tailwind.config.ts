@@ -54,7 +54,7 @@ const config: Config = {
           cyan: '#06b6d4',
           dark: '#050505',
         },
-        zmove: {
+        motorz: {
           carbon: '#121212',
           'carbon-elevated': '#1E1E26',
           blue: '#2D5BFF',

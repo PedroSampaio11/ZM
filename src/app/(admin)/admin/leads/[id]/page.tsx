@@ -282,7 +282,7 @@ export default async function LeadDetailPage({ params }: Params) {
             <Card className="bg-zinc-900/50 border-white/5">
               <CardHeader>
                 <CardTitle className="font-bold text-white text-sm flex items-center gap-2">
-                  <TrendingUp size={14} className="text-zmove-gold" />
+                  <TrendingUp size={14} className="text-motorz-gold" />
                   Simulações F&I
                 </CardTitle>
               </CardHeader>
@@ -298,7 +298,7 @@ export default async function LeadDetailPage({ params }: Params) {
                       </div>
                       <div>
                         <p className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1">{sim.installments}x de</p>
-                        <p className="text-sm font-black text-zmove-gold">
+                        <p className="text-sm font-black text-motorz-gold">
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(Number(sim.monthlyPayment))}
                         </p>
                       </div>

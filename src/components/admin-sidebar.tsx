@@ -28,12 +28,7 @@ export function AdminSidebar() {
   return (
     <aside className="w-64 border-r border-white/5 bg-background flex flex-col h-screen sticky top-0">
       <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
-          <span className="text-white font-black text-sm">ZM</span>
-        </div>
-        <span className="text-lg font-bold tracking-tight text-foreground uppercase">
-          z<span className="text-primary">move</span>
-        </span>
+        <img src="/assets/brand/logos/logo1.png" alt="motorz" className="h-8 w-auto" />
       </div>
 
       <nav className="flex-1 px-4 space-y-1 mt-4">

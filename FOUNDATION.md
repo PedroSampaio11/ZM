@@ -1,4 +1,4 @@
-# Super Loja 2026 — Fundação Backend
+# motorz — Fundação Backend
 
 **Data**: 2026-05-05 | **Stack**: Next.js 15 · Prisma · PostgreSQL (Supabase) · TypeScript 5.7 · Zod
 

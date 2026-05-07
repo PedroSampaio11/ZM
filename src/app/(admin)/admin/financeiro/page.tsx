@@ -86,7 +86,7 @@ export default async function FinanceiroPage() {
       value: fmt(totalPortfolio),
       sub:   `${enriched.reduce((s, p) => s + p._count.vehicles, 0)} veículos disponíveis`,
       icon:  Car,
-      color: 'text-zmove-cyan',
+      color: 'text-motorz-cyan',
     },
     {
       label: 'Receita Projetada',
@@ -100,7 +100,7 @@ export default async function FinanceiroPage() {
       value: totalGoal > 0 ? fmt(totalGoal) : '—',
       sub:   totalGoal > 0 ? `${pct(globalProgress ?? 0)} atingido` : 'Defina metas por loja abaixo',
       icon:  Target,
-      color: 'text-zmove-gold',
+      color: 'text-motorz-gold',
     },
     {
       label: 'Receita do Mês',
@@ -145,13 +145,13 @@ export default async function FinanceiroPage() {
           <CardContent className="pt-5">
             <div className="flex justify-between text-xs mb-2">
               <span className="font-bold text-white">Progresso Global da Meta</span>
-              <span className={cn('font-black', globalProgress >= 100 ? 'text-green-400' : 'text-zmove-gold')}>
+              <span className={cn('font-black', globalProgress >= 100 ? 'text-green-400' : 'text-motorz-gold')}>
                 {pct(globalProgress)} — {fmt(totalRevenueMonth)} de {fmt(totalGoal)}
               </span>
             </div>
             <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden">
               <div
-                className={cn('h-full rounded-full transition-all', globalProgress >= 100 ? 'bg-green-500' : 'bg-zmove-gold')}
+                className={cn('h-full rounded-full transition-all', globalProgress >= 100 ? 'bg-green-500' : 'bg-motorz-gold')}
                 style={{ width: `${Math.min(100, globalProgress)}%` }}
               />
             </div>
@@ -163,7 +163,7 @@ export default async function FinanceiroPage() {
       <Card className="bg-card/50 border-white/5">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base font-bold text-white flex items-center gap-2">
-            <Trophy size={16} className="text-zmove-gold" /> Ranking de Parceiros
+            <Trophy size={16} className="text-motorz-gold" /> Ranking de Parceiros
           </CardTitle>
           <p className="text-[10px] text-zinc-600">Ordenado por portfólio · Clique na linha para editar meta</p>
         </CardHeader>
@@ -179,7 +179,7 @@ export default async function FinanceiroPage() {
                     {/* Rank */}
                     <div className={cn(
                       'w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0',
-                      idx === 0 ? 'bg-zmove-gold/20 text-zmove-gold' :
+                      idx === 0 ? 'bg-motorz-gold/20 text-motorz-gold' :
                       idx === 1 ? 'bg-zinc-400/20 text-zinc-300' :
                       idx === 2 ? 'bg-orange-700/20 text-orange-500' :
                       'bg-white/5 text-zinc-500'
@@ -201,7 +201,7 @@ export default async function FinanceiroPage() {
 
                     {/* Portfólio */}
                     <div className="text-right hidden md:block w-32">
-                      <p className="font-black text-zmove-cyan text-sm">{fmt(p.portfolioValue)}</p>
+                      <p className="font-black text-motorz-cyan text-sm">{fmt(p.portfolioValue)}</p>
                       <p className="text-[9px] text-zinc-600 uppercase tracking-wide">Portfólio</p>
                     </div>
 
@@ -213,7 +213,7 @@ export default async function FinanceiroPage() {
 
                     {/* Receita projetada */}
                     <div className="text-right hidden lg:block w-28">
-                      <p className="font-black text-zmove-gold text-sm">{fmt(p.projectedRevenue)}</p>
+                      <p className="font-black text-motorz-gold text-sm">{fmt(p.projectedRevenue)}</p>
                       <p className="text-[9px] text-zinc-600 uppercase tracking-wide">Projetado</p>
                     </div>
 
@@ -227,12 +227,12 @@ export default async function FinanceiroPage() {
                             </span>
                             {p.goalProgress! >= 100
                               ? <CheckCircle size={11} className="text-green-400" />
-                              : <AlertCircle size={11} className="text-zmove-gold" />
+                              : <AlertCircle size={11} className="text-motorz-gold" />
                             }
                           </div>
                           <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
                             <div
-                              className={cn('h-full rounded-full', p.goalProgress! >= 100 ? 'bg-green-500' : 'bg-zmove-gold')}
+                              className={cn('h-full rounded-full', p.goalProgress! >= 100 ? 'bg-green-500' : 'bg-motorz-gold')}
                               style={{ width: `${Math.min(100, p.goalProgress!)}%` }}
                             />
                           </div>
@@ -259,9 +259,9 @@ export default async function FinanceiroPage() {
                           <p className="font-black text-white">{p.leads.length}</p>
                         </div>
                         {p.carsNeeded !== null && (
-                          <div className="bg-zmove-gold/5 border border-zmove-gold/10 rounded-xl p-3 col-span-2">
-                            <p className="text-[10px] text-zmove-gold/70">Para bater a meta ainda falta</p>
-                            <p className="font-black text-zmove-gold text-lg">{p.carsNeeded} venda{p.carsNeeded !== 1 ? 's' : ''}</p>
+                          <div className="bg-motorz-gold/5 border border-motorz-gold/10 rounded-xl p-3 col-span-2">
+                            <p className="text-[10px] text-motorz-gold/70">Para bater a meta ainda falta</p>
+                            <p className="font-black text-motorz-gold text-lg">{p.carsNeeded} venda{p.carsNeeded !== 1 ? 's' : ''}</p>
                             <p className="text-[9px] text-zinc-600">Faltam {fmt(p.remainingGoal!)} · média {fmt(p.portfolioValue / (p._count.vehicles || 1))} por carro</p>
                           </div>
                         )}

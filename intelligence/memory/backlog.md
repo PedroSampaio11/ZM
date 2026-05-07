@@ -1,4 +1,4 @@
-# Backlog Mestre — Super Loja 2026
+# Backlog Mestre — motorz
 
 **Status Global**: 🟢 Sessão 4 concluída — Admin completo, Financeiro, Multi-DMS, Segurança
 **Última Atualização**: 2026-05-07 (Sessão 4)

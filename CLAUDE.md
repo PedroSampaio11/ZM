@@ -1,13 +1,13 @@
-# Super Loja 2026 — CLAUDE.md
+# motorz — CLAUDE.md
 
-Projeto: Marketplace automotivo inteligente e modular (Asset-Light).
+Projeto: motorz — Marketplace automotivo inteligente e modular (Asset-Light).
 Sócios: Pedro (Tech), Vitor (Growth), Lico (Operações/Bancário).
 
 ## Memória
 - `intelligence/memory/context.md` — contexto e stack (leia primeiro)
 - `intelligence/memory/decisions.md` — decisões arquiteturais (ADRs)
 - `intelligence/memory/backlog.md` — backlog por fases (Fase 1–4)
-- `intelligence/memory/specifications/superloja_schema.md` — schema do banco
+- `intelligence/memory/specifications/motorz_schema.md` — schema do banco
 
 ## Regras Obrigatórias
 - Leia `intelligence/memory/context.md` antes de qualquer ação

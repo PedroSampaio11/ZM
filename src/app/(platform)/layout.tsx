@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "../(admin)/globals.css"; // Reutilizando os estilos base
 
 export const metadata: Metadata = {
-  title: "zmove | Consultoria Automotiva",
+  title: "motorz | Consultoria Automotiva",
   description: "A melhor seleção de veículos com garantia e procedência.",
 };
 
@@ -18,12 +18,7 @@ export default function PlatformLayout({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-black text-sm">ZM</span>
-                </div>
-                <span className="text-xl font-bold tracking-tight text-foreground uppercase">
-                  z<span className="text-primary">move</span>
-                </span>
+                <img src="/assets/brand/logos/logo1.png" alt="motorz" className="h-8 w-auto" />
               </div>
               <nav className="hidden md:flex gap-8 text-sm font-medium text-zinc-600">
                 <a href="#" className="hover:text-primary transition-colors">Estoque</a>
@@ -42,7 +37,7 @@ export default function PlatformLayout({
 
         <footer className="bg-white border-t py-12 mt-20">
           <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-zinc-500 text-sm">© 2026 zmove. Todos os direitos reservados.</p>
+            <p className="text-zinc-500 text-sm">© 2026 motorz. Todos os direitos reservados.</p>
           </div>
         </footer>
       </body>

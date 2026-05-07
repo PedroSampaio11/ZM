@@ -69,8 +69,8 @@ export default async function AdminDashboard() {
       value: activePartners,
       sub: activePartners === 1 ? 'concessionária' : 'concessionárias',
       icon: Building2,
-      accent: 'text-zmove-cyan',
-      glow: 'shadow-zmove-cyan/10',
+      accent: 'text-motorz-cyan',
+      glow: 'shadow-motorz-cyan/10',
     },
     {
       name: 'Estoque Disponível',
@@ -85,8 +85,8 @@ export default async function AdminDashboard() {
       value: leadsToday,
       sub: leadsToday === 1 ? 'novo contato' : 'novos contatos',
       icon: Users,
-      accent: 'text-zmove-gold',
-      glow: 'shadow-zmove-gold/10',
+      accent: 'text-motorz-gold',
+      glow: 'shadow-motorz-gold/10',
     },
     {
       name: 'Último Sync',

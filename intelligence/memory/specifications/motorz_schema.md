@@ -1,4 +1,4 @@
-# 🗄️ Master Schema: Super Loja 2026
+# 🗄️ Master Schema: motorz
 
 **Status**: 🟢 V1.1 Aplicado em Produção (2026-04-30)
 **Stack**: PostgreSQL + Prisma ORM + Supabase
