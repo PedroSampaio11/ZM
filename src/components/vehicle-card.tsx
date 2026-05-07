@@ -1,0 +1,157 @@
+'use client';
+
+import { useState } from 'react';
+import { Vehicle } from '@/modules/inventory/types';
+import { LayoutGrid, MessageCircle } from 'lucide-react';
+
+interface VehicleCardProps {
+  vehicle: Vehicle;
+  onInterest: (vehicle: Vehicle) => void;
+  index?: number;
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(value);
+}
+
+function formatMileage(km: number) {
+  if (km >= 1000) return `${(km / 1000).toFixed(0)}k km`;
+  return `${km} km`;
+}
+
+const TRANSMISSION_LABELS: Record<string, string> = {
+  MANUAL: 'Manual',
+  AUTOMATIC: 'Automático',
+  CVT: 'CVT',
+  SEMI_AUTOMATIC: 'Semi-auto',
+};
+
+export function VehicleCard({ vehicle, onInterest, index = 0 }: VehicleCardProps) {
+  const [imgError, setImgError] = useState(false);
+
+  const imageUrl = !imgError && vehicle.images?.[0]
+    ? vehicle.images[0]
+    : `https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800`;
+
+  return (
+    <div
+      className="card-vehicle anim-fade-up"
+      style={{ animationDelay: `${index * 80}ms` }}
+      onClick={() => onInterest(vehicle)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onInterest(vehicle)}
+      aria-label={`Ver detalhes: ${vehicle.brand} ${vehicle.model}`}
+    >
+      {/* Image Container */}
+      <div className="zoom-container" style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden' }}>
+        <img
+          src={imageUrl}
+          alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
+          onError={() => setImgError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+
+        {/* Gradient overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to bottom, transparent 60%, rgba(15, 23, 42, 0.3) 100%)',
+        }} />
+
+        {/* Top-left: Year */}
+        <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
+          <div className="glass" style={{
+            padding: '4px 10px',
+            borderRadius: '8px',
+            fontSize: '11px',
+            fontWeight: 800,
+            color: 'var(--mz-ink)',
+            textTransform: 'uppercase',
+          }}>
+            {vehicle.year}
+          </div>
+        </div>
+
+        {/* Bottom-left: Tech badge */}
+        <div style={{
+          position: 'absolute',
+          bottom: '12px',
+          left: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(8px)',
+          padding: '6px 10px',
+          borderRadius: '8px',
+          fontSize: '10px',
+          fontWeight: 800,
+          color: 'var(--mz-ink)',
+          boxShadow: 'var(--shadow-sm)',
+          textTransform: 'uppercase',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+        }}>
+          <LayoutGrid size={12} />
+          Tecnologia Ativa
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: '24px 24px 28px' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
+            {vehicle.brand}
+          </p>
+          <h3 style={{ fontSize: '24px', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: '8px' }}>
+            {vehicle.model}
+          </h3>
+          {vehicle.version && (
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 500, lineHeight: 1.4, opacity: 0.8 }}>
+              {vehicle.version}
+            </p>
+          )}
+        </div>
+
+        {/* Specs */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
+          {vehicle.mileage != null && (
+            <span className="spec-pill" style={{ background: 'var(--mz-frost)', border: '1px solid var(--border)', fontSize: '12px', padding: '4px 12px', borderRadius: '8px', fontWeight: 600 }}>
+              {formatMileage(vehicle.mileage)}
+            </span>
+          )}
+          {vehicle.fuel && (
+            <span className="spec-pill" style={{ background: 'var(--mz-frost)', border: '1px solid var(--border)', fontSize: '12px', padding: '4px 12px', borderRadius: '8px', fontWeight: 600 }}>
+              {vehicle.fuel}
+            </span>
+          )}
+          {vehicle.transmission && (
+            <span className="spec-pill" style={{ background: 'var(--mz-frost)', border: '1px solid var(--border)', fontSize: '12px', padding: '4px 12px', borderRadius: '8px', fontWeight: 600 }}>
+              {TRANSMISSION_LABELS[vehicle.transmission] ?? vehicle.transmission}
+            </span>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '24px' }}>
+          <div>
+            <p style={{ fontSize: '10px', color: 'var(--text-faint)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>
+              Preço Motorz
+            </p>
+            <div className="price-tag" style={{ color: 'var(--mz-royal)', fontWeight: 900, fontSize: '28px' }}>
+              {formatCurrency(vehicle.price)}
+            </div>
+          </div>
+          <button
+            onClick={e => { e.stopPropagation(); onInterest(vehicle); }}
+            className="btn-primary"
+            style={{ padding: '14px 28px', borderRadius: '16px', fontWeight: 800, fontSize: '14px' }}
+          >
+            <MessageCircle size={18} />
+            Tenho Interesse
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

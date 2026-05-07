@@ -19,6 +19,36 @@ interface Loja {
   integrations: Integration[]
 }
 
+// ── Config de campos por DMS ─────────────────────────────────────────────────
+
+type CredField = { name: string; label: string; credKey: string; type?: string }
+
+const DMS_LABEL: Record<string, string> = {
+  AUTOCERTO:    'AutoCerto',
+  COCKPIT:      'Cockpit DMS',
+  REVENDA_MAIS: 'Revenda Mais',
+  MOTOR21:      'Motor21',
+}
+
+const DMS_EDIT_FIELDS: Record<string, CredField[]> = {
+  AUTOCERTO: [
+    { name: 'dmsUsername', label: 'Usuário / Login',       credKey: 'username' },
+    { name: 'dmsPassword', label: 'Nova senha (opcional)', credKey: 'password', type: 'password' },
+  ],
+  REVENDA_MAIS: [
+    { name: 'dmsUsername', label: 'Usuário / Login',       credKey: 'username' },
+    { name: 'dmsPassword', label: 'Nova senha (opcional)', credKey: 'password', type: 'password' },
+  ],
+  COCKPIT: [
+    { name: 'dmsApiKey',    label: 'API Key',    credKey: 'apiKey'    },
+    { name: 'dmsEmpresaId', label: 'Empresa ID', credKey: 'empresaId' },
+  ],
+  MOTOR21: [
+    { name: 'dmsClientId',     label: 'Client ID',            credKey: 'clientId'     },
+    { name: 'dmsClientSecret', label: 'Client Secret (novo)', credKey: 'clientSecret', type: 'password' },
+  ],
+}
+
 // ── Estilos compartilhados ────────────────────────────────────────────────────
 
 const inputCls = 'w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all'
@@ -32,7 +62,8 @@ export function LojaActionsMenu({ loja }: { loja: Loja }) {
   const [error,       setError]       = useState<string | null>(null)
   const [isPending,   startTransition] = useTransition()
 
-  const autocertoInteg = loja.integrations.find(i => i.adapter === 'AUTOCERTO')
+  const primaryInteg = loja.integrations.find(i => i.adapter !== 'MANUAL') ?? null
+  const editFields   = primaryInteg ? (DMS_EDIT_FIELDS[primaryInteg.adapter] ?? []) : []
 
   // ── Editar ──────────────────────────────────────────────────────────────────
 
@@ -108,6 +139,7 @@ export function LojaActionsMenu({ loja }: { loja: Loja }) {
 
             <form action={handleEdit} className="p-6 space-y-4">
               <input type="hidden" name="partnerId" value={loja.id} />
+              <input type="hidden" name="dms" value={primaryInteg?.adapter ?? 'MANUAL'} />
 
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Nome da Loja *</label>
@@ -125,23 +157,27 @@ export function LojaActionsMenu({ loja }: { loja: Loja }) {
                 </div>
               </div>
 
-              {autocertoInteg && (
+              {primaryInteg && editFields.length > 0 && (
                 <div className="pt-2 border-t border-white/5 space-y-4">
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Credenciais AutoCerto</p>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Usuário / Login</label>
-                    <input
-                      name="dmsUsername"
-                      defaultValue={autocertoInteg.credentials?.username ?? ''}
-                      className={inputCls}
-                      placeholder="usuario@empresa.com"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Nova senha (opcional)</label>
-                    <input name="dmsPassword" type="password" className={inputCls} placeholder="••••••••" />
-                    <p className="text-[10px] text-zinc-600">Deixe em branco para manter a senha atual</p>
-                  </div>
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
+                    Credenciais {DMS_LABEL[primaryInteg.adapter] ?? primaryInteg.adapter}
+                  </p>
+                  {editFields.map(field => (
+                    <div key={field.name} className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{field.label}</label>
+                      <input
+                        name={field.name}
+                        type={field.type ?? 'text'}
+                        defaultValue={field.type === 'password' ? '' : (primaryInteg.credentials?.[field.credKey] ?? '')}
+                        autoComplete="off"
+                        className={inputCls}
+                        placeholder={field.type === 'password' ? '••••••••' : ''}
+                      />
+                      {field.type === 'password' && (
+                        <p className="text-[10px] text-zinc-600">Deixe em branco para manter</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
 

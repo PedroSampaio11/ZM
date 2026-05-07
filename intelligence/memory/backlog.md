@@ -1,60 +1,70 @@
-# Backlog Mestre — motorz
-
-**Status Global**: 🟢 Sessão 4 concluída — Admin completo, Financeiro, Multi-DMS, Segurança
-**Última Atualização**: 2026-05-07 (Sessão 4)
+# Backlog — motorz
+**Sessão**: 5 | **Data**: 2026-05-07 | **TypeScript**: 0 erros ✅
 
 ---
 
-## ✅ Fases 0–3 UI: CONCLUÍDO
+## ✅ CONCLUÍDO (não reler)
 
-Tudo que foi construído até aqui está em `intelligence/handover_status.md`.
-Não releia este bloco — vá direto ao handover para o estado atual.
+- Painel Admin completo: Geral, Estoque, Lojas, Financeiro, Leads + detalhe
+- Multi-DMS: AutoCerto ✅ (testado + funcionando Sessão 5), Cockpit / Revenda Mais / Motor21 (implementados, não testados)
+- Segurança: AES-256-GCM nas credenciais, auth guard, rate limiting
+- Financeiro: metas por parceiro, comissão %, receita projetada, ranking
+- RLS Supabase: ✅ executado no Dashboard
+- Rename: zmove → **motorz** (código + docs + Tailwind)
+- AddLojaDialog: campos dinâmicos por DMS (AutoCerto/RevendaMais: user+senha | Cockpit: apiKey+empresaId | Motor21: clientId+clientSecret)
+- Sidebar: meta mensal **real** do banco (sem hardcode)
+- User→Store mapping: `Store.ownerId` no schema, `createStore` seta, `getActiveStore` prioriza
+- Vitrine pública: layout, nav, hero, grid de veículos, bottom sheet de lead, footer (CSS em `platform.css`)
+- `@hugeicons/react` substituído por `lucide-react` nos 4 arquivos da vitrine
+- `updateLoja` DMS-aware: merge seletivo por adapter, credenciais descriptografadas server-side antes do client
 
 ---
 
-## 🔴 Próximas Ações (Alta Prioridade)
+## 🔴 Alta Prioridade (próxima sessão)
 
-- [ ] **Vitrine pública** `src/app/(platform)/` — página de listagem de veículos para o cliente final
-  - Grid de veículos com filtros (marca, preço, ano, km)
-  - Página de detalhe do veículo com formulário de interesse (cria Lead)
-  - SEO básico (metadata por veículo)
+### 1. Testar adapters Cockpit / Revenda Mais / Motor21
+- Adapters implementados mas **nunca testados com API real**
+- Precisa: credenciais reais de um parceiro com cada DMS
+- Ajustar field mapping quando tiver acesso
+- Arquivo: `src/lib/inventory-sync/cockpit-adapter.ts`, `revenda-mais-adapter.ts`, `motor21-adapter.ts`
 
-- [ ] **AddLojaDialog — campos por DMS** — hoje o formulário mostra usuário/senha para qualquer DMS
-  - Cockpit precisa: `apiKey` + `empresaId`
-  - Motor21 precisa: `clientId` + `clientSecret`
-  - Revenda Mais precisa: `username` + `password`
-  - Solução: campos dinâmicos no dialog baseados no DMS selecionado
-
-- [ ] **Testar novos adapters com credenciais reais** (Cockpit, Revenda Mais, Motor21)
-  - Os adapters estão implementados mas ainda não foram testados com APIs reais
-  - Ajustar field mapping quando houver acesso às APIs
+### 2. ~~updateLoja — credenciais por DMS~~ ✅ RESOLVIDO (Sessão 5)
+### 3. ~~AutoCerto sync~~ ✅ TESTADO EM PRODUÇÃO (Sessão 5)
+- `updateLoja` agora lê `dms` do formData e faz merge apenas dos campos preenchidos
+- `loja-actions-menu.tsx` renderiza campos corretos por adapter (AUTOCERTO/REVENDA_MAIS/COCKPIT/MOTOR21)
+- `page.tsx` descriptografa credenciais server-side antes de passar ao client component
 
 ---
 
 ## 🟡 Média Prioridade
 
-- [ ] **RLS no Supabase** — executar `intelligence/rls_setup.sql` no Supabase Dashboard
-  - Já gerado, Pedro só precisa colar e rodar no SQL Editor
+### 3. Vitrine pública — página de detalhe do veículo
+- Rota: `src/app/(platform)/veiculo/[id]/page.tsx` (não existe ainda)
+- Exibir specs completas, galeria de fotos, formulário de lead, SEO (metadata dinâmica)
 
-- [ ] **Sidebar — widget de meta global real**
-  - Hoje mostra "R$ 4.2M / 62%" hardcoded
-  - Buscar `monthlyGoal` e `revenueThisMonth` real via `getActiveStore()` + query agregada
+### 4. Vitrine pública — SEO e metadata dinâmica
+- `generateMetadata` por veículo para Google indexar
+- OG tags para compartilhamento
 
-- [ ] **Notificações de sync** — alertar quando sync falha ou veículos somem do feed
-
-- [ ] **Exportar dados** — CSV de estoque ou leads para planilha
-
----
-
-## 🟢 Fase 3: Lead Engine & IA (Pausado)
-
-- [ ] Evolution API client + webhook WhatsApp (`POST /api/webhooks/whatsapp`)
-- [ ] Agente de qualificação Claude com RAG no estoque real
-- [ ] Dashboard de leads: funil, métricas de conversão
+### 5. Vincular Store existente ao usuário atual
+- A store "Via Brasil" foi criada antes do `ownerId` existir → `ownerId` é null
+- Fix: rodar no Supabase Dashboard:
+  ```sql
+  UPDATE "Store" SET "ownerId" = '<uuid-do-pedro>' WHERE slug = 'via-brasil';
+  ```
+  UUID do Pedro: Supabase Dashboard → Authentication → Users
 
 ---
 
-## 🟢 Fase 4: F&I (Pausado)
+## 🟢 Fase 3 — Lead Engine & IA (pausado, não priorizar)
 
-- [ ] Integração banco parceiro (simulação de financiamento real)
-- [ ] Fluxo de handoff para Lico
+- Evolution API webhook WhatsApp (`POST /api/webhooks/whatsapp`)
+- Agente de qualificação Claude com RAG no estoque
+- Funil de leads: métricas de conversão
+
+---
+
+## 🟢 Fase 4 — F&I (pausado)
+
+- Simulação de financiamento real com banco parceiro
+- Fluxo de handoff para Lico

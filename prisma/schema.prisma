@@ -86,6 +86,7 @@ model Store {
   document String?           // CNPJ do operador (opcional)
   plan     StorePlan @default(STARTER)
   isActive Boolean   @default(true)
+  ownerId  String?   @db.Uuid // Supabase Auth user UUID
 
   partners     Partner[]
   vehicles     Vehicle[]
@@ -96,6 +97,7 @@ model Store {
 
   @@index([slug])
   @@index([isActive])
+  @@index([ownerId])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

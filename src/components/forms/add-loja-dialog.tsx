@@ -11,12 +11,52 @@ const selectCls = `${inputCls} [&>option]:bg-zinc-900 cursor-pointer`
 
 const BR_STATES = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
-const DMS_OPTIONS = [
-  { value: 'AUTOCERTO',    label: 'AutoCerto',    available: true,  note: 'Integração via API — credenciais obrigatórias' },
-  { value: 'MANUAL',       label: 'Manual',        available: true,  note: 'Cadastro manual pelo painel' },
-  { value: 'COCKPIT',      label: 'Cockpit DMS',   available: false, note: 'Em breve' },
-  { value: 'REVENDA_MAIS', label: 'Revenda Mais',  available: false, note: 'Em breve' },
-  { value: 'MOTOR21',      label: 'Motor21',       available: false, note: 'Em breve' },
+type DmsField = { name: string; label: string; placeholder: string; type?: string }
+type DmsOption = { value: string; label: string; note: string; fields: DmsField[] }
+
+const DMS_OPTIONS: DmsOption[] = [
+  {
+    value: 'AUTOCERTO',
+    label: 'AutoCerto',
+    note: 'API REST — OAuth2',
+    fields: [
+      { name: 'dmsUsername', label: 'Usuário / Login', placeholder: 'usuario@autocerto.com' },
+      { name: 'dmsPassword', label: 'Senha', placeholder: '••••••••', type: 'password' },
+    ],
+  },
+  {
+    value: 'REVENDA_MAIS',
+    label: 'Revenda Mais',
+    note: 'API REST — JWT',
+    fields: [
+      { name: 'dmsUsername', label: 'Usuário / Login', placeholder: 'usuario@revendamais.com.br' },
+      { name: 'dmsPassword', label: 'Senha', placeholder: '••••••••', type: 'password' },
+    ],
+  },
+  {
+    value: 'COCKPIT',
+    label: 'Cockpit DMS',
+    note: 'API REST — API Key',
+    fields: [
+      { name: 'dmsApiKey',    label: 'API Key',    placeholder: 'ck_xxxxxxxxxxxxxxxx' },
+      { name: 'dmsEmpresaId', label: 'Empresa ID', placeholder: '1234' },
+    ],
+  },
+  {
+    value: 'MOTOR21',
+    label: 'Motor21',
+    note: 'OAuth2 — Client Credentials',
+    fields: [
+      { name: 'dmsClientId',     label: 'Client ID',     placeholder: 'client_...' },
+      { name: 'dmsClientSecret', label: 'Client Secret', placeholder: '••••••••', type: 'password' },
+    ],
+  },
+  {
+    value: 'MANUAL',
+    label: 'Manual',
+    note: 'Cadastro manual pelo painel',
+    fields: [],
+  },
 ]
 
 export function AddLojaDialog() {
@@ -24,6 +64,8 @@ export function AddLojaDialog() {
   const [error, setError] = useState<string | null>(null)
   const [dms, setDms]     = useState('AUTOCERTO')
   const [isPending, startTransition] = useTransition()
+
+  const selectedDms = DMS_OPTIONS.find(d => d.value === dms)!
 
   function handleSubmit(formData: FormData) {
     formData.set('dms', dms)
@@ -34,8 +76,6 @@ export function AddLojaDialog() {
       else { setOpen(false); setDms('AUTOCERTO') }
     })
   }
-
-  const needsCredentials = dms !== 'MANUAL'
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); setError(null) }}>
@@ -93,16 +133,14 @@ export function AddLojaDialog() {
               <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Sistema de Gestão (DMS)</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {DMS_OPTIONS.map(opt => (
                 <button
                   key={opt.value}
                   type="button"
-                  disabled={!opt.available}
-                  onClick={() => opt.available && setDms(opt.value)}
+                  onClick={() => setDms(opt.value)}
                   className={cn(
                     'p-3 rounded-xl text-left border transition-all',
-                    !opt.available && 'opacity-40 cursor-not-allowed',
                     dms === opt.value
                       ? 'bg-primary/10 border-primary/40 text-primary'
                       : 'bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10'
@@ -114,17 +152,24 @@ export function AddLojaDialog() {
               ))}
             </div>
 
-            {needsCredentials && (
+            {selectedDms.fields.length > 0 && (
               <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/5">
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Credenciais {DMS_OPTIONS.find(d => d.value === dms)?.label}</p>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Usuário / Login *</label>
-                  <input name="dmsUsername" required={needsCredentials} placeholder="usuario@empresa.com" type="text" autoComplete="off" className={inputCls} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Senha *</label>
-                  <input name="dmsPassword" required={needsCredentials} placeholder="••••••••" type="password" autoComplete="new-password" className={inputCls} />
-                </div>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                  Credenciais {selectedDms.label}
+                </p>
+                {selectedDms.fields.map(field => (
+                  <div key={field.name} className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{field.label} *</label>
+                    <input
+                      name={field.name}
+                      required
+                      placeholder={field.placeholder}
+                      type={field.type ?? 'text'}
+                      autoComplete="off"
+                      className={inputCls}
+                    />
+                  </div>
+                ))}
               </div>
             )}
           </div>

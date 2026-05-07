@@ -110,21 +110,46 @@ export async function syncPartnerNow(integrationConfigId: string) {
   }
 }
 
+function buildDmsCredentials(dms: string, formData: FormData): Record<string, string> | null {
+  if (dms === 'MANUAL') return null
+
+  if (dms === 'COCKPIT') {
+    const apiKey    = (formData.get('dmsApiKey')    as string)?.trim()
+    const empresaId = (formData.get('dmsEmpresaId') as string)?.trim()
+    if (!apiKey || !empresaId) return null
+    return { apiKey, empresaId }
+  }
+
+  if (dms === 'MOTOR21') {
+    const clientId     = (formData.get('dmsClientId')     as string)?.trim()
+    const clientSecret = (formData.get('dmsClientSecret') as string)?.trim()
+    if (!clientId || !clientSecret) return null
+    return { clientId, clientSecret }
+  }
+
+  // AUTOCERTO, REVENDA_MAIS: username + password
+  const username = (formData.get('dmsUsername') as string)?.trim()
+  const password = (formData.get('dmsPassword') as string)?.trim()
+  if (!username) return null
+  return { username, password }
+}
+
 export async function createLoja(formData: FormData) {
   try {
     const store = await getActiveStore()
     if (!store) return { error: 'Nenhuma loja base encontrada no sistema' }
 
-    const name        = (formData.get('name')        as string)?.trim()
-    const document    = (formData.get('document')    as string)?.replace(/\D/g, '')
-    const city        = (formData.get('city')        as string)?.trim()
-    const state       = (formData.get('state')       as string)?.trim()
-    const dms         = (formData.get('dms')         as string) || 'MANUAL'
-    const dmsUsername = (formData.get('dmsUsername') as string)?.trim() || ''
-    const dmsPassword = (formData.get('dmsPassword') as string)?.trim() || ''
+    const name     = (formData.get('name')     as string)?.trim()
+    const document = (formData.get('document') as string)?.replace(/\D/g, '')
+    const city     = (formData.get('city')     as string)?.trim()
+    const state    = (formData.get('state')    as string)?.trim()
+    const dms      = (formData.get('dms')      as string) || 'MANUAL'
 
     if (!name || !document || !city || !state) return { error: 'Preencha todos os campos obrigatórios' }
     if (document.length !== 14) return { error: 'CNPJ deve ter 14 dígitos' }
+
+    const rawCreds = buildDmsCredentials(dms, formData)
+    if (dms !== 'MANUAL' && !rawCreds) return { error: 'Preencha todas as credenciais do DMS' }
 
     const existing = await prisma.partner.findUnique({ where: { document } })
     if (existing) return { error: 'CNPJ já cadastrado no sistema' }
@@ -133,8 +158,8 @@ export async function createLoja(formData: FormData) {
       data: { storeId: store.id, name, document, city, state, isActive: true, commission: 0 },
     })
 
-    const credentials: Prisma.InputJsonValue = (dms !== 'MANUAL' && dmsUsername)
-      ? encryptCredentials({ username: dmsUsername, password: dmsPassword }) as Prisma.InputJsonValue
+    const credentials: Prisma.InputJsonValue = rawCreds
+      ? encryptCredentials(rawCreds) as Prisma.InputJsonValue
       : {}
 
     await prisma.integrationConfig.create({
@@ -158,12 +183,11 @@ export async function createLoja(formData: FormData) {
 
 export async function updateLoja(formData: FormData) {
   try {
-    const partnerId   = (formData.get('partnerId')   as string)?.trim()
-    const name        = (formData.get('name')        as string)?.trim()
-    const city        = (formData.get('city')        as string)?.trim()
-    const state       = (formData.get('state')       as string)?.trim()
-    const dmsUsername = (formData.get('dmsUsername') as string)?.trim() || ''
-    const dmsPassword = (formData.get('dmsPassword') as string)?.trim() || ''
+    const partnerId = (formData.get('partnerId') as string)?.trim()
+    const name      = (formData.get('name')      as string)?.trim()
+    const city      = (formData.get('city')      as string)?.trim()
+    const state     = (formData.get('state')     as string)?.trim()
+    const dms       = (formData.get('dms')       as string)?.trim() || ''
 
     if (!partnerId || !name || !city || !state) return { error: 'Preencha todos os campos obrigatórios' }
 
@@ -172,22 +196,28 @@ export async function updateLoja(formData: FormData) {
       data:  { name, city, state },
     })
 
-    // Atualiza credenciais da integração AutoCerto se fornecidas
-    if (dmsUsername) {
-      const integration = await prisma.integrationConfig.findFirst({
-        where: { partnerId, adapter: 'AUTOCERTO' },
-      })
-      if (integration) {
-        const existing = integration.credentials as Record<string, string>
-        const merged = {
-          ...existing,
-          username: dmsUsername,
-          ...(dmsPassword ? { password: dmsPassword } : {}),
-        }
-        await prisma.integrationConfig.update({
-          where: { id: integration.id },
-          data:  { credentials: encryptCredentials(merged) as Prisma.InputJsonValue },
+    if (dms && dms !== 'MANUAL') {
+      const candidates: Record<string, string> = {
+        username:     (formData.get('dmsUsername')     as string)?.trim() || '',
+        password:     (formData.get('dmsPassword')     as string)?.trim() || '',
+        apiKey:       (formData.get('dmsApiKey')       as string)?.trim() || '',
+        empresaId:    (formData.get('dmsEmpresaId')    as string)?.trim() || '',
+        clientId:     (formData.get('dmsClientId')     as string)?.trim() || '',
+        clientSecret: (formData.get('dmsClientSecret') as string)?.trim() || '',
+      }
+      const newValues = Object.fromEntries(Object.entries(candidates).filter(([, v]) => v !== ''))
+
+      if (Object.keys(newValues).length > 0) {
+        const integration = await prisma.integrationConfig.findFirst({
+          where: { partnerId, adapter: dms as never },
         })
+        if (integration) {
+          const existing = decryptCredentials(integration.credentials as Record<string, unknown>)
+          await prisma.integrationConfig.update({
+            where: { id: integration.id },
+            data:  { credentials: encryptCredentials({ ...existing, ...newValues }) as Prisma.InputJsonValue },
+          })
+        }
       }
     }
 

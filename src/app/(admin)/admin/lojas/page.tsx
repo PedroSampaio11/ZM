@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { getActiveStore } from '@/lib/get-store'
+import { decryptCredentials } from '@/lib/inventory-sync/credentials'
 import { AddLojaDialog } from '@/components/forms/add-loja-dialog'
 import { SyncLojaButton } from '@/components/lojas/sync-loja-button'
 import { LojaActionsMenu } from '@/components/lojas/loja-actions-menu'
@@ -139,7 +140,7 @@ export default async function LojasPage() {
                       state: partner.state,
                       integrations: partner.integrations.map(i => ({
                         adapter:     i.adapter,
-                        credentials: (i.credentials ?? {}) as Record<string, string>,
+                        credentials: decryptCredentials((i.credentials ?? {}) as Record<string, unknown>),
                       })),
                     }} />
                   </div>

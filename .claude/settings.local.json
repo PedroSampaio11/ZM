@@ -9,7 +9,9 @@
       "Bash(git commit -m 'feat: AutoCerto adapter - OAuth2 client, field mapping, dry-run sync endpoint *)",
       "Bash(curl -s http://localhost:3000/api/health)",
       "Bash(git commit -m 'feat: Task 2.3 + technical debt - Zod validation, rate limiting, leads CRUD *)",
-      "PowerShell(Get-Process *)"
+      "PowerShell(Get-Process *)",
+      "Bash(node -e \"const pkg = require\\('@hugeicons/react'\\); const keys = Object.keys\\(pkg\\); console.log\\(keys.filter\\(k => k.toLowerCase\\(\\).includes\\('whatsapp'\\) || k.toLowerCase\\(\\).includes\\('menu'\\) || k.toLowerCase\\(\\).includes\\('home'\\) || k.toLowerCase\\(\\).includes\\('package'\\) || k.toLowerCase\\(\\).includes\\('favourite'\\) || k.toLowerCase\\(\\).includes\\('close'\\) || k.toLowerCase\\(\\).includes\\('x0'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('@hugeicons/react'\\); console.log\\(Object.keys\\(pkg\\).slice\\(0,20\\).join\\('\\\\n'\\)\\)\")"
     ]
   }
 }

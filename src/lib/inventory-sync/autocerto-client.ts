@@ -51,7 +51,10 @@ async function getToken(username: string, password: string): Promise<string> {
     signal:  AbortSignal.timeout(15_000),
   })
 
-  if (!res.ok) throw new Error(`AutoCerto auth failed: ${res.status} ${res.statusText}`)
+  if (!res.ok) {
+    const body = await res.text().catch(() => '(sem body)')
+    throw new Error(`AutoCerto auth failed: ${res.status} ${res.statusText} — ${body}`)
+  }
 
   const data = await res.json() as { access_token: string; expires_in: number }
   const entry: TokenEntry = { token: data.access_token, expiresAt: Date.now() + data.expires_in * 1000 }
