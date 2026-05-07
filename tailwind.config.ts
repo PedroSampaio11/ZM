@@ -63,6 +63,16 @@ const config: Config = {
           silver: '#A9ADC1',
           gold: '#FFB800',
         },
+        mz: {
+          royal: '#1243B2',
+          'royal-light': '#1e56d4',
+          snow: '#FFFFFF',
+          frost: '#F8FAFC',
+          ash: '#E2E8F0',
+          ink: '#0F172A',
+          slate: '#475569',
+          'slate-dim': '#94A3B8',
+        },
       },
       borderRadius: {
         lg: `var(--radius)`,
