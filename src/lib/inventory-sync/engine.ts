@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { ExternalVehicleSchema } from '@/lib/schemas';
 import { getAdapter } from './adapter-registry';
+import { decryptCredentials } from './credentials';
 import type { AdapterType } from '@prisma/client';
 
 export interface SyncResult {
@@ -38,7 +39,13 @@ export async function syncPartner(
 
   const adapter = getAdapter(adapterType);
 
-  const externalVehicles = await adapter.fetchVehicles(adapterConfig);
+  const decryptedCredentials = decryptCredentials(
+    adapterConfig.credentials as Record<string, unknown>,
+  );
+  const externalVehicles = await adapter.fetchVehicles({
+    ...adapterConfig,
+    credentials: decryptedCredentials,
+  });
   const result: SyncResult = {
     provider:    adapter.providerName,
     partnerId:   partner.id,
@@ -164,7 +171,7 @@ export async function syncStore(
         integration.partnerId,
         integration.adapter,
         {
-          credentials: integration.credentials as Record<string, string>,
+          credentials: decryptCredentials(integration.credentials as Record<string, unknown>),
           config:      integration.config as Record<string, unknown>,
         },
         options

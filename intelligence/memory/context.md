@@ -1,8 +1,8 @@
 # Contexto: Super Loja 2026
 
 **Data de Início**: 2026-04-30
-**Última Atualização**: 2026-05-05 (Sessão 3)
-**Status**: 🟢 Em Desenvolvimento Ativo — Painel Admin funcional, foco em estabilidade e testes
+**Última Atualização**: 2026-05-07 (Sessão 4)
+**Status**: 🟢 Em Desenvolvimento Ativo — Painel Admin completo, Financeiro implementado
 **Stack Principal**: Next.js 15 (App Router), TypeScript 5.7, Prisma, PostgreSQL (Supabase), Tailwind CSS, Zod.
 
 ---
@@ -10,83 +10,68 @@
 ## Objetivo
 
 Marketplace automotivo B2B/B2C no modelo asset-light. Função principal:
-1. Cadastrar lojas parceiras (concessionárias) no painel
-2. Configurar a integração com o DMS de cada loja (AutoCerto, Cockpit, etc.)
-3. Sincronizar o estoque automaticamente
-4. Exibir veículos no site público e no painel interno com filtros e controle total
+1. Cadastrar lojas parceiras (concessionárias) e configurar a integração com o DMS delas
+2. Sincronizar o estoque automaticamente via adapters (AutoCerto, Cockpit, Revenda Mais, Motor21)
+3. Exibir veículos no site público e no painel interno com filtros e controle total
+4. Controlar metas de receita por parceiro e projetar faturamento
 
 ---
 
 ## Arquitetura Multi-Tenant (ADR-005)
 
-Instância compartilhada PostgreSQL com `storeId` denormalizado em todas as tabelas:
-
 ```
 Store (tenant)
   └── Partner (loja parceira / concessionária)
-        ├── IntegrationConfig (adapter + credentials por parceiro)
+        ├── IntegrationConfig (adapter + credentials criptografadas por parceiro)
         ├── Vehicle (estoque)
         └── Lead (contatos)
 ```
 
-**Invariante obrigatória**: Toda query de dados filtra por `storeId`. Nunca confiar em `storeId` vindo do request body — deve vir do contexto de auth.
+**Invariante**: Toda query filtra por `storeId`. Usar `getActiveStore()` em `src/lib/get-store.ts`.
+**Credenciais**: Criptografadas com AES-256-GCM em `src/lib/inventory-sync/credentials.ts`. Chave: `CREDENTIALS_ENCRYPTION_KEY` (64 hex chars) no `.env.local`.
 
 ---
 
 ## Adapter Registry (ADR-006)
 
-Para adicionar novo DMS (ex: Cockpit):
-1. Implementar `InventoryAdapter` em `src/lib/inventory-sync/`
-2. Registrar no `ADAPTER_REGISTRY` em `adapter-registry.ts`
-3. Não precisa tocar engine, API routes ou UI
+Adapters implementados: `AUTOCERTO` ✅, `COCKPIT` ✅, `REVENDA_MAIS` ✅, `MOTOR21` ✅, `MANUAL` ✅
+Estrutura pronta (sem API real): `WEBMOTORS`, `OLX_AUTOS`, `MOBIAUTO`, `ICARROS`, `REPASSE`
 
-Adapters disponíveis: `AUTOCERTO` (✅ ativo), `MANUAL` (✅), demais `COCKPIT|REVENDA_MAIS|MOTOR21|WEBMOTORS|OLX_AUTOS|MOBIAUTO|ICARROS|REPASSE` (estrutura pronta, implementação pendente).
-
-**Credenciais**: Armazenadas por `IntegrationConfig.credentials` (JSON) — precisam de encriptação AES-256 antes do GA.
+Para adicionar novo DMS: implementar `InventoryAdapter` em `src/lib/inventory-sync/` → registrar no `ADAPTER_REGISTRY`.
 
 ---
 
-## Painel Admin — Navegação
+## Painel Admin — Navegação Atual
 
 ```
-Geral     → /admin           (home/overview)
-Estoque   → /admin/inventory (todos veículos + filtros)
-Lojas     → /admin/lojas     (PÁGINA PRINCIPAL — cadastrar + DMS + sync)
-Leads     → /admin/leads     (não prioritário agora)
+Geral        → /admin              (overview: stats reais + sync status)
+Estoque      → /admin/inventory   (grid de veículos + filtros + tabs de status)
+             → /admin/inventory/[id]  (detalhe: specs, alterar status, leads)
+Lojas        → /admin/lojas       (cadastrar parceiros + DMS + sync)
+Financeiro   → /admin/financeiro  (portfólio, metas, receita projetada, ranking)
+Leads        → /admin/leads       (lista de leads)
+             → /admin/leads/[id]  (detalhe: timeline, status, interações)
 ```
 
 ---
 
-## Fluxo Principal Implementado
+## Schema v2.1 (atual)
 
-1. `/admin/lojas` → "Adicionar Loja" → preenche dados + seleciona DMS + credenciais
-2. `createLoja()` cria `Partner` + `IntegrationConfig` em uma ação
-3. Card da loja → "Sincronizar agora" → `syncPartnerNow()` → AutoCerto OAuth2 → upsert veículos
-4. Veículos aparecem em `/admin/inventory` com filtros por loja/marca/busca
+Arquivo: `prisma/schema.prisma`
 
----
+Modelos: Store, Partner (+ `monthlyGoal`), Vehicle, Lead, IntegrationConfig, Interaction, Simulation
 
-## Estado Atual dos Arquivos
-
-**TypeScript**: 0 erros (`npm run typecheck` limpo)
-**Banco**: schema v2.0 com Store, Partner, Vehicle, Lead, IntegrationConfig, Simulation, Interaction
-**Seed**: dados fictícios (Via Brasil Multimarcas, Daitan Motors, Euroville Premium)
-
-Arquivos de referência:
-- `intelligence/handover_status.md` — estado detalhado atual (leia sempre primeiro)
-- `intelligence/memory/backlog.md` — todas as tarefas por fase
-- `intelligence/memory/decisions.md` — ADRs arquiteturais
-- `prisma/schema.prisma` — schema completo do banco
-- `src/lib/schemas.ts` — todos os Zod schemas
+Campo novo na Sessão 4: `Partner.monthlyGoal Decimal? @db.Decimal(12,2)`
 
 ---
 
 ## Padrões Obrigatórios
 
-- TypeScript estrito — sem `any`
+- TypeScript estrito — sem `any`, sem `as any`
+- Store lookup: sempre via `getActiveStore()` em `src/lib/get-store.ts` (nunca `prisma.store.findFirst` direto)
+- Credenciais: sempre `encryptCredentials()` ao salvar, `decryptCredentials()` ao ler
 - UI: Tailwind + `cn()` — dark theme `bg-zinc-900`, bordas `border-white/5`
 - Cores: `text-primary` (azul), `text-zmove-gold`, `text-zmove-cyan`
-- Mutations via Server Actions em `src/lib/*-actions.ts`
-- Validação via Zod em `src/lib/schemas.ts`
-- Soft deletes sempre (Partner: `isActive=false`, Vehicle: `status=ARCHIVED`)
-- Dialog components: usar `@base-ui/react` — **sem `asChild`**, usar `className` direto no `DialogTrigger`
+- Mutations: Server Actions em `src/lib/*-actions.ts`
+- Validação: Zod em `src/lib/schemas.ts`
+- Soft deletes: Partner `isActive=false`, Vehicle `status=ARCHIVED`

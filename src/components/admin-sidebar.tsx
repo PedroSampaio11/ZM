@@ -9,15 +9,17 @@ import {
   TrendingUp,
   MessageSquare,
   Building2,
+  DollarSign,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logout } from '@/lib/auth-actions'
 
 const navigation = [
-  { name: 'Geral',   href: '/admin',           icon: LayoutDashboard },
-  { name: 'Estoque', href: '/admin/inventory', icon: Car },
-  { name: 'Lojas',   href: '/admin/lojas',     icon: Building2 },
-  { name: 'Leads',   href: '/admin/leads',     icon: MessageSquare },
+  { name: 'Geral',       href: '/admin',             icon: LayoutDashboard },
+  { name: 'Estoque',     href: '/admin/inventory',   icon: Car },
+  { name: 'Lojas',       href: '/admin/lojas',       icon: Building2 },
+  { name: 'Financeiro',  href: '/admin/financeiro',  icon: DollarSign },
+  { name: 'Leads',       href: '/admin/leads',       icon: MessageSquare },
 ]
 
 export function AdminSidebar() {

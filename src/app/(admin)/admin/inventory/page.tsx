@@ -8,6 +8,7 @@ import { NewVehicleDialog } from '@/components/forms/new-vehicle-dialog'
 import { InventoryFilters } from '@/components/inventory-filters'
 import { Suspense } from 'react'
 import Link from 'next/link'
+import { getActiveStore } from '@/lib/get-store'
 
 const statusConfig: Record<VehicleStatus, { label: string; dot: string; badge: string }> = {
   AVAILABLE: { label: 'Disponível', dot: 'bg-green-500',  badge: 'bg-green-600/20 text-green-400' },
@@ -26,7 +27,7 @@ type SearchParams = {
 export default async function InventoryPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { status: statusParam, search, partnerId: partnerParam, brand: brandParam } = await searchParams
 
-  const store = await prisma.store.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'asc' } })
+  const store = await getActiveStore()
 
   const validStatus = Object.keys(statusConfig) as VehicleStatus[]
   const statusFilter = validStatus.includes(statusParam as VehicleStatus) ? (statusParam as VehicleStatus) : undefined
@@ -158,7 +159,8 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
           {vehicles.map(vehicle => {
             const status = statusConfig[vehicle.status]
             return (
-              <Card key={vehicle.id} className="bg-zinc-900/50 border-white/5 overflow-hidden group hover:border-white/10 transition-all">
+              <Link key={vehicle.id} href={`/admin/inventory/${vehicle.id}`}>
+              <Card className="bg-zinc-900/50 border-white/5 overflow-hidden group hover:border-white/10 hover:border-primary/20 transition-all cursor-pointer">
                 {/* Imagem placeholder */}
                 <div className="aspect-video bg-zinc-800 relative overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -197,6 +199,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
                   </div>
                 </CardContent>
               </Card>
+              </Link>
             )
           })}
         </div>

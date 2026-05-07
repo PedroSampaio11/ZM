@@ -1,15 +1,14 @@
 # Handover Status — Super Loja 2026
-**Data**: 2026-05-05 | **Sessão**: 3 | **TypeScript**: 0 erros ✅
+**Data**: 2026-05-07 | **Sessão**: 4 | **TypeScript**: 0 erros ✅
 
 ---
 
 ## O Que É Este Projeto
 
-Marketplace automotivo B2B/B2C. A função principal é:
-1. Cadastrar lojas parceiras (concessionárias/revendas) no painel
-2. Configurar a API do sistema de gestão delas (AutoCerto, Cockpit, etc.)
-3. Sincronizar o estoque automaticamente
-4. Exibir tudo no site público e no painel interno
+Marketplace automotivo B2B/B2C asset-light.
+- Pedro cadastra lojas parceiras (concessionárias), configura o DMS delas
+- Sistema sincroniza estoque automaticamente
+- Pedro vende os carros e recebe comissão por venda
 
 **Sócios**: Pedro (Tech), Vitor (Growth), Lico (Operações/Bancário)
 
@@ -17,144 +16,109 @@ Marketplace automotivo B2B/B2C. A função principal é:
 
 ## Stack
 
-| Camada       | Tecnologia |
+| Camada | Tecnologia |
 |---|---|
-| Framework    | Next.js 15 (App Router, Server Components + Server Actions) |
-| Linguagem    | TypeScript 5.7 estrito (sem `any`) |
-| Banco        | PostgreSQL via Supabase (Prisma ORM) |
-| Auth         | Supabase Auth (`createClient` server-side) |
-| UI           | Tailwind CSS + shadcn/ui via `cn()` de `@/lib/utils` |
-| Validação    | Zod em `src/lib/schemas.ts` |
-| DMS Adapter  | AutoCerto (ativo), Cockpit/Revenda Mais/Motor21/Manual (em breve) |
+| Framework | Next.js 15 (App Router, Server Components + Server Actions) |
+| Linguagem | TypeScript 5.7 estrito |
+| Banco | PostgreSQL via Supabase (Prisma ORM) |
+| Auth | Supabase Auth (`createClient` server-side) |
+| UI | Tailwind CSS + shadcn/ui via `cn()` |
+| Validação | Zod em `src/lib/schemas.ts` |
+| DMS Adapters | AutoCerto ✅, Cockpit ✅, Revenda Mais ✅, Motor21 ✅, Manual ✅ |
+| Segurança | AES-256-GCM para credenciais, rate limiting, auth guard |
 
 ---
 
-## Arquitetura Multi-Tenant (ADR-005)
+## Páginas Admin (todas funcionando)
 
-```
-Store (tenant)
-  └── Partner (loja parceira)
-        ├── IntegrationConfig (credentials + DMS adapter)
-        ├── Vehicle (estoque — status: AVAILABLE|RESERVED|SOLD|ARCHIVED)
-        └── Lead (contatos)
-```
-
-- `storeId` denormalizado em todas as tabelas de negócio
-- Admin pages usam `findFirst({ where: { isActive: true } })` como fallback (User→Store mapping pendente)
-- Soft deletes: Partner usa `isActive: false`, Vehicle usa `status: ARCHIVED`
-
----
-
-## Painel Admin — Estado Atual
-
-### Sidebar (navegação)
-```
-Geral     → /admin           (overview/home)
-Estoque   → /admin/inventory (todos os veículos, filtros, busca)
-Lojas     → /admin/lojas     (PÁGINA PRINCIPAL — cadastrar + DMS + sync)
-Leads     → /admin/leads     (lista de leads — não prioritário agora)
-```
-
-### Páginas implementadas ✅
-| Rota | Arquivo | Status |
+| Rota | Arquivo | O que faz |
 |---|---|---|
-| `/admin` | `admin/page.tsx` | ✅ básico |
-| `/admin/inventory` | `admin/inventory/page.tsx` | ✅ com filtros |
-| `/admin/lojas` | `admin/lojas/page.tsx` | ✅ completo |
-| `/admin/leads` | `admin/leads/page.tsx` | ✅ lista |
-| `/admin/leads/[id]` | `admin/leads/[id]/page.tsx` | ✅ detalhe |
-| `/admin/stores` | `admin/stores/page.tsx` | ✅ existe (fora do nav) |
-| `/admin/partners` | `admin/partners/page.tsx` | ✅ existe (fora do nav) |
-
----
-
-## Fluxo Principal (Funcionando)
-
-### Adicionar loja + configurar DMS + sincronizar
-1. `/admin/lojas` → clica "Adicionar Loja"
-2. `AddLojaDialog`: preenche Nome, CNPJ, Cidade, Estado
-3. Seleciona DMS: **AutoCerto** → preenche usuário + senha
-4. Submit → `createLoja()` (server action) cria `Partner` + `IntegrationConfig` com credentials no banco
-5. Card da loja aparece → clica **"Sincronizar agora"** → `SyncLojaButton` chama `syncPartnerNow(integrationId)`
-6. `syncPartner()` usa `AutoCertoAdapter.fetchVehicles(config)` que lê credentials do banco (não do .env)
-7. Veículos aparecem em `/admin/inventory`
-
-### Inventário com filtros
-- Busca por texto (marca/modelo/versão) — debounce 400ms
-- Filtro por loja parceira (dropdown dinâmico)
-- Filtro por marca (populado do banco)
-- Filter tabs por status (Disponível / Reservado / Vendido / Arquivado)
-- Badge da loja em cada card
+| `/admin` | `admin/page.tsx` | Overview: stats reais, leads recentes, status de sync |
+| `/admin/inventory` | `admin/inventory/page.tsx` | Grid de veículos, filtros, tabs por status |
+| `/admin/inventory/[id]` | `admin/inventory/[id]/page.tsx` | Detalhe do veículo, alterar status, leads vinculados |
+| `/admin/lojas` | `admin/lojas/page.tsx` | Cadastrar parceiros, configurar DMS, sincronizar |
+| `/admin/financeiro` | `admin/financeiro/page.tsx` | Portfólio por loja, metas, receita, ranking |
+| `/admin/leads` | `admin/leads/page.tsx` | Lista de leads |
+| `/admin/leads/[id]` | `admin/leads/[id]/page.tsx` | Detalhe, timeline, status, interações |
 
 ---
 
 ## Arquivos Críticos
 
-### Server Actions (mutations)
-- `src/lib/partner-actions.ts` — `createLoja()`, `createPartner()`, `syncPartnerNow()`, `configureIntegration()`
-- `src/lib/store-actions.ts` — `createStore()`, `updateStore()`, `toggleStoreActive()`
-- `src/lib/vehicle-actions.ts` — `createVehicle()`, `updateVehicleStatus()`, `archiveVehicle()`
+### Helpers principais
+- `src/lib/get-store.ts` — `getActiveStore()`: lê storeId do Supabase Auth user_metadata, fallback findFirst
+- `src/lib/inventory-sync/credentials.ts` — `encryptCredentials()` / `decryptCredentials()` (AES-256-GCM)
+
+### Server Actions
+- `src/lib/partner-actions.ts` — `createLoja`, `syncPartnerNow`, `updateLoja`, `deleteLoja`, `updatePartnerFinancial`
+- `src/lib/vehicle-actions.ts` — `createVehicle`, `updateVehicleStatus`, `archiveVehicle`
+- `src/lib/lead-actions.ts` — `createLead`
+- `src/lib/store-actions.ts` — `createStore`, `updateStore`
 
 ### DMS Integration
-- `src/lib/inventory-sync/adapter-registry.ts` — `ADAPTER_REGISTRY`, `InventoryAdapter` interface
+- `src/lib/inventory-sync/adapter-registry.ts` — registry com todos os adapters
 - `src/lib/inventory-sync/engine.ts` — `syncPartner()`, `syncStore()`
-- `src/lib/inventory-sync/autocerto-client.ts` — OAuth2 com token cache **por usuário** (Map), fallback para env
-- `src/lib/inventory-sync/autocerto-adapter.ts` — lê credentials do `AdapterFetchConfig`
-
-### Components
-- `src/components/forms/add-loja-dialog.tsx` — formulário único: Partner + IntegrationConfig
-- `src/components/lojas/sync-loja-button.tsx` — botão client que chama `syncPartnerNow`
-- `src/components/inventory-filters.tsx` — filtros client com `useRouter` + URLSearchParams
-- `src/components/admin-sidebar.tsx` — sidebar com `startsWith` para active path
+- `src/lib/inventory-sync/autocerto-adapter.ts` — AutoCerto OAuth2 (testado ✅)
+- `src/lib/inventory-sync/cockpit-adapter.ts` — Cockpit (implementado, não testado)
+- `src/lib/inventory-sync/revenda-mais-adapter.ts` — Revenda Mais (implementado, não testado)
+- `src/lib/inventory-sync/motor21-adapter.ts` — Motor21 (implementado, não testado)
 
 ### Schema
-- `prisma/schema.prisma` — Store, Partner, Vehicle, Lead, IntegrationConfig, Simulation, Interaction
-- `src/lib/schemas.ts` — todos os Zod schemas (CreateStoreSchema, CreatePartnerSchema, etc.)
+- `prisma/schema.prisma` — v2.1: Partner tem `monthlyGoal Decimal?`
+- `src/lib/schemas.ts` — Zod schemas
 
 ---
 
-## O Que Está Pendente (Por Prioridade)
+## Fluxo Principal (funcionando com AutoCerto real)
 
-### Alta prioridade
-- [ ] **Testar fluxo real**: Adicionar loja AutoCerto com credenciais reais → sync → ver veículos
-- [ ] **Página Geral (`/admin`)**: Overview melhor — stats reais (total veículos, leads novos, lojas ativas)
-- [ ] **User→Store mapping**: Hoje toda admin page usa `findFirst` (funciona com 1 store). Precisa: `StoreUser` junction table ou `user_metadata.storeId` no Supabase Auth
+1. `/admin/lojas` → "Adicionar Loja" → preenche dados + seleciona DMS + credenciais
+2. `createLoja()` cria `Partner` + `IntegrationConfig` com credenciais **criptografadas**
+3. Card → "Sincronizar agora" → `syncPartnerNow()` → decripta credenciais → adapter → upsert veículos
+4. Veículos em `/admin/inventory` com filtros
+5. `/admin/financeiro` → definir comissão % e meta mensal → sistema calcula projeções
 
-### Média prioridade
-- [ ] **Criptografar credentials**: `IntegrationConfig.credentials` está em JSON puro. Precisa AES-256 antes de ir a produção
-- [ ] **RLS policies**: Executar SQL no Supabase dashboard para Vehicle, Lead, Partner filtrando por `storeId`
-- [ ] **Adicionar novo adapter**: Para plugar Cockpit ou Revenda Mais: implementar `InventoryAdapter` + 1 linha no `ADAPTER_REGISTRY`
+---
 
-### Baixa prioridade (Fase 3)
-- [ ] **Evolution API + WhatsApp webhook**: `POST /api/webhooks/whatsapp`, client em `src/lib/evolution/client.ts`
-- [ ] **Agente de qualificação IA**: Claude para qualificar leads com RAG no estoque
-- [ ] **Leads**: melhorar dashboard (não prioritário por ora)
-- [ ] **Remover rotas CoreBrain**: `/api/export`, `/api/memory`, `/api/skills`, `/api/state`, `/api/agents` — são resquícios de outro projeto
+## Segurança Implementada
+
+- Credenciais DMS: AES-256-GCM. Chave em `CREDENTIALS_ENCRYPTION_KEY` (.env.local)
+- Auth guard: `src/lib/auth-guard.ts`
+- Rate limiting: `src/lib/rate-limit.ts`
+- Store isolation: `getActiveStore()` garante que cada admin vê só sua store
+- RLS SQL pronto em `intelligence/rls_setup.sql` — **Pedro ainda precisa executar no Supabase Dashboard**
+
+---
+
+## Variáveis de Ambiente Necessárias (.env.local)
+
+```
+DATABASE_URL=...
+DIRECT_URL=...
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+CREDENTIALS_ENCRYPTION_KEY=<64 hex chars — gerar: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">
+AUTOCERTO_API_BASE_URL=https://integracao.autocerto.com
+```
+
+---
+
+## Próximos Passos (por prioridade)
+
+1. **Vitrine pública** `src/app/(platform)/` — listagem + detalhe de veículo + formulário de lead
+2. **AddLojaDialog — campos dinâmicos por DMS** — Cockpit precisa apiKey+empresaId, não usuário+senha
+3. **Testar Cockpit/Revenda Mais/Motor21** com credenciais reais de parceiros
+4. **Sidebar widget de meta** — substituir valor hardcoded por dados reais do banco
+5. **RLS no Supabase** — executar `intelligence/rls_setup.sql`
 
 ---
 
 ## Como Rodar
 
 ```bash
-npm run dev          # servidor local → http://localhost:3000
-npm run typecheck    # verifica tipos (deve dar 0 erros)
+npm run dev          # http://localhost:3000
+npm run typecheck    # deve dar 0 erros
 npx prisma studio    # UI do banco
 ```
 
-**Login**: Supabase Auth → crie usuário em `supabase.com/dashboard/project/dpipnkwvcomwlldlllnx` → Authentication → Users → Add user
-
-**Dados de teste** (seed fictício):
-- Loja: Via Brasil Multimarcas
-- Parceiros: Daitan Motors (AutoCerto), Euroville Premium (Manual)
-
----
-
-## Padrões Obrigatórios
-
-- TypeScript estrito — sem `any`, sem `as any`
-- Toda query de dados deve filtrar por `storeId`
-- UI: Tailwind + `cn()` de `@/lib/utils` — dark theme com `bg-zinc-900`, bordas `border-white/5`
-- Cores da marca: `text-primary` (azul), `text-zmove-gold`, `text-zmove-cyan`
-- Mutations via Server Actions (não via fetch client-side para operações simples)
-- Validação de inputs externos via Zod (`src/lib/schemas.ts`)
-- Soft deletes — nunca delete físico de Partner ou Vehicle
+**Login**: Supabase Dashboard → Authentication → Users → Add user
+**Dados de teste**: Via Brasil Multimarcas (AutoCerto real, sync testado ✅)

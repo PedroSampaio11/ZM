@@ -1,5 +1,8 @@
 import type { AdapterType } from '@prisma/client';
-import { AutoCertoAdapter } from './autocerto-adapter';
+import { AutoCertoAdapter }   from './autocerto-adapter';
+import { CockpitAdapter }     from './cockpit-adapter';
+import { RevendaMaisAdapter } from './revenda-mais-adapter';
+import { Motor21Adapter }     from './motor21-adapter';
 
 export type AdapterFetchConfig = {
   credentials: Record<string, string>;
@@ -16,9 +19,9 @@ export interface InventoryAdapter {
 
 export const ADAPTER_REGISTRY: Partial<Record<AdapterType, new () => InventoryAdapter>> = {
   AUTOCERTO:    AutoCertoAdapter,
-  // COCKPIT:   CockpitAdapter,    // implementar quando necessário
-  // REVENDA_MAIS: RevendaMaisAdapter,
-  // MOTOR21:   Motor21Adapter,
+  COCKPIT:      CockpitAdapter,
+  REVENDA_MAIS: RevendaMaisAdapter,
+  MOTOR21:      Motor21Adapter,
 };
 
 export const ADAPTER_DISPLAY_NAMES: Record<AdapterType, string> = {

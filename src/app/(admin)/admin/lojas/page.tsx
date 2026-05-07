@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { getActiveStore } from '@/lib/get-store'
 import { AddLojaDialog } from '@/components/forms/add-loja-dialog'
 import { SyncLojaButton } from '@/components/lojas/sync-loja-button'
 import { LojaActionsMenu } from '@/components/lojas/loja-actions-menu'
@@ -25,7 +26,7 @@ const PARTNER_COLORS = [
 ]
 
 export default async function LojasPage() {
-  const store = await prisma.store.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'asc' } })
+  const store = await getActiveStore()
 
   const partners = store
     ? await prisma.partner.findMany({

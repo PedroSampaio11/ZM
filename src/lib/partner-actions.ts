@@ -3,6 +3,8 @@
 import { prisma } from '@/lib/prisma'
 import { CreatePartnerSchema } from '@/lib/schemas'
 import { syncPartner } from '@/lib/inventory-sync/engine'
+import { encryptCredentials, decryptCredentials } from '@/lib/inventory-sync/credentials'
+import { getActiveStore } from '@/lib/get-store'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@prisma/client'
 
@@ -93,8 +95,8 @@ export async function syncPartnerNow(integrationConfigId: string) {
       integration.partnerId,
       integration.adapter,
       {
-        credentials: integration.credentials as Record<string, string>,
-        config:      integration.config      as Record<string, unknown>,
+        credentials: decryptCredentials(integration.credentials as Record<string, unknown>),
+        config:      integration.config as Record<string, unknown>,
       },
       { dryRun: false }
     )
@@ -110,7 +112,7 @@ export async function syncPartnerNow(integrationConfigId: string) {
 
 export async function createLoja(formData: FormData) {
   try {
-    const store = await prisma.store.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'asc' } })
+    const store = await getActiveStore()
     if (!store) return { error: 'Nenhuma loja base encontrada no sistema' }
 
     const name        = (formData.get('name')        as string)?.trim()
@@ -132,7 +134,7 @@ export async function createLoja(formData: FormData) {
     })
 
     const credentials: Prisma.InputJsonValue = (dms !== 'MANUAL' && dmsUsername)
-      ? { username: dmsUsername, password: dmsPassword }
+      ? encryptCredentials({ username: dmsUsername, password: dmsPassword }) as Prisma.InputJsonValue
       : {}
 
     await prisma.integrationConfig.create({
@@ -176,14 +178,15 @@ export async function updateLoja(formData: FormData) {
         where: { partnerId, adapter: 'AUTOCERTO' },
       })
       if (integration) {
+        const existing = integration.credentials as Record<string, string>
+        const merged = {
+          ...existing,
+          username: dmsUsername,
+          ...(dmsPassword ? { password: dmsPassword } : {}),
+        }
         await prisma.integrationConfig.update({
           where: { id: integration.id },
-          data:  {
-            credentials: {
-              username: dmsUsername,
-              ...(dmsPassword ? { password: dmsPassword } : {}),
-            } as Prisma.InputJsonValue,
-          },
+          data:  { credentials: encryptCredentials(merged) as Prisma.InputJsonValue },
         })
       }
     }
@@ -192,6 +195,30 @@ export async function updateLoja(formData: FormData) {
     return { success: true }
   } catch {
     return { error: 'Erro ao atualizar loja.' }
+  }
+}
+
+export async function updatePartnerFinancial(formData: FormData) {
+  try {
+    const partnerId   = (formData.get('partnerId')   as string)?.trim()
+    const commission  = parseFloat((formData.get('commission')  as string) || '0')
+    const monthlyGoal = parseFloat((formData.get('monthlyGoal') as string) || '0')
+
+    if (!partnerId) return { error: 'Parceiro inválido' }
+
+    await prisma.partner.update({
+      where: { id: partnerId },
+      data:  {
+        commission:  isNaN(commission)  ? 0    : commission,
+        monthlyGoal: isNaN(monthlyGoal) || monthlyGoal <= 0 ? null : monthlyGoal,
+      },
+    })
+
+    revalidatePath('/admin/financeiro')
+    revalidatePath('/admin/lojas')
+    return { success: true }
+  } catch {
+    return { error: 'Erro ao atualizar dados financeiros.' }
   }
 }
 
