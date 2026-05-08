@@ -9,7 +9,7 @@ import { revalidatePath } from 'next/cache'
 async function savePartnerFinancial(formData: FormData) {
   'use server'
   await updatePartnerFinancial(formData)
-  revalidatePath('/admin/financeiro')
+  revalidatePath('/gestao/financeiro')
 }
 
 const fmt = (n: number) =>
@@ -169,7 +169,7 @@ export default async function FinanceiroPage() {
         </CardHeader>
         <CardContent>
           {ranked.length === 0 ? (
-            <p className="text-zinc-600 text-sm py-8 text-center">Nenhum parceiro ativo. Adicione lojas em /admin/lojas.</p>
+            <p className="text-zinc-600 text-sm py-8 text-center">Nenhum parceiro ativo. Adicione lojas em /gestao/lojas.</p>
           ) : (
             <div className="space-y-3">
               {ranked.map((p, idx) => (

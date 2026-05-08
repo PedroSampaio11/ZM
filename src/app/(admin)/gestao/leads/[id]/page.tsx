@@ -30,7 +30,7 @@ async function updateLeadStatus(leadId: string, formData: FormData) {
   'use server'
   const status = formData.get('status') as string
   await prisma.lead.update({ where: { id: leadId }, data: { status: status as never } })
-  revalidatePath(`/admin/leads/${leadId}`)
+  revalidatePath(`/gestao/leads/${leadId}`)
 }
 
 async function addInteraction(leadId: string, formData: FormData) {
@@ -41,7 +41,7 @@ async function addInteraction(leadId: string, formData: FormData) {
   await prisma.interaction.create({
     data: { leadId, channel: 'INTERNAL', direction: direction as never, content },
   })
-  revalidatePath(`/admin/leads/${leadId}`)
+  revalidatePath(`/gestao/leads/${leadId}`)
 }
 
 type Params = { params: Promise<{ id: string }> }
@@ -72,7 +72,7 @@ export default async function LeadDetailPage({ params }: Params) {
     <div className="space-y-8 max-w-5xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-3">
-        <Link href="/admin/leads" className="flex items-center gap-1.5 text-zinc-500 hover:text-white text-sm transition-colors">
+        <Link href="/gestao/leads" className="flex items-center gap-1.5 text-zinc-500 hover:text-white text-sm transition-colors">
           <ArrowLeft size={14} /> Leads
         </Link>
         <span className="text-zinc-700">/</span>

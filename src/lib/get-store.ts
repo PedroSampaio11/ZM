@@ -5,28 +5,25 @@ import type { Store } from '@prisma/client'
 /**
  * Retorna a Store do usuário autenticado.
  * Prioridade:
- *   1. Store onde ownerId = user.id (set automaticamente ao criar)
- *   2. user_metadata.storeId (atribuição manual legada — Supabase Dashboard)
- *   3. Primeira store ativa (fallback de compatibilidade)
+ *   1. Store onde ownerId = user.id
+ *   2. user_metadata.storeId (legado — atribuição manual via Supabase Dashboard)
+ * Retorna null se o usuário não tiver store vinculada.
  */
 export async function getActiveStore(): Promise<Store | null> {
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-    if (user?.id) {
-      const byOwner = await prisma.store.findFirst({ where: { ownerId: user.id, isActive: true } })
-      if (byOwner) return byOwner
-    }
+  if (!user) return null
 
-    const storeId = user?.user_metadata?.storeId as string | undefined
-    if (storeId) {
-      const byMeta = await prisma.store.findFirst({ where: { id: storeId, isActive: true } })
-      if (byMeta) return byMeta
-    }
-  } catch {
-    // Fora de contexto de request (ex: cron) — cai para fallback
+  if (user.id) {
+    const byOwner = await prisma.store.findFirst({ where: { ownerId: user.id, isActive: true } })
+    if (byOwner) return byOwner
   }
 
-  return prisma.store.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'asc' } })
+  const storeId = user.user_metadata?.storeId as string | undefined
+  if (storeId) {
+    return prisma.store.findFirst({ where: { id: storeId, isActive: true } })
+  }
+
+  return null
 }

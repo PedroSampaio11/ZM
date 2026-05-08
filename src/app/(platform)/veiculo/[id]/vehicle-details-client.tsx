@@ -66,10 +66,14 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
         {/* ── LEFT: GALLERY ── */}
         <div className="lg:col-span-7 space-y-4">
           <div className={`rounded-3xl overflow-hidden aspect-[16/10] relative shadow-lg ${isFeatured ? 'ring-2 ring-motorz-gold ring-offset-4 ring-offset-mz-snow' : ''}`}>
-            <img
+            <Image
               src={images[activeImage]}
-              alt={`${vehicle.brand} ${vehicle.model}`}
-              className="w-full h-full object-cover"
+              alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 58vw"
+              className="object-cover"
+              unoptimized={!images[activeImage].includes('unsplash.com') && !images[activeImage].includes('supabase.co')}
             />
             {/* Featured Overlay */}
             {isFeatured && (
@@ -86,7 +90,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
                   onClick={() => setActiveImage(idx)}
                   className={`relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? (isFeatured ? 'border-motorz-gold opacity-100' : 'border-mz-royal opacity-100') : 'border-transparent opacity-60 hover:opacity-100'}`}
                 >
-                  <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                  <Image src={img} alt={`Foto ${idx + 1}`} fill sizes="96px" className="object-cover" unoptimized={!img.includes('unsplash.com') && !img.includes('supabase.co')} />
                 </button>
               ))}
             </div>

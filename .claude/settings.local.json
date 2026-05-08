@@ -11,7 +11,15 @@
       "Bash(git commit -m 'feat: Task 2.3 + technical debt - Zod validation, rate limiting, leads CRUD *)",
       "PowerShell(Get-Process *)",
       "Bash(node -e \"const pkg = require\\('@hugeicons/react'\\); const keys = Object.keys\\(pkg\\); console.log\\(keys.filter\\(k => k.toLowerCase\\(\\).includes\\('whatsapp'\\) || k.toLowerCase\\(\\).includes\\('menu'\\) || k.toLowerCase\\(\\).includes\\('home'\\) || k.toLowerCase\\(\\).includes\\('package'\\) || k.toLowerCase\\(\\).includes\\('favourite'\\) || k.toLowerCase\\(\\).includes\\('close'\\) || k.toLowerCase\\(\\).includes\\('x0'\\)\\).join\\('\\\\n'\\)\\)\")",
-      "Bash(node -e \"const pkg = require\\('@hugeicons/react'\\); console.log\\(Object.keys\\(pkg\\).slice\\(0,20\\).join\\('\\\\n'\\)\\)\")"
+      "Bash(node -e \"const pkg = require\\('@hugeicons/react'\\); console.log\\(Object.keys\\(pkg\\).slice\\(0,20\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Invoke-WebRequest -Uri \"https://cdn.jsdelivr.net/npm/cal-sans@1.0.1/fonts/CalSans-SemiBold.woff2\" -OutFile \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\" -UseBasicParsing; \\(Get-Item \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\"\\).Length)",
+      "PowerShell(Invoke-WebRequest -Uri \"https://cdn.jsdelivr.net/npm/cal-sans/dist/CalSans-SemiBold.woff2\" -OutFile \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\" -UseBasicParsing; \\(Get-Item \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\"\\).Length)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "PowerShell(Invoke-WebRequest -Uri \"https://cdn.jsdelivr.net/npm/cal-sans@1.0.1/fonts/webfonts/CalSans-SemiBold.woff2\" -OutFile \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\" -UseBasicParsing; \\(Get-Item \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\"\\).Length)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)"
     ]
   }
 }

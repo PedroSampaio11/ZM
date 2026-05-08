@@ -1,158 +1,111 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-primary: #121212;
-  --bg-glass: rgba(255, 255, 255, 0.03);
-  --border-glass: rgba(255, 255, 255, 0.08);
-  --z-blue: #2D5BFF;
-  --z-cyan: #00F0FF;
-  --z-gold: #FFB800;
-  --z-platinum: #F1F1F1;
-  --z-silver: #A9ADC1;
-  --z-carbon: #121212;
-  --z-carbon-elevated: #1E1E26;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: #e4e4e7;
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
-}
-
-/* Glassmorphism */
-.glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-glass);
-}
-
-.glass-hover:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(45, 91, 255, 0.3);
-  box-shadow: 0 0 30px rgba(45, 91, 255, 0.1);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, var(--z-blue), var(--z-cyan));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Glow effects */
-.glow-primary { box-shadow: 0 0 40px rgba(45, 91, 255, 0.15); }
-.glow-accent { box-shadow: 0 0 40px rgba(0, 240, 255, 0.15); }
-.glow-gold { box-shadow: 0 0 40px rgba(255, 184, 0, 0.15); }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.5); }
-
-/* Background grid */
-.bg-grid {
-  background-image: 
-    linear-gradient(rgba(168, 85, 247, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(168, 85, 247, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+  /* Motorz Official Palette */
+  --motorz-gold:    #FFC107;
+  --motorz-blue:    #2D5BFF;
+  --motorz-cyan:    #00F0FF;
+  --motorz-carbon:  #020202;
+  --motorz-platinum: #F1F1F1;
+  --motorz-silver:   #A9ADC1;
+  
+  --background: var(--motorz-carbon);
+  --foreground: var(--motorz-platinum);
+  
+  --card: rgba(255, 255, 255, 0.03);
+  --card-border: rgba(255, 255, 255, 0.08);
+  
+  --primary: var(--motorz-blue);
+  --primary-foreground: white;
 }
 
 @layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: var(--font-sans);
-  }
-  :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
-  }
-  .dark {
-    --background: var(--z-carbon);
-    --foreground: var(--z-platinum);
-    --card: var(--z-carbon-elevated);
-    --card-foreground: var(--z-platinum);
-    --popover: var(--z-carbon-elevated);
-    --popover-foreground: var(--z-platinum);
-    --primary: var(--z-blue);
-    --primary-foreground: var(--z-platinum);
-    --secondary: var(--z-carbon-elevated);
-    --secondary-foreground: var(--z-platinum);
-    --muted: var(--z-carbon-elevated);
-    --muted-foreground: var(--z-silver);
-    --accent: var(--z-cyan);
-    --accent-foreground: var(--z-carbon);
-    --destructive: #7f1d1d;
-    --border: rgba(255, 255, 255, 0.1);
-    --input: rgba(255, 255, 255, 0.1);
-    --ring: var(--z-blue);
-    --chart-1: var(--z-blue);
-    --chart-2: var(--z-cyan);
-    --chart-3: var(--z-gold);
-    --chart-4: var(--z-platinum);
-    --chart-5: var(--z-silver);
-    --sidebar: var(--z-carbon);
-    --sidebar-foreground: var(--z-silver);
-    --sidebar-primary: var(--z-blue);
-    --sidebar-primary-foreground: var(--z-platinum);
-    --sidebar-accent: var(--z-carbon-elevated);
-    --sidebar-accent-foreground: var(--z-platinum);
-    --sidebar-border: rgba(255, 255, 255, 0.1);
-    --sidebar-ring: var(--z-blue);
-  }
-  * {
-    border-color: var(--border);
-    outline-color: var(--ring);
-  }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-onest), system-ui, sans-serif;
   }
-  html {
-    @apply font-sans;
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-cal), sans-serif;
+    @apply tracking-tight;
   }
+}
+
+/* ── VISUAL IDENTITY ELEMENTS ──────────────────────── */
+
+.mesh-bg {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(18, 67, 178, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(45, 91, 255, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 193, 7, 0.08) 0%, transparent 60%);
+  filter: blur(100px);
+  animation: mesh-float 20s ease-in-out infinite alternate;
+}
+
+@keyframes mesh-float {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.2) translate(5%, 5%); }
+}
+
+.tech-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+}
+
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ── SHADCN OVERRIDES FOR GLASSMORPHISM ────────────── */
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 221 100% 58%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 1rem;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

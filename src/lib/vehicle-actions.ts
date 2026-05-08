@@ -52,7 +52,7 @@ export async function createVehicle(formData: FormData) {
       },
     })
 
-    revalidatePath('/admin/inventory')
+    revalidatePath('/gestao/inventory')
     return { success: true }
   } catch {
     return { error: 'Erro ao cadastrar veículo. Verifique os dados.' }

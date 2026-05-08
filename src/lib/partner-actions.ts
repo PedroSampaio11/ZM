@@ -41,7 +41,7 @@ export async function createPartner(formData: FormData) {
       },
     })
 
-    revalidatePath('/admin/partners')
+    revalidatePath('/gestao/partners')
     return { success: true }
   } catch (err) {
     if (err instanceof Error && err.message.includes('document')) return { error: 'CNPJ inválido' }
@@ -51,7 +51,7 @@ export async function createPartner(formData: FormData) {
 
 export async function togglePartnerActive(id: string, isActive: boolean) {
   await prisma.partner.update({ where: { id }, data: { isActive } })
-  revalidatePath('/admin/partners')
+  revalidatePath('/gestao/partners')
 }
 
 export async function configureIntegration(formData: FormData) {
@@ -76,7 +76,7 @@ export async function configureIntegration(formData: FormData) {
       },
     })
 
-    revalidatePath('/admin/partners')
+    revalidatePath('/gestao/partners')
     return { success: true }
   } catch {
     return { error: 'Erro ao configurar integração.' }
@@ -101,9 +101,9 @@ export async function syncPartnerNow(integrationConfigId: string) {
       { dryRun: false }
     )
 
-    revalidatePath('/admin/lojas')
-    revalidatePath('/admin/partners')
-    revalidatePath('/admin/inventory')
+    revalidatePath('/gestao/lojas')
+    revalidatePath('/gestao/partners')
+    revalidatePath('/gestao/inventory')
     return { success: true, result }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Erro ao sincronizar' }
@@ -173,8 +173,8 @@ export async function createLoja(formData: FormData) {
       },
     })
 
-    revalidatePath('/admin/lojas')
-    revalidatePath('/admin/inventory')
+    revalidatePath('/gestao/lojas')
+    revalidatePath('/gestao/inventory')
     return { success: true, partnerId: partner.id }
   } catch {
     return { error: 'Erro ao cadastrar loja. Verifique os dados.' }
@@ -221,7 +221,7 @@ export async function updateLoja(formData: FormData) {
       }
     }
 
-    revalidatePath('/admin/lojas')
+    revalidatePath('/gestao/lojas')
     return { success: true }
   } catch {
     return { error: 'Erro ao atualizar loja.' }
@@ -244,8 +244,8 @@ export async function updatePartnerFinancial(formData: FormData) {
       },
     })
 
-    revalidatePath('/admin/financeiro')
-    revalidatePath('/admin/lojas')
+    revalidatePath('/gestao/financeiro')
+    revalidatePath('/gestao/lojas')
     return { success: true }
   } catch {
     return { error: 'Erro ao atualizar dados financeiros.' }
@@ -259,8 +259,8 @@ export async function deleteLoja(partnerId: string) {
     await prisma.vehicle.deleteMany({ where: { partnerId } })
     await prisma.integrationConfig.deleteMany({ where: { partnerId } })
     await prisma.partner.delete({ where: { id: partnerId } })
-    revalidatePath('/admin/lojas')
-    revalidatePath('/admin/inventory')
+    revalidatePath('/gestao/lojas')
+    revalidatePath('/gestao/inventory')
     return { success: true }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Erro ao remover loja.' }

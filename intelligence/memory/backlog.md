@@ -1,5 +1,5 @@
 # Backlog — motorz
-**Sessão**: 5 | **Data**: 2026-05-07 | **TypeScript**: 0 erros ✅
+**Sessão**: 6 | **Data**: 2026-05-08 | **TypeScript**: 0 erros ✅
 
 ---
 
@@ -11,48 +11,77 @@
 - Financeiro: metas por parceiro, comissão %, receita projetada, ranking
 - RLS Supabase: ✅ executado no Dashboard
 - Rename: zmove → **motorz** (código + docs + Tailwind)
-- AddLojaDialog: campos dinâmicos por DMS (AutoCerto/RevendaMais: user+senha | Cockpit: apiKey+empresaId | Motor21: clientId+clientSecret)
-- Sidebar: meta mensal **real** do banco (sem hardcode)
-- User→Store mapping: `Store.ownerId` no schema, `createStore` seta, `getActiveStore` prioriza
-- Vitrine pública: layout, nav, hero, grid de veículos, bottom sheet de lead, footer (CSS em `platform.css`)
-- `@hugeicons/react` substituído por `lucide-react` nos 4 arquivos da vitrine
-- `updateLoja` DMS-aware: merge seletivo por adapter, credenciais descriptografadas server-side antes do client
+- AddLojaDialog: campos dinâmicos por DMS
+- Sidebar: meta mensal real do banco
+- User→Store mapping: `Store.ownerId` no schema
+- Vitrine pública: layout, nav, hero, grid de veículos, bottom sheet de lead, footer
+- `updateLoja` DMS-aware: merge seletivo por adapter
+- Página de detalhe do veículo: `/veiculo/[id]` com galeria, specs, breadcrumbs
+
+### ✅ Sessão 6 — SEO/GEO + Performance + Segurança Admin
+
+**Performance (causa do travamento resolvida):**
+- `(platform)/layout.tsx` convertido de `'use client'` → **server component** — era a causa raiz do travamento entre páginas
+- Extraídos `nav-client.tsx` e `footer-client.tsx` para isolar partes client-only
+- Fonts migradas de `@import CSS` (render-blocking) → `next/font/google` (Onest) + `next/font/local` (Cal Sans)
+- Cal Sans baixada em `/public/fonts/CalSans-SemiBold.woff2`
+- `@view-transition { navigation: auto }` no CSS → transições nativas entre páginas
+- `{ passive: true }` no scroll listener do TopNav
+- `next/image` em `vehicle-card.tsx` e `vehicle-details-client.tsx` com AVIF/WebP, lazy/eager por posição
+- `next.config.mjs`: formatos AVIF+WebP, `minimumCacheTTL: 86400`, headers de cache para `/assets/` e `/fonts/`
+
+**SEO + GEO (ABCD Paulista):**
+- `export const metadata` em homepage, estoque e seja-parceiro
+- `generateMetadata` dinâmica em `/veiculo/[id]` com preço + cidade
+- JSON-LD `AutoDealer` + `WebSite` na homepage com `areaServed` para 7 cidades do ABCD
+- JSON-LD `Car` + `Offer` dinâmico em cada página de veículo
+- `src/app/sitemap.ts` — sitemap dinâmico com todos os veículos disponíveis
+- `src/app/robots.ts` — bloqueia `/admin/` e `/api/` para crawlers
+- `dynamicParams = true` + `generateStaticParams` expandido para 200 veículos
+- `seja-parceiro/page.tsx` convertido para server wrapper com metadata
+
+**Segurança Admin:**
+- Middleware com 2 camadas: autenticação (→ /login) + autorização por email allowlist (→ / silencioso)
+- `requireAuth()` atualizado: retorna 403 se email não está na `ADMIN_EMAILS`
+- `ADMIN_EMAILS=pedrosampaio11@icloud.com` adicionado ao `.env.local` e documentado em `.env.example`
 
 ---
 
 ## 🔴 Alta Prioridade (próxima sessão)
 
-### 1. Testar adapters Cockpit / Revenda Mais / Motor21
+### 1. ~~Vincular Store ao Pedro~~ ✅ FEITO (Sessão 6)
+- SQL executado: `UPDATE "Store" SET "ownerId" = 'da3a4523-2d30-401f-b95c-2fa470c1c8d8' WHERE slug = 'motorz';`
+- Fallback inseguro removido de `getActiveStore()` — agora retorna `null` se não achar store do usuário
+- Isolamento multi-tenant agora é real
+
+### 2. Testar adapters Cockpit / Revenda Mais / Motor21
 - Adapters implementados mas **nunca testados com API real**
 - Precisa: credenciais reais de um parceiro com cada DMS
-- Ajustar field mapping quando tiver acesso
-- Arquivo: `src/lib/inventory-sync/cockpit-adapter.ts`, `revenda-mais-adapter.ts`, `motor21-adapter.ts`
+- Arquivos: `src/lib/inventory-sync/cockpit-adapter.ts`, `revenda-mais-adapter.ts`, `motor21-adapter.ts`
 
-### 2. ~~updateLoja — credenciais por DMS~~ ✅ RESOLVIDO (Sessão 5)
-### 3. ~~AutoCerto sync~~ ✅ TESTADO EM PRODUÇÃO (Sessão 5)
-- `updateLoja` agora lê `dms` do formData e faz merge apenas dos campos preenchidos
-- `loja-actions-menu.tsx` renderiza campos corretos por adapter (AUTOCERTO/REVENDA_MAIS/COCKPIT/MOTOR21)
-- `page.tsx` descriptografa credenciais server-side antes de passar ao client component
+### 3. OG Image — criar imagem para compartilhamento social
+- Metadata referencia `/assets/brand/og-image.png` mas o arquivo **não existe ainda**
+- Dimensões: 1200×630px
+- Sem ela, links compartilhados no WhatsApp/Instagram mostram preview em branco
+- Criar em Canva ou Figma e salvar em `public/assets/brand/og-image.png`
 
 ---
 
 ## 🟡 Média Prioridade
 
-### 3. Vitrine pública — página de detalhe do veículo
-- Rota: `src/app/(platform)/veiculo/[id]/page.tsx` (não existe ainda)
-- Exibir specs completas, galeria de fotos, formulário de lead, SEO (metadata dinâmica)
+### 4. Domínio e metadataBase
+- `metadataBase` no layout aponta para `https://motorz.com.br`
+- Quando o domínio real for definido (pode ser diferente), atualizar em:
+  - `src/app/(platform)/layout.tsx` linha 27
+  - `src/app/sitemap.ts` variável `base`
+  - `src/app/robots.ts`
 
-### 4. Vitrine pública — SEO e metadata dinâmica
-- `generateMetadata` por veículo para Google indexar
-- OG tags para compartilhamento
+### 5. ~~Remover fallback perigoso do getActiveStore()~~ ✅ FEITO (Sessão 6)
 
-### 5. Vincular Store existente ao usuário atual
-- A store "Via Brasil" foi criada antes do `ownerId` existir → `ownerId` é null
-- Fix: rodar no Supabase Dashboard:
-  ```sql
-  UPDATE "Store" SET "ownerId" = '<uuid-do-pedro>' WHERE slug = 'via-brasil';
-  ```
-  UUID do Pedro: Supabase Dashboard → Authentication → Users
+### 6. URL params para filtros do estoque
+- Filtros rodam 100% client-side sem refletir na URL
+- Impacto SEO: `/estoque?marca=Honda&preco=ate300k` não funciona
+- Benefício: usuário pode compartilhar/bookmarkar filtros
 
 ---
 

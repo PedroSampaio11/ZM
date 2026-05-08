@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
+import { Onest } from 'next/font/google';
+import localFont from 'next/font/local';
 import "./globals.css";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { prisma } from "@/lib/prisma";
 import { getActiveStore } from "@/lib/get-store";
 
+const onest = Onest({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-onest',
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  preload: true,
+});
+
+const calSans = localFont({
+  src: '../../../public/fonts/CalSans-SemiBold.woff2',
+  variable: '--font-cal',
+  display: 'swap',
+  weight: '600',
+  preload: true,
+});
+
 export const metadata: Metadata = {
-  title: "motorz | Admin",
+  title: "motorz | Gestão",
   description: "Painel de controle da plataforma motorz",
 };
 
@@ -46,12 +64,19 @@ export default async function AdminLayout({
   const meta = await getSidebarMeta();
 
   return (
-    <html lang="pt-br" className="dark">
-      <body className="antialiased bg-zinc-950 text-zinc-100 min-h-screen font-sans selection:bg-blue-500/30">
-        <div className="flex">
+    <html lang="pt-br" className={`${onest.variable} ${calSans.variable} dark`}>
+      <body className="antialiased bg-[#020202] text-zinc-100 min-h-screen selection:bg-primary/30">
+        <div className="flex relative min-h-screen overflow-hidden">
+          {/* ── BACKGROUND IDV ─────────────────────────────────── */}
+          <div className="fixed inset-0 pointer-events-none z-0">
+            <div className="mesh-bg opacity-40" />
+            <div className="tech-grid opacity-20" />
+            <div className="noise opacity-[0.03]" />
+          </div>
+
           <AdminSidebar meta={meta} />
-          <main className="flex-1 min-h-screen overflow-y-auto bg-grid">
-            <div className="p-8">
+          <main className="flex-1 relative z-10 min-h-screen overflow-y-auto">
+            <div className="p-8 max-w-7xl mx-auto">
               {children}
             </div>
           </main>

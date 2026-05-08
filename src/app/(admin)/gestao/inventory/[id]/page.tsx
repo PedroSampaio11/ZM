@@ -26,8 +26,8 @@ async function changeStatus(vehicleId: string, formData: FormData) {
   'use server'
   const status = formData.get('status') as VehicleStatus
   await prisma.vehicle.update({ where: { id: vehicleId }, data: { status } })
-  revalidatePath(`/admin/inventory/${vehicleId}`)
-  revalidatePath('/admin/inventory')
+  revalidatePath(`/gestao/inventory/${vehicleId}`)
+  revalidatePath('/gestao/inventory')
 }
 
 type Params = { params: Promise<{ id: string }> }
@@ -80,7 +80,7 @@ export default async function VehicleDetailPage({ params }: Params) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <Link
-            href="/admin/inventory"
+            href="/gestao/inventory"
             className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-3"
           >
             <ArrowLeft size={13} /> Estoque
@@ -149,7 +149,7 @@ export default async function VehicleDetailPage({ params }: Params) {
               <p className="font-bold text-white text-sm">{vehicle.partner.name}</p>
               <p className="text-xs text-zinc-500 mt-0.5">{vehicle.partner.city}, {vehicle.partner.state}</p>
               <Link
-                href={`/admin/lojas`}
+                href={`/gestao/lojas`}
                 className="inline-block mt-3 text-[10px] font-bold text-primary hover:underline"
               >
                 Ver na página de Lojas →
@@ -200,7 +200,7 @@ export default async function VehicleDetailPage({ params }: Params) {
               {vehicle.leads.map((lead) => (
                 <Link
                   key={lead.id}
-                  href={`/admin/leads/${lead.id}`}
+                  href={`/gestao/leads/${lead.id}`}
                   className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] transition-all"
                 >
                   <div className="flex items-center gap-3">

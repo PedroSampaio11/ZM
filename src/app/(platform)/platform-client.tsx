@@ -673,8 +673,8 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
           <div style={{ borderRadius: '32px', padding: '1px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(255,255,255,0.05))', boxShadow: '0 40px 80px rgba(0,0,0,0.5)' }}>
             <div style={{ borderRadius: '31px', overflow: 'hidden', background: '#0A1931' }}>
               <ComparisonSlider
-                beforeImage="/assets/images/searching-chaos.png"
-                afterImage="/assets/images/motorz-success.png"
+                beforeImage="/assets/images/searching-chaos.png?v=1"
+                afterImage="/assets/images/motorz-sucess.png?v=1"
               />
             </div>
           </div>

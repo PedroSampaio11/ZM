@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Vehicle } from '@/modules/inventory/types';
 import { LayoutGrid, MessageCircle } from 'lucide-react';
 
@@ -50,11 +51,15 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
       
       {/* Image Container */}
       <div className="zoom-container" style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-        <img
+        <Image
           src={imageUrl}
           alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          loading={index < 4 ? 'eager' : 'lazy'}
           onError={() => setImgError(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ objectFit: 'cover' }}
+          unoptimized={!imageUrl.includes('unsplash.com') && !imageUrl.includes('supabase.co')}
         />
 
         {/* Gradient overlay */}

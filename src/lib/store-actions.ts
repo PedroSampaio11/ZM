@@ -32,7 +32,7 @@ export async function createStore(formData: FormData) {
       },
     })
 
-    revalidatePath('/admin/stores')
+    revalidatePath('/gestao/stores')
     return { success: true }
   } catch {
     return { error: 'Erro ao criar loja. Verifique os dados.' }
@@ -50,7 +50,7 @@ export async function updateStore(id: string, formData: FormData) {
 
     await prisma.store.update({ where: { id }, data: input })
 
-    revalidatePath('/admin/stores')
+    revalidatePath('/gestao/stores')
     return { success: true }
   } catch {
     return { error: 'Erro ao atualizar loja.' }
@@ -59,5 +59,5 @@ export async function updateStore(id: string, formData: FormData) {
 
 export async function toggleStoreActive(id: string, isActive: boolean) {
   await prisma.store.update({ where: { id }, data: { isActive } })
-  revalidatePath('/admin/stores')
+  revalidatePath('/gestao/stores')
 }

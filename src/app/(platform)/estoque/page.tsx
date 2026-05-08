@@ -1,8 +1,22 @@
+import type { Metadata } from 'next';
 import { prisma, withRetry } from '@/lib/prisma';
 import { Vehicle } from '@/modules/inventory/types';
 import { EstoqueClient } from './estoque-client';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Estoque Completo — Veículos no ABCD Paulista | Motorz',
+  description: 'Explore centenas de veículos curados no ABCD Paulista. Filtre por marca, preço e especificações. Carros em Santo André, São Bernardo, São Caetano e Diadema com transparência total.',
+  alternates: {
+    canonical: 'https://motorz.com.br/estoque',
+  },
+  openGraph: {
+    title: 'Estoque Completo — Veículos no ABCD Paulista | Motorz',
+    description: 'Centenas de veículos curados no ABCD Paulista. Filtre por marca, preço e muito mais.',
+    url: 'https://motorz.com.br/estoque',
+  },
+};
 
 export default async function EstoquePage() {
   const [rawVehicles, totalVehicles, totalPartners, brandsRaw] = await withRetry(() =>

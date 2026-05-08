@@ -58,7 +58,7 @@ export async function createLead(formData: FormData) {
       },
     });
 
-    revalidatePath('/admin/leads');
+    revalidatePath('/gestao/leads');
     return { success: true };
   } catch (error: unknown) {
     console.error('[Action createLead]', error);

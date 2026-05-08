@@ -133,7 +133,7 @@ export default async function AdminDashboard() {
         <Card className="lg:col-span-2 bg-card/50 border-white/5 backdrop-blur-xl">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base font-bold text-foreground">Leads Recentes</CardTitle>
-            <a href="/admin/leads" className="text-xs font-bold text-primary hover:underline">
+            <a href="/gestao/leads" className="text-xs font-bold text-primary hover:underline">
               Ver todos →
             </a>
           </CardHeader>
@@ -145,7 +145,7 @@ export default async function AdminDashboard() {
                 {recentLeads.map((lead) => (
                   <a
                     key={lead.id}
-                    href={`/admin/leads/${lead.id}`}
+                    href={`/gestao/leads/${lead.id}`}
                     className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] transition-all"
                   >
                     <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export default async function AdminDashboard() {
         <Card className="bg-card/50 border-white/5 backdrop-blur-xl">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base font-bold text-foreground">Sincronizações</CardTitle>
-            <a href="/admin/lojas" className="text-xs font-bold text-primary hover:underline">
+            <a href="/gestao/lojas" className="text-xs font-bold text-primary hover:underline">
               Gerenciar →
             </a>
           </CardHeader>

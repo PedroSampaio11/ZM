@@ -86,7 +86,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
     { label: 'Arquivado',  value: 'ARCHIVED',  count: countMap['ARCHIVED']  ?? 0 },
   ]
 
-  const baseUrl = '/admin/inventory'
+  const baseUrl = '/gestao/inventory'
 
   return (
     <div className="space-y-6">
@@ -159,7 +159,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
           {vehicles.map(vehicle => {
             const status = statusConfig[vehicle.status]
             return (
-              <Link key={vehicle.id} href={`/admin/inventory/${vehicle.id}`}>
+              <Link key={vehicle.id} href={`/gestao/inventory/${vehicle.id}`}>
               <Card className="bg-zinc-900/50 border-white/5 overflow-hidden group hover:border-white/10 hover:border-primary/20 transition-all cursor-pointer">
                 {/* Imagem placeholder */}
                 <div className="aspect-video bg-zinc-800 relative overflow-hidden">

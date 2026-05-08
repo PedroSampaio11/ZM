@@ -20,7 +20,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/admin');
+  redirect('/gestao');
 }
 
 export async function logout() {
