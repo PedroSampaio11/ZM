@@ -13,22 +13,22 @@ datasource db {
 // ─────────────────────────────────────────────────────────────────────────────
 
 enum StorePlan {
-  STARTER      // 1 loja, 1 integração, até 500 veículos
+  STARTER // 1 loja, 1 integração, até 500 veículos
   PROFESSIONAL // até 5 lojas, 3 integrações, até 5.000 veículos
-  ENTERPRISE   // ilimitado
+  ENTERPRISE // ilimitado
 }
 
 enum AdapterType {
-  AUTOCERTO    // DMS/Integrador (OAuth2 REST)
-  COCKPIT      // DMS popular no Brasil (REST API)
+  AUTOCERTO // DMS/Integrador (OAuth2 REST)
+  COCKPIT // DMS popular no Brasil (REST API)
   REVENDA_MAIS // CRM/DMS (REST API)
-  MOTOR21      // Integrador (XML/REST)
-  WEBMOTORS    // Classificado (API publicação)
-  OLX_AUTOS    // Classificado (API publicação)
-  MOBIAUTO     // Marketplace (REST API)
-  ICARROS      // Classificado (Feed XML)
-  REPASSE      // Leilão B2B (REST API)
-  MANUAL       // Cadastro manual via admin UI
+  MOTOR21 // Integrador (XML/REST)
+  WEBMOTORS // Classificado (API publicação)
+  OLX_AUTOS // Classificado (API publicação)
+  MOBIAUTO // Marketplace (REST API)
+  ICARROS // Classificado (Feed XML)
+  REPASSE // Leilão B2B (REST API)
+  MANUAL // Cadastro manual via admin UI
 }
 
 enum VehicleStatus {
@@ -83,14 +83,14 @@ model Store {
   id       String    @id @default(cuid())
   name     String
   slug     String    @unique // subdomínio-ready: viabrasil.motorz.com
-  document String?           // CNPJ do operador (opcional)
+  document String? // CNPJ do operador (opcional)
   plan     StorePlan @default(STARTER)
   isActive Boolean   @default(true)
   ownerId  String?   @db.Uuid // Supabase Auth user UUID
 
-  partners     Partner[]
-  vehicles     Vehicle[]
-  leads        Lead[]
+  partners Partner[]
+  vehicles Vehicle[]
+  leads    Lead[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -105,17 +105,17 @@ model Store {
 // ─────────────────────────────────────────────────────────────────────────────
 
 model Partner {
-  id       String @id @default(cuid())
-  storeId  String
-  store    Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
-  name       String
-  document   String  @unique // CNPJ (14 dígitos sem pontuação)
-  email      String?
-  phone      String?
-  address    String?
-  city       String
-  state      String
+  name        String
+  document    String   @unique // CNPJ (14 dígitos sem pontuação)
+  email       String?
+  phone       String?
+  address     String?
+  city        String
+  state       String
   commission  Float    @default(0.0) // % de success fee negociada
   monthlyGoal Decimal? @db.Decimal(12, 2) // meta de receita mensal (R$)
   isActive    Boolean  @default(true)
@@ -139,7 +139,7 @@ model IntegrationConfig {
   id        String  @id @default(cuid())
   partnerId String
   partner   Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-  storeId   String  // denormalizado para queries e RLS
+  storeId   String // denormalizado para queries e RLS
 
   adapter  AdapterType
   isActive Boolean     @default(true)
@@ -152,7 +152,7 @@ model IntegrationConfig {
   config Json @default("{}")
 
   lastSyncAt     DateTime?
-  lastSyncStatus String?   // "OK" | "ERROR: mensagem"
+  lastSyncStatus String? // "OK" | "ERROR: mensagem"
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -167,7 +167,7 @@ model IntegrationConfig {
 
 model Vehicle {
   id        String  @id @default(cuid())
-  storeId   String  // denormalizado para RLS
+  storeId   String // denormalizado para RLS
   store     Store   @relation(fields: [storeId], references: [id])
   partnerId String
   partner   Partner @relation(fields: [partnerId], references: [id])
@@ -177,11 +177,11 @@ model Vehicle {
   version      String?
   year         Int
   mileage      Int
-  price        Decimal @db.Decimal(12, 2)
+  price        Decimal  @db.Decimal(12, 2)
   fuel         String?
   transmission String?
   color        String?
-  description  String? @db.Text
+  description  String?  @db.Text
   images       String[]
   videoUrl     String?
 
@@ -211,7 +211,7 @@ model Lead {
   store   Store  @relation(fields: [storeId], references: [id])
 
   name  String
-  phone String  // Formato: 5511999999999 (Evolution API)
+  phone String // Formato: 5511999999999 (Evolution API)
   email String?
 
   origin LeadOrigin?
@@ -222,7 +222,7 @@ model Lead {
   partner   Partner? @relation(fields: [partnerId], references: [id])
 
   status  LeadStatus @default(NEW)
-  score   Int        @default(0)  // 0–100 (IA)
+  score   Int        @default(0) // 0–100 (IA)
   summary String?    @db.Text
 
   interactions Interaction[]

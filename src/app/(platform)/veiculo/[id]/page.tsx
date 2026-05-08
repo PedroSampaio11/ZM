@@ -6,6 +6,18 @@ import { VehicleDetailsClient } from './vehicle-details-client';
 
 export const revalidate = 60;
 
+// Pré-renderiza as páginas dos veículos disponíveis no build — navegação instantânea
+export async function generateStaticParams() {
+  const vehicles = await withRetry(() =>
+    prisma.vehicle.findMany({
+      where:  { status: 'AVAILABLE' },
+      select: { id: true },
+      take:   100,
+    })
+  );
+  return vehicles.map(v => ({ id: v.id }));
+}
+
 interface Props {
   params: Promise<{ id: string }>;
 }

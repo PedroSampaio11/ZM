@@ -4,12 +4,14 @@ import './platform.css';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { MessageCircle, Menu, X, Home, Package, Heart, ArrowUp } from 'lucide-react';
 
 // ── NAVIGATION ───────────────────────────────────────────
 function TopNav() {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -18,9 +20,8 @@ function TopNav() {
   }, []);
 
   const navItems = [
-    { name: 'Estoque', href: '/#estoque' },
-    { name: 'Tecnologia', href: '/#tecnologia' },
-    { name: 'Parceiros', href: '/#parceiros' },
+    { name: 'Estoque', href: '/estoque' },
+    { name: 'Sobre', href: '/#quem-somos' },
   ];
 
   return (
@@ -54,13 +55,15 @@ function TopNav() {
               </Link>
             ))}
             <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 8px' }} />
-            <a 
-              href="https://wa.me/5511999999999" 
-              style={{ padding: '8px 20px', fontSize: '13px', borderRadius: '12px', background: 'var(--motorz-gold)', color: 'var(--mz-ink)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
-            >
-              <MessageCircle size={16} />
-              Consultor
-            </a>
+            
+            {pathname !== '/seja-parceiro' && (
+              <Link
+                href="/seja-parceiro"
+                style={{ padding: '8px 20px', fontSize: '13px', borderRadius: '12px', background: 'var(--mz-ink)', color: 'white', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+              >
+                Seja Parceiro →
+              </Link>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -93,9 +96,9 @@ function TopNav() {
                 {item.name}
               </Link>
             ))}
-            <a href="https://wa.me/5511999999999" className="btn-primary" style={{ padding: '20px 40px', fontSize: '18px' }}>
-              WhatsApp Consultor
-            </a>
+            <Link href="/seja-parceiro" onClick={() => setIsMobileMenuOpen(false)} className="btn-primary" style={{ padding: '20px 40px', fontSize: '18px', textDecoration: 'none' }}>
+              Seja Parceiro
+            </Link>
             
             <button 
               onClick={() => setIsMobileMenuOpen(false)}
@@ -118,10 +121,10 @@ function BottomNav() {
           <Home size={20} />
           <span style={{ fontSize: '10px', fontWeight: 700 }}>Início</span>
         </a>
-        <a href="#estoque" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--mz-slate-dim)' }}>
+        <Link href="/estoque" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--mz-slate-dim)' }}>
           <Package size={20} />
           <span style={{ fontSize: '10px', fontWeight: 700 }}>Estoque</span>
-        </a>
+        </Link>
         <a href="#favoritos" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--mz-slate-dim)' }}>
           <Heart size={20} />
           <span style={{ fontSize: '10px', fontWeight: 700 }}>Favoritos</span>
@@ -154,14 +157,15 @@ function Footer() {
             <h5 style={{ fontWeight: 800, marginBottom: '24px', fontSize: '14px', color: 'white', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Navegação</h5>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <li><a href="/" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Início</a></li>
-              <li><a href="#estoque" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Estoque</a></li>
-              <li><a href="#tecnologia" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Tecnologia</a></li>
+              <li><a href="/estoque" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Estoque</a></li>
+              <li><a href="/#quem-somos" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Sobre</a></li>
             </ul>
           </div>
           <div>
             <h5 style={{ fontWeight: 800, marginBottom: '24px', fontSize: '14px', color: 'white', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Plataforma</h5>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <li><a href="#parceiros" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Lojas Parceiras</a></li>
+              <li><a href="/#parceiros" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Lojas Parceiras</a></li>
+              <li><a href="/seja-parceiro" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Seja Parceiro</a></li>
               <li><a href="https://wa.me/5511999999999" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '15px', fontWeight: 500, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color='white'} onMouseLeave={(e) => e.currentTarget.style.color='rgba(255,255,255,0.6)'}>Falar com Consultor</a></li>
             </ul>
           </div>
@@ -184,13 +188,13 @@ function Footer() {
           }}>
             ZM.
           </h2>
-          <a href="#estoque" style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: '80px', 
-            height: '80px', 
-            borderRadius: '50%', 
+          <a href="#" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
             background: 'transparent',
             border: '1px solid rgba(255,255,255,0.25)',
             color: 'white',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Vehicle } from '@/modules/inventory/types';
 import { VehicleCard } from '@/components/vehicle-card';
@@ -12,6 +13,18 @@ import {
 import { ComparisonSlider } from '@/components/comparison-slider';
 import { LiveTimeBadge } from '@/components/live-time-badge';
 import { ZmChat } from '@/components/zm-chat';
+
+// ── Padronizado: eyebrow de seção ────────────────────────────
+function SectionEyebrow({ label, dark = false }: { label: string; dark?: boolean }) {
+  const color = dark ? 'rgba(255,255,255,0.45)' : 'var(--mz-ink)';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+      <div style={{ width: '28px', height: '1px', background: color, opacity: 0.4 }} />
+      <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color, opacity: 0.6 }}>{label}</span>
+    </div>
+  );
+}
+
 
 interface Props {
   vehicles:      Vehicle[];
@@ -104,7 +117,6 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isSheetOpen,     setIsSheetOpen]     = useState(false);
   const [activeBrand,     setActiveBrand]     = useState('Todos');
-  const [activeStore,     setActiveStore]     = useState('Todas');
   const [priceRange,      setPriceRange]      = useState<PriceRange>('all');
   const [searchQuery,     setSearchQuery]     = useState('');
   const [visibleCount,    setVisibleCount]    = useState(6);
@@ -124,19 +136,17 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
     'trabalha por você.'
   ]);
 
-  const allBrands  = ['Todos', ...brands];
-  const allStores  = ['Todas', ...Array.from(new Set(vehicles.map(v => v.storeName).filter(Boolean) as string[]))];
+  const allBrands = ['Todos', ...brands];
 
   const filtered = vehicles.filter(v => {
     const matchBrand  = activeBrand === 'Todos' || v.brand?.toLowerCase() === activeBrand.toLowerCase();
     const matchSearch = !searchQuery || `${v.brand} ${v.model} ${v.version}`.toLowerCase().includes(searchQuery.toLowerCase());
     const matchPrice  = matchesPrice(v.price, priceRange);
-    const matchStore  = activeStore === 'Todas' || v.storeName === activeStore;
-    return matchBrand && matchSearch && matchPrice && matchStore;
+    return matchBrand && matchSearch && matchPrice;
   });
 
   const featuredVehicles = vehicles.slice(0, 3);
-  const hasActiveFilter  = activeBrand !== 'Todos' || priceRange !== 'all' || searchQuery !== '' || activeStore !== 'Todas';
+  const hasActiveFilter  = activeBrand !== 'Todos' || priceRange !== 'all' || searchQuery !== '';
 
   function openSheet(vehicle: Vehicle) {
     setSelectedVehicle(vehicle);
@@ -145,7 +155,6 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
 
   function resetFilters() {
     setActiveBrand('Todos');
-    setActiveStore('Todas');
     setPriceRange('all');
     setSearchQuery('');
     setVisibleCount(6);
@@ -313,17 +322,17 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
       </section>
 
 
+
       {/* ── INVENTORY ──────────────────────────────────────────── */}
       <section id="estoque" style={{ background: 'var(--mz-snow)', paddingTop: '120px', paddingBottom: '0' }}>
+
+
 
         {/* ── Section Header ── */}
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px', marginBottom: '64px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '32px', flexWrap: 'wrap' }}>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(18,67,178,0.06)', border: '1px solid rgba(18,67,178,0.12)', borderRadius: '100px', padding: '6px 14px', marginBottom: '20px' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1243B2', boxShadow: '0 0 6px rgba(18,67,178,0.5)' }} />
-                <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1243B2' }}>Catálogo Completo</span>
-              </div>
+              <SectionEyebrow label="Catálogo Completo" />
               <h2 style={{ fontSize: 'clamp(36px, 5vw, 64px)', letterSpacing: '-0.05em', fontWeight: 900, lineHeight: 1, margin: 0, color: 'var(--mz-ink)' }}>
                 Encontre seu<br />próximo carro
               </h2>
@@ -444,33 +453,6 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
               </div>
             </div>
 
-            {/* Store */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Loja</span>
-              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' } as React.CSSProperties}>
-                {allStores.map(store => (
-                  <button
-                    key={store}
-                    onClick={() => { setActiveStore(store); setVisibleCount(6); }}
-                    style={{
-                      flexShrink: 0,
-                      padding: '8px 16px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      fontFamily: 'inherit',
-                      borderRadius: '10px',
-                      border: '1px solid',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                      whiteSpace: 'nowrap',
-                      background: activeStore === store ? '#1243B2' : 'var(--mz-frost)',
-                      borderColor: activeStore === store ? '#1243B2' : 'var(--border)',
-                      color: activeStore === store ? 'white' : 'var(--mz-slate)',
-                    }}
-                  >{store}</button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Results bar */}
@@ -499,24 +481,119 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
             </div>
           )}
 
-          {visibleCount < filtered.length && (
-            <button className="btn-load-more" onClick={() => setVisibleCount(prev => prev + 6)} style={{ marginTop: '80px' }}>
-              Carregar mais veículos <ArrowRight size={20} />
-            </button>
-          )}
+
+          {/* Ver todo estoque */}
+          <div style={{ textAlign: 'center', padding: '60px 0 80px' }}>
+            <Link
+              href="/estoque"
+              className="btn-primary"
+              style={{ padding: '18px 40px', fontSize: '16px', borderRadius: '16px', gap: '10px', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}
+            >
+              Ver todo o estoque <ArrowRight size={20} />
+            </Link>
+            <p style={{ marginTop: '16px', color: 'var(--text-dim)', fontSize: '13px', fontWeight: 500 }}>
+              {totalVehicles} veículos disponíveis · Atualizado em tempo real
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CURADORIA (PROCESSO) ────────────────────────────────── */}
+      <section id="curadoria" style={{ background: '#fff', padding: '120px 24px', borderTop: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+
+          {/* Eyebrow + headline — full left-align, editorial */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '80px', marginBottom: '96px', flexWrap: 'wrap' }}>
+            <div style={{ flex: '0 0 auto' }}>
+              <SectionEyebrow label="Curadoria" />
+              <h2 style={{ fontSize: 'clamp(40px, 5vw, 68px)', letterSpacing: '-0.05em', fontWeight: 900, color: 'var(--mz-ink)', lineHeight: 0.95, margin: 0, maxWidth: '520px' }}>
+                Cada loja aqui foi aprovada pela nossa equipe.
+              </h2>
+            </div>
+            <div style={{ flex: '1 1 280px', paddingTop: '16px' }}>
+              <p style={{ fontSize: '17px', color: 'var(--text-dim)', lineHeight: 1.75, margin: '0 0 28px', maxWidth: '400px' }}>
+                Motorz não é um portal de anúncios. É uma rede fechada de revendas que passaram por triagem, auditoria e são monitoradas continuamente.
+              </p>
+              <p style={{ fontSize: '14px', color: 'var(--text-dim)', lineHeight: 1.7, margin: 0, maxWidth: '400px', opacity: 0.75 }}>
+                Se um veículo aparece aqui, ele existe. O preço é real. A loja é verificada. Simples assim.
+              </p>
+            </div>
+          </div>
+
+          {/* Cards with Tech Features - Integrated into curation flow */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', marginBottom: '80px' }}>
+            {TECH_FEATURES.map((feat, i) => (
+              <div key={i} style={{ padding: '40px 32px', borderRadius: '28px', background: 'var(--mz-frost)', border: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'inline-flex', padding: '14px', borderRadius: '18px', background: `${feat.color}15`, color: feat.color, flexShrink: 0 }}>
+                    {feat.icon}
+                  </div>
+                  <div style={{ display: 'inline-flex', alignSelf: 'center', alignItems: 'center', background: `${feat.color}10`, border: `1px solid ${feat.color}30`, borderRadius: '100px', padding: '4px 12px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: feat.color }}>{feat.tag}</span>
+                  </div>
+                </div>
+                <h3 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '12px', color: 'var(--mz-ink)', letterSpacing: '-0.03em' }}>{feat.title}</h3>
+                <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, fontWeight: 500, margin: 0 }}>{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Process — horizontal ruled list, typographic steps */}
+          <div style={{ borderTop: '1px solid var(--border)' }}>
+            {[
+              {
+                n: '01',
+                title: 'Análise e Aprovação',
+                desc: 'CNPJ ativo, histórico no mercado, reputação em plataformas e entrevista presencial ou por vídeo com nossa equipe comercial.',
+              },
+              {
+                n: '02',
+                title: 'Auditoria de Estoque',
+                desc: 'Cada veículo tem fotos, quilometragem, histórico e precificação validados antes de entrar ao vivo. Discrepâncias bloqueiam o anúncio automaticamente.',
+              },
+              {
+                n: '03',
+                title: 'Monitoramento em Tempo Real',
+                desc: 'Nosso sistema monitora o estoque 24h. Lojas com quedas de qualidade são suspensas — sem aviso prévio e sem negociação.',
+              },
+            ].map((item) => (
+              <div key={item.n} style={{ display: 'grid', gridTemplateColumns: '64px 1fr 2fr', gap: '40px', alignItems: 'start', padding: '36px 0', borderBottom: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--mz-ink)', opacity: 0.2, fontFamily: "'Cal Sans', sans-serif", letterSpacing: '0.04em', paddingTop: '3px' }}>{item.n}</span>
+                <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--mz-ink)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{item.title}</h3>
+                <p style={{ fontSize: '15px', color: 'var(--text-dim)', margin: 0, lineHeight: 1.7 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom seal row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '24px', marginTop: '56px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1.5px solid var(--mz-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.7 }}>
+                <ShieldCheck size={18} color="var(--mz-ink)" />
+              </div>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--mz-ink)', opacity: 0.6, letterSpacing: '-0.01em' }}>Rede de lojas verificadas pelo Motorz</span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {['CNPJ ativo', 'Fotos reais', 'Preço justo', 'Sem anúncio fantasma', 'Consultor real'].map((tag) => (
+                <span key={tag} style={{ fontSize: '12px', fontWeight: 600, color: 'var(--mz-ink)', opacity: 0.5, border: '1px solid currentColor', borderRadius: '100px', padding: '4px 12px', whiteSpace: 'nowrap' }}>{tag}</span>
+              ))}
+            </div>
+          </div>
+
         </div>
       </section>
 
       {/* ── PARTNERS (CLEAN PREMIUM CAROUSEL) ───────────────── */}
-      <section className="partners-section">
+      <section id="parceiros" className="partners-section">
         {/* Background Detail - Soft Complementary Color */}
         <div className="partners-bg-glow" />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
-          <div className="section-label" style={{ justifyContent: 'center' }}>
-            <LayoutGrid size={18} /> Rede de Confiança
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <SectionEyebrow label="Rede de Confiança" />
           </div>
-          <h2 style={{ fontSize: 'clamp(36px, 5vw, 64px)', letterSpacing: '-0.04em', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: 'clamp(36px, 5vw, 64px)', letterSpacing: '-0.04em', marginBottom: '24px', color: 'var(--mz-ink)', fontWeight: 900 }}>
             Ecossistema de Qualidade
           </h2>
           <p style={{ color: 'var(--text-dim)', fontSize: '18px', lineHeight: 1.6, fontWeight: 500 }}>
@@ -542,29 +619,51 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
         </div>
       </section>
 
+      {/* ── QUEM SOMOS ───────────────────────────────────────────── */}
+      <section id="quem-somos" style={{ background: 'var(--mz-snow)', padding: '140px 24px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+            <div>
+              <SectionEyebrow label="Nossa História" />
+              <h2 style={{ fontSize: 'clamp(40px, 5vw, 64px)', letterSpacing: '-0.05em', fontWeight: 900, lineHeight: 1.05, color: 'var(--mz-ink)', marginBottom: '28px' }}>
+                Nascemos para<br />mudar o jogo
+              </h2>
+              <p style={{ color: 'var(--text-dim)', fontSize: '18px', lineHeight: 1.7, fontWeight: 500, marginBottom: '20px' }}>
+                A Motorz surgiu da frustração com um mercado opaco, cheio de anúncios fantasmas e lojas não verificadas. Construímos uma plataforma onde estoque real, tecnologia e transparência andam juntos.
+              </p>
+              <p style={{ color: 'var(--text-dim)', fontSize: '18px', lineHeight: 1.7, fontWeight: 500, marginBottom: '48px' }}>
+                Conectamos compradores a lojas certificadas com sincronização em tempo real — sem intermediários, sem surpresas.
+              </p>
+              <Link href="/seja-parceiro" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '16px 36px', fontSize: '16px', borderRadius: '16px', textDecoration: 'none' }}>
+                Quero ser parceiro <ArrowRight size={20} />
+              </Link>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              {[
+                { value: '500+',  label: 'Negociações realizadas', color: '#1243B2' },
+                { value: '100%',  label: 'Estoque verificado',      color: '#22C55E' },
+                { value: '<2min', label: 'Tempo de resposta',       color: '#F59E0B' },
+                { value: 'A+',    label: 'Lojas auditadas',         color: '#A855F7' },
+              ].map((stat, i) => (
+                <div key={i} style={{ padding: '36px 28px', borderRadius: '24px', background: 'white', border: '1px solid var(--border)', boxShadow: '0 4px 24px rgba(0,0,0,0.04)' }}>
+                  <div style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 900, letterSpacing: '-0.04em', color: stat.color, marginBottom: '8px' }}>{stat.value}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-dim)', lineHeight: 1.3 }}>{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── COMPARISON ────────────────────────────────────────── */}
-      <section style={{ padding: '140px 24px', background: 'linear-gradient(to bottom, #1243B2 0%, #0A1931 100%)', position: 'relative', overflow: 'hidden' }}>
+      <section id="comparacao" style={{ padding: '140px 24px', background: 'linear-gradient(to bottom, #1243B2 0%, #0A1931 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.15), transparent 60%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: '80px' }}>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '16px',
-              fontSize: '12px', 
-              fontWeight: 800, 
-              color: '#FFB800', 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.3em', 
-              marginBottom: '40px' 
-            }}>
-              <span style={{ width: '40px', height: '2px', background: '#FFB800' }} />
-              A diferença é visível
-              <span style={{ width: '40px', height: '2px', background: '#FFB800' }} />
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+              <SectionEyebrow label="Antes e Depois" dark />
             </div>
             <h2 style={{ fontSize: 'clamp(48px, 8vw, 96px)', color: 'white', letterSpacing: '-0.04em', lineHeight: 1.05, fontWeight: 900 }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)' }}>Antes. Depois.</span><br />
               Com a Motorz.
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '20px', maxWidth: '600px', margin: '32px auto 0', lineHeight: 1.6, fontWeight: 500 }}>
