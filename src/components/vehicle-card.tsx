@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Vehicle } from '@/modules/inventory/types';
 import { LayoutGrid, MessageCircle } from 'lucide-react';
 
@@ -29,7 +29,6 @@ const TRANSMISSION_LABELS: Record<string, string> = {
 };
 
 export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }: VehicleCardProps) {
-  const router = useRouter();
   const [imgError, setImgError] = useState(false);
 
   const imageUrl = !imgError && vehicle.images?.[0]
@@ -39,13 +38,14 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
   return (
     <div
       className={`card-vehicle anim-fade-up ${featured ? 'card-featured' : ''}`}
-      style={{ animationDelay: `${index * 80}ms` }}
-      onClick={() => router.push(`/veiculo/${vehicle.id}`)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && router.push(`/veiculo/${vehicle.id}`)}
-      aria-label={`Ver detalhes: ${vehicle.brand} ${vehicle.model}`}
+      style={{ animationDelay: `${index * 80}ms`, position: 'relative' }}
     >
+      {/* Stretched link — cobre todo o card, prefetch automático no hover */}
+      <Link
+        href={`/veiculo/${vehicle.id}`}
+        aria-label={`Ver detalhes: ${vehicle.brand} ${vehicle.model}`}
+        style={{ position: 'absolute', inset: 0, zIndex: 1 }}
+      />
       {featured && <div className="special-badge" style={{ zIndex: 10 }}>DESTAQUE</div>}
       
       {/* Image Container */}
@@ -154,9 +154,9 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
             </div>
           </div>
           <button
-            onClick={e => { e.stopPropagation(); onInterest(vehicle); }}
+            onClick={() => onInterest(vehicle)}
             className="btn-primary"
-            style={{ padding: '10px 20px', borderRadius: '12px', fontWeight: 700, fontSize: '13px', gap: '8px', boxShadow: 'none' }}
+            style={{ padding: '10px 20px', borderRadius: '12px', fontWeight: 700, fontSize: '13px', gap: '8px', boxShadow: 'none', position: 'relative', zIndex: 2 }}
           >
             <MessageCircle size={16} />
             Interesse

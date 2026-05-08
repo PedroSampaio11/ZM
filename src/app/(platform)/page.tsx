@@ -1,31 +1,33 @@
-import { prisma } from '@/lib/prisma';
+import { prisma, withRetry } from '@/lib/prisma';
 import { Vehicle } from '@/modules/inventory/types';
 import { PlatformClient } from './platform-client';
 
 export const revalidate = 60;
 
 export default async function PlatformHome() {
-  const [rawVehicles, totalVehicles, totalPartners, brandsRaw, partnersRaw] = await Promise.all([
-    prisma.vehicle.findMany({
-      where:   { status: 'AVAILABLE' },
-      orderBy: { createdAt: 'desc' },
-      take:    60,
-    }),
-    prisma.vehicle.count({ where: { status: 'AVAILABLE' } }),
-    prisma.partner.count({ where: { isActive: true } }),
-    prisma.vehicle.findMany({
-      where:    { status: 'AVAILABLE' },
-      select:   { brand: true },
-      distinct: ['brand'],
-      orderBy:  { brand: 'asc' },
-    }),
-    prisma.partner.findMany({
-      where:   { isActive: true },
-      select:  { name: true },
-      orderBy: { name: 'asc' },
-      take:    20,
-    }),
-  ]);
+  const [rawVehicles, totalVehicles, totalPartners, brandsRaw, partnersRaw] = await withRetry(() =>
+    Promise.all([
+      prisma.vehicle.findMany({
+        where:   { status: 'AVAILABLE' },
+        orderBy: { createdAt: 'desc' },
+        take:    60,
+      }),
+      prisma.vehicle.count({ where: { status: 'AVAILABLE' } }),
+      prisma.partner.count({ where: { isActive: true } }),
+      prisma.vehicle.findMany({
+        where:    { status: 'AVAILABLE' },
+        select:   { brand: true },
+        distinct: ['brand'],
+        orderBy:  { brand: 'asc' },
+      }),
+      prisma.partner.findMany({
+        where:   { isActive: true },
+        select:  { name: true },
+        orderBy: { name: 'asc' },
+        take:    20,
+      }),
+    ])
+  );
 
   const vehicles: Vehicle[] = rawVehicles.map(v => ({ ...v, price: Number(v.price) }));
 

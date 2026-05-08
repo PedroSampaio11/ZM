@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Vehicle } from '@/modules/inventory/types';
 import { VehicleCard } from '@/components/vehicle-card';
 import { LeadBottomSheet } from '@/components/lead-bottom-sheet';
 import {
   ShieldCheck, Search, ArrowRight, Mouse, Shield,
-  Cloud, Zap, MessageSquare, Cpu, LayoutGrid,
+  Cloud, Zap, MessageSquare, Cpu, LayoutGrid, Database, Car, Globe, Heart
 } from 'lucide-react';
+import { ComparisonSlider } from '@/components/comparison-slider';
+import { LiveTimeBadge } from '@/components/live-time-badge';
+import { ZmChat } from '@/components/zm-chat';
 
 interface Props {
   vehicles:      Vehicle[];
@@ -30,30 +34,30 @@ const TECH_FEATURES = [
   {
     icon:  <Cloud size={32} />,
     color: '#3B82F6',
-    title: 'Sync em Tempo Real',
-    desc:  'Estoque sincronizado automaticamente direto do DMS de cada parceiro. Sem digitação manual, sem atraso.',
-    tag:   'AutoCerto · Cockpit · Motor21',
+    title: 'Estoque 100% Real',
+    desc:  'Nossa tecnologia sincroniza com as lojas em tempo real. Se você está vendo o carro aqui, ele está disponível lá. Sem anúncios fantasmas.',
+    tag:   'Sync em tempo real',
   },
   {
     icon:  <Zap size={32} />,
-    color: '#FFC700',
-    title: 'Velocidade',
-    desc:  'Da visita ao contato com o consultor em menos de 2 minutos. Sem call center, sem burocracia.',
-    tag:   'Resposta imediata',
+    color: '#FFC107',
+    title: 'Conexão Imediata',
+    desc:  'Esqueça formulários lentos. Em menos de 2 minutos você está conversando com o consultor responsável pelo veículo.',
+    tag:   'Resposta ultra-rápida',
   },
   {
     icon:  <Cpu size={32} />,
     color: '#A855F7',
-    title: 'IA de Qualificação',
-    desc:  'Nossa inteligência artificial conversa via WhatsApp, entende o que você busca e te conecta ao carro certo.',
-    tag:   'Beta · Em breve',
+    title: 'Busca Inteligente',
+    desc:  'Nossa IA analisa milhares de opções para encontrar o carro que realmente combina com seu estilo de vida e orçamento.',
+    tag:   'IA personalizada',
   },
   {
     icon:  <Shield size={32} />,
     color: '#22C55E',
-    title: 'Parceiros Verificados',
-    desc:  'Cada loja passa por auditoria antes de entrar na rede. Dados reais, fotos reais, preços reais.',
-    tag:   'Curadoria humana',
+    title: 'Segurança Certificada',
+    desc:  'Apenas lojas que passam por nossa auditoria rigorosa podem anunciar. Dados, fotos e preços são validados por nós.',
+    tag:   'Lojas verificadas',
   },
 ];
 
@@ -64,25 +68,75 @@ function matchesPrice(price: number, range: PriceRange): boolean {
   return price > 400_000;
 }
 
+function useTypingAnimation(texts: string[], typingSpeed = 100, deletingSpeed = 50, delayBetween = 2000) {
+  const [displayText, setDisplayText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [textIndex, setTextIndex] = useState(0);
+
+  useEffect(() => {
+    const currentText = texts[textIndex];
+    let timer: NodeJS.Timeout;
+
+    if (isDeleting) {
+      timer = setTimeout(() => {
+        setDisplayText(currentText.substring(0, displayText.length - 1));
+      }, deletingSpeed);
+    } else {
+      timer = setTimeout(() => {
+        setDisplayText(currentText.substring(0, displayText.length + 1));
+      }, typingSpeed);
+    }
+
+    if (!isDeleting && displayText === currentText) {
+      timer = setTimeout(() => setIsDeleting(true), delayBetween);
+    } else if (isDeleting && displayText === '') {
+      setIsDeleting(false);
+      setTextIndex((prev) => (prev + 1) % texts.length);
+    }
+
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, textIndex, texts, typingSpeed, deletingSpeed, delayBetween]);
+
+  return displayText;
+}
+
 export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands, partners }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isSheetOpen,     setIsSheetOpen]     = useState(false);
   const [activeBrand,     setActiveBrand]     = useState('Todos');
+  const [activeStore,     setActiveStore]     = useState('Todas');
   const [priceRange,      setPriceRange]      = useState<PriceRange>('all');
   const [searchQuery,     setSearchQuery]     = useState('');
   const [visibleCount,    setVisibleCount]    = useState(6);
 
-  const allBrands = ['Todos', ...brands];
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  const typingText = useTypingAnimation([
+    'ganha movimento.',
+    'acelera escolhas.',
+    'trabalha por você.'
+  ]);
+
+  const allBrands  = ['Todos', ...brands];
+  const allStores  = ['Todas', ...Array.from(new Set(vehicles.map(v => v.storeName).filter(Boolean) as string[]))];
 
   const filtered = vehicles.filter(v => {
     const matchBrand  = activeBrand === 'Todos' || v.brand?.toLowerCase() === activeBrand.toLowerCase();
     const matchSearch = !searchQuery || `${v.brand} ${v.model} ${v.version}`.toLowerCase().includes(searchQuery.toLowerCase());
     const matchPrice  = matchesPrice(v.price, priceRange);
-    return matchBrand && matchSearch && matchPrice;
+    const matchStore  = activeStore === 'Todas' || v.storeName === activeStore;
+    return matchBrand && matchSearch && matchPrice && matchStore;
   });
 
   const featuredVehicles = vehicles.slice(0, 3);
-  const hasActiveFilter  = activeBrand !== 'Todos' || priceRange !== 'all' || searchQuery !== '';
+  const hasActiveFilter  = activeBrand !== 'Todos' || priceRange !== 'all' || searchQuery !== '' || activeStore !== 'Todas';
 
   function openSheet(vehicle: Vehicle) {
     setSelectedVehicle(vehicle);
@@ -91,6 +145,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
 
   function resetFilters() {
     setActiveBrand('Todos');
+    setActiveStore('Todas');
     setPriceRange('all');
     setSearchQuery('');
     setVisibleCount(6);
@@ -105,134 +160,330 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
     <div className="platform-container">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="bg-hero-gradient noise" style={{ minHeight: '92svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '120px 24px 100px', textAlign: 'center', position: 'relative' }}>
-        <div className="hero-glow" />
+      <section ref={heroRef} className="noise" style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '120px 24px', position: 'relative', overflow: 'hidden' }}>
+        <div className="mesh-bg" />
+        <div className="tech-grid" />
+        <div className="glow-spot" />
 
-        <div className="chip-premium anim-fade-up" style={{ marginBottom: '32px', position: 'relative', zIndex: 1 }}>
-          <ShieldCheck size={18} />
-          {totalVehicles > 0 ? `${totalVehicles} veículos curados com segurança` : 'Curadoria Premium'}
+        {/* Orbital Ecosystem Background */}
+        <div className="hidden lg:block" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
+          {[
+            { size: 900, duration: 80, nodes: [ 
+              { label: 'AutoCerto', icon: <Database size={14}/>, angle: 45,  delay: 0 }, 
+              { label: 'Eurobike',  icon: <Car size={14}/>,      angle: 135, delay: 1.2 },
+              { label: 'Revenda Mais', icon: <Cloud size={14}/>, angle: 225, delay: 2.4 },
+              { label: 'Stuttgart', icon: <Zap size={14}/>,      angle: 315, delay: 3.6 }
+            ] },
+            { size: 1250, duration: 110, nodes: [ 
+              { label: 'Cockpit',       icon: <Cpu size={14}/>,    angle: 0,   delay: 0.5 }, 
+              { label: 'Avantgarde',    icon: <Globe size={14}/>,  angle: 72,  delay: 1.3 },
+              { label: 'Socarros',      icon: <Car size={14}/>,    angle: 144, delay: 2.1 },
+              { label: 'Select Motors', icon: <Shield size={14}/>, angle: 216, delay: 3.0 },
+              { label: 'Personal Car',  icon: <Heart size={14}/>,  angle: 288, delay: 3.8 }
+            ] },
+            { size: 1600, duration: 140, nodes: [ 
+              { label: 'Motor21',    icon: <Globe size={14}/>,  angle: 30,  delay: 0.8 }, 
+              { label: 'By Motors',  icon: <Car size={14}/>,    angle: 90,  delay: 1.6 },
+              { label: 'Webmotors', icon: <Search size={14}/>, angle: 150, delay: 2.4 },
+              { label: 'Icarros',   icon: <Car size={14}/>,    angle: 210, delay: 3.2 },
+              { label: 'Kavak',     icon: <Zap size={14}/>,    angle: 270, delay: 4.0 },
+              { label: 'Karvi',     icon: <Shield size={14}/>, angle: 330, delay: 4.8 }
+            ] }
+          ].map((ring, ringIdx) => (
+            <div key={`ring-${ringIdx}`} style={{ position: 'absolute', top: '50%', left: '50%', width: ring.size, height: ring.size, transform: 'translate(-50%, -50%)', border: '1px solid rgba(18, 67, 178, 0.04)', borderRadius: '50%' }}>
+              {ring.nodes.map((node, nodeIdx) => (
+                <motion.div
+                  key={`node-${nodeIdx}`}
+                  initial={{ rotate: node.angle }}
+                  animate={{ rotate: node.angle + 360 }}
+                  transition={{ duration: ring.duration, repeat: Infinity, ease: 'linear' }}
+                  style={{ position: 'absolute', top: '50%', left: '50%', width: ring.size, height: ring.size, marginLeft: -ring.size/2, marginTop: -ring.size/2, willChange: 'transform' }}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)' }}>
+                    <motion.div
+                      initial={{ rotate: -node.angle }}
+                      animate={{ rotate: -(node.angle + 360) }}
+                      transition={{ duration: ring.duration, repeat: Infinity, ease: 'linear' }}
+                      style={{ willChange: 'transform' }}
+                    >
+                      {/* Pulse via CSS — zero JS overhead */}
+                      <div
+                        className="orbital-node"
+                        style={{
+                          '--pulse-dur': `${3.5 + node.delay}s`,
+                          animationDelay: `${node.delay}s`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '7px',
+                          padding: '5px 13px',
+                          background: 'rgba(255,255,255,0.65)',
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(18, 67, 178, 0.08)',
+                          borderRadius: '100px',
+                          color: 'var(--mz-slate-dim)',
+                          fontWeight: 600,
+                          fontSize: '11px',
+                          whiteSpace: 'nowrap',
+                        } as React.CSSProperties}
+                      >
+                        <span style={{ color: 'var(--mz-royal)', opacity: 0.7, display: 'flex' }}>{node.icon}</span>
+                        {node.label}
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ))}
         </div>
-
-        <h1 className="anim-fade-up" style={{ fontSize: 'clamp(56px, 14vw, 120px)', lineHeight: 0.85, marginBottom: '32px', maxWidth: '1200px', position: 'relative', zIndex: 1, letterSpacing: '-0.06em' }}>
-          Onde a tecnologia<br /> encontra sua <span className="text-gradient-blue">paixão.</span>
-        </h1>
-
-        <p className="anim-fade-up" style={{ fontSize: 'clamp(18px, 4vw, 22px)', color: 'var(--text-dim)', maxWidth: '700px', marginBottom: '56px', fontWeight: 500, lineHeight: 1.5, position: 'relative', zIndex: 1 }}>
-          A nova forma de comprar seu próximo veículo — transparência total, curadoria de elite e tecnologia de ponta.
-        </p>
-
-        <div className="anim-fade-up" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-          <a href="#estoque" className="btn-primary" style={{ padding: '22px 48px', fontSize: '18px', borderRadius: '18px' }}>
-            Explorar Estoque <ArrowRight size={22} />
-          </a>
-          <a href="#tecnologia" className="btn-ghost" style={{ padding: '22px 48px', fontSize: '18px', borderRadius: '18px' }}>
-            Nossa Tecnologia
-          </a>
-        </div>
-
-        <div className="anim-fade-up" style={{ marginTop: '80px', display: 'flex', gap: '48px', position: 'relative', zIndex: 1, opacity: 0.6 }}>
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--mz-ink)' }}>{totalPartners}+</div>
-            <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--mz-slate-dim)' }}>Lojas Parceiras</div>
+        
+        <motion.div 
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="max-w-5xl mx-auto w-full relative z-10 text-center"
+        >
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <LiveTimeBadge />
+            </motion.div>
           </div>
-          <div style={{ textAlign: 'left', paddingLeft: '48px', borderLeft: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--mz-ink)' }}>{totalVehicles > 0 ? `${totalVehicles}` : '–'}</div>
-            <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--mz-slate-dim)' }}>Veículos disponíveis</div>
-          </div>
-        </div>
 
-        <div style={{ position: 'absolute', bottom: '40px', color: 'var(--mz-slate-dim)' }} className="anim-fade-up">
-          <Mouse size={28} className="float" />
-        </div>
-      </section>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            style={{ fontSize: 'clamp(48px, 6vw, 84px)', lineHeight: 1.0, marginBottom: '32px', letterSpacing: '-0.05em', fontWeight: 900, color: 'var(--mz-ink)' }}
+          >
+            Onde o estoque<br />
+            <span style={{ display: 'inline-block', whiteSpace: 'nowrap', minHeight: '1.2em' }}>
+              {typingText}<span className="cursor-blink" />
+            </span>
+          </motion.h1>
 
-      {/* ── INVENTORY ──────────────────────────────────────────── */}
-      <section id="estoque" className="section-pad" style={{ background: 'var(--mz-snow)', paddingTop: '100px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            style={{ fontSize: 'clamp(16px, 1.5vw, 18px)', color: 'var(--text-dim)', maxWidth: '520px', margin: '0 auto 48px', fontWeight: 500, lineHeight: 1.6 }}
+          >
+            Estoque real, lojas certificadas e conexão direta com o consultor — sem anúncios fantasmas.
+          </motion.p>
 
-          {/* Highlights */}
-          {featuredVehicles.length > 0 && (
-            <div style={{ marginBottom: '100px', background: 'var(--mz-frost)', padding: '60px 40px', borderRadius: '48px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: '300px', height: '300px', background: 'radial-gradient(circle at top right, rgba(18, 67, 178, 0.05), transparent 70%)', pointerEvents: 'none' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', gap: '24px', flexWrap: 'wrap' }}>
-                <div>
-                  <div className="section-label" style={{ marginBottom: '12px' }}><ShieldCheck size={18} /> Seleção Especial</div>
-                  <h2 style={{ fontSize: 'clamp(32px, 5vw, 48px)', letterSpacing: '-0.05em' }}>Destaques Motorz</h2>
-                </div>
-                <p style={{ maxWidth: '400px', color: 'var(--text-dim)', fontSize: '16px', lineHeight: 1.6 }}>
-                  Veículos com o selo de inspeção 360º e condições exclusivas de financiamento.
-                </p>
-              </div>
-              <div className="highlights-scroll" style={{ padding: '10px 0 30px', margin: '0 -40px', paddingLeft: '40px' }}>
-                {featuredVehicles.map((v, i) => (
-                  <div key={v.id} className="highlights-item" style={{ minWidth: '380px' }}>
-                    <VehicleCard vehicle={v} onInterest={openSheet} index={i} featured />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}
+          >
+            <a href="#estoque" className="btn-primary" style={{ padding: '20px 48px', fontSize: '18px', borderRadius: '20px' }}>
+              Explorar Estoque <ArrowRight size={22} />
+            </a>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '10px 24px', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.3)' }}>
+              <div style={{ display: 'flex' }}>
+                {[1,2,3].map(i => (
+                  <div key={i} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid white', background: 'var(--mz-frost)', marginLeft: '-10px', overflow: 'hidden' }}>
+                    <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="User" />
                   </div>
                 ))}
               </div>
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ fontSize: '14px', fontWeight: 800, color: 'var(--mz-ink)', margin: 0 }}>+500 negociações</p>
+                <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--mz-slate-dim)', margin: 0 }}>realizadas este mês</p>
+              </div>
             </div>
-          )}
+          </motion.div>
 
-          {/* Catalog Header */}
-          <div style={{ marginBottom: '60px', textAlign: 'center' }}>
-            <div className="section-label" style={{ justifyContent: 'center' }}><Search size={18} /> Catálogo Completo</div>
-            <h2 style={{ fontSize: 'clamp(32px, 5vw, 56px)', marginBottom: '24px' }}>Encontre seu próximo carro</h2>
+          {/* Scroll Indicator */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2, duration: 1 }}
+            style={{ marginTop: '80px', display: 'flex', justifyContent: 'center', opacity: 0.25 }}
+          >
+            <div style={{ width: '24px', height: '40px', borderRadius: '12px', border: '1.5px solid var(--mz-slate-dim)', display: 'flex', justifyContent: 'center', paddingTop: '6px' }}>
+              <motion.div 
+                animate={{ y: [0, 10, 0], opacity: [1, 0, 1] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ width: '4px', height: '6px', background: 'var(--mz-slate-dim)', borderRadius: '2px' }} 
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+
+      {/* ── INVENTORY ──────────────────────────────────────────── */}
+      <section id="estoque" style={{ background: 'var(--mz-snow)', paddingTop: '120px', paddingBottom: '0' }}>
+
+        {/* ── Section Header ── */}
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px', marginBottom: '64px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '32px', flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(18,67,178,0.06)', border: '1px solid rgba(18,67,178,0.12)', borderRadius: '100px', padding: '6px 14px', marginBottom: '20px' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1243B2', boxShadow: '0 0 6px rgba(18,67,178,0.5)' }} />
+                <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1243B2' }}>Catálogo Completo</span>
+              </div>
+              <h2 style={{ fontSize: 'clamp(36px, 5vw, 64px)', letterSpacing: '-0.05em', fontWeight: 900, lineHeight: 1, margin: 0, color: 'var(--mz-ink)' }}>
+                Encontre seu<br />próximo carro
+              </h2>
+            </div>
+            <p style={{ maxWidth: '380px', color: 'var(--text-dim)', fontSize: '17px', lineHeight: 1.6, fontWeight: 500, marginBottom: '8px' }}>
+              {totalVehicles} veículos disponíveis de {totalPartners} lojas parceiras verificadas, com estoque em tempo real.
+            </p>
           </div>
+        </div>
 
+        {/* ── Featured Carousel (bleeds into next section) ── */}
+        {featuredVehicles.length > 0 && (
+          <div style={{ position: 'relative', zIndex: 10 }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FFB800', boxShadow: '0 0 8px rgba(255,184,0,0.5)' }} />
+                <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>Seleção Especial</span>
+              </div>
+            </div>
+            {/* Full-width bleed scroll — overflow visible so cards float over section seam */}
+            <div style={{ paddingLeft: '48px', display: 'flex', gap: '24px', overflowX: 'auto', overflowY: 'visible', paddingBottom: '64px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+              {featuredVehicles.map((v, i) => (
+                <div key={v.id} style={{ minWidth: 'clamp(300px, 30vw, 420px)', flex: '0 0 clamp(300px, 30vw, 420px)', filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.10))' }}>
+                  <VehicleCard vehicle={v} onInterest={openSheet} index={i} featured />
+                </div>
+              ))}
+              <div style={{ minWidth: '48px', flexShrink: 0 }} />
+            </div>
+          </div>
+        )}
+
+        {/* ── Filter Bar ── */}
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px' }}>
           {/* Search */}
-          <div className="search-bar" style={{ maxWidth: '800px', margin: '0 auto 40px', padding: '16px 32px' }}>
-            <Search size={24} color="var(--mz-royal)" />
+          <div style={{ position: 'relative', marginBottom: '24px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--mz-slate-dim)', pointerEvents: 'none' }} />
             <input
               type="text"
-              placeholder="Busque por marca, modelo, versão ou ano..."
+              placeholder="Busque por marca, modelo ou versão..."
               value={searchQuery}
               onChange={e => { setSearchQuery(e.target.value); setVisibleCount(6); }}
-              style={{ fontSize: '18px' }}
+              style={{
+                width: '100%',
+                padding: '14px 44px',
+                fontSize: '15px',
+                fontFamily: 'inherit',
+                fontWeight: 500,
+                background: 'var(--mz-frost)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                outline: 'none',
+                color: 'var(--mz-ink)',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={e => e.target.style.borderColor = '#1243B2'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
             {searchQuery && (
-              <button onClick={() => { setSearchQuery(''); setVisibleCount(6); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mz-slate-dim)', fontSize: '18px', lineHeight: 1, padding: '0 4px' }}>×</button>
+              <button onClick={() => { setSearchQuery(''); setVisibleCount(6); }} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'var(--mz-ash)', border: 'none', width: '24px', height: '24px', borderRadius: '50%', cursor: 'pointer', color: 'var(--mz-slate)', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
             )}
           </div>
 
-          {/* Brand Filter */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '16px' }}>
-            {allBrands.map(brand => (
-              <button
-                key={brand}
-                onClick={() => { setActiveBrand(brand); setVisibleCount(6); }}
-                className={`filter-pill ${activeBrand === brand ? 'active' : ''}`}
-                style={{ padding: '10px 22px', fontSize: '14px' }}
-              >
-                {brand}
-              </button>
-            ))}
-          </div>
-
-          {/* Price Filter */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '48px' }}>
-            {PRICE_OPTIONS.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => { setPriceRange(opt.value); setVisibleCount(6); }}
-                className={`filter-pill filter-pill-price ${priceRange === opt.value ? 'active' : ''}`}
-                style={{ padding: '8px 20px', fontSize: '13px' }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Active filter summary + reset */}
-          {hasActiveFilter && (
-            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-              <span style={{ fontSize: '14px', color: 'var(--text-dim)' }}>
-                {filtered.length} veículo{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
-              </span>
-              <button onClick={resetFilters} style={{ marginLeft: '16px', background: 'none', border: '1px solid var(--border)', borderRadius: '100px', padding: '4px 14px', fontSize: '13px', color: 'var(--mz-royal)', cursor: 'pointer', fontWeight: 600 }}>
-                Limpar filtros
-              </button>
+          {/* 3-column filter row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
+            {/* Brand */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Marca</span>
+              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' } as React.CSSProperties}>
+                {allBrands.map(brand => (
+                  <button
+                    key={brand}
+                    onClick={() => { setActiveBrand(brand); setVisibleCount(6); }}
+                    style={{
+                      flexShrink: 0,
+                      padding: '8px 16px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      fontFamily: 'inherit',
+                      borderRadius: '10px',
+                      border: '1px solid',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                      background: activeBrand === brand ? '#1243B2' : 'var(--mz-frost)',
+                      borderColor: activeBrand === brand ? '#1243B2' : 'var(--border)',
+                      color: activeBrand === brand ? 'white' : 'var(--mz-slate)',
+                    }}
+                  >{brand}</button>
+                ))}
+              </div>
             </div>
-          )}
+
+            {/* Price */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Valor</span>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {PRICE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setPriceRange(opt.value); setVisibleCount(6); }}
+                    style={{
+                      flexShrink: 0,
+                      padding: '8px 16px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      fontFamily: 'inherit',
+                      borderRadius: '10px',
+                      border: '1px solid',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                      background: priceRange === opt.value ? '#1243B2' : 'var(--mz-frost)',
+                      borderColor: priceRange === opt.value ? '#1243B2' : 'var(--border)',
+                      color: priceRange === opt.value ? 'white' : 'var(--mz-slate)',
+                    }}
+                  >{opt.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Store */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Loja</span>
+              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' } as React.CSSProperties}>
+                {allStores.map(store => (
+                  <button
+                    key={store}
+                    onClick={() => { setActiveStore(store); setVisibleCount(6); }}
+                    style={{
+                      flexShrink: 0,
+                      padding: '8px 16px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      fontFamily: 'inherit',
+                      borderRadius: '10px',
+                      border: '1px solid',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                      background: activeStore === store ? '#1243B2' : 'var(--mz-frost)',
+                      borderColor: activeStore === store ? '#1243B2' : 'var(--border)',
+                      color: activeStore === store ? 'white' : 'var(--mz-slate)',
+                    }}
+                  >{store}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Results bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-dim)' }}>
+              {filtered.length} veículo{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
+            </span>
+            {hasActiveFilter && (
+              <button onClick={resetFilters} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, color: 'var(--mz-royal)', cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '0.02em' }}>
+                × Limpar filtros
+              </button>
+            )}
+          </div>
 
           {/* Grid */}
           {filtered.length > 0 ? (
@@ -256,35 +507,32 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
         </div>
       </section>
 
-      {/* ── PARTNERS (ULTRA PREMIUM) ────────────────────────── */}
+      {/* ── PARTNERS (CLEAN PREMIUM CAROUSEL) ───────────────── */}
       <section className="partners-section">
-        {/* Background Signature */}
-        <div className="partners-signature">Motorz</div>
+        {/* Background Detail - Soft Complementary Color */}
+        <div className="partners-bg-glow" />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '80px', flexWrap: 'wrap', gap: '48px' }}>
-            <div style={{ maxWidth: '600px' }}>
-              <div className="section-label"><LayoutGrid size={18} /> Partner Ecosystem</div>
-              <h2 style={{ fontSize: 'clamp(40px, 6vw, 72px)', lineHeight: 0.9, letterSpacing: '-0.06em', textTransform: 'uppercase' }}>
-                Parceiros<br />
-                <span className="text-mz-slate-dim">& Tecnologias</span>
-              </h2>
-            </div>
-            <div style={{ maxWidth: '400px', marginTop: '32px' }}>
-              <p style={{ color: 'var(--text-dim)', fontSize: '20px', lineHeight: 1.6, fontWeight: 500 }}>
-                Colaboramos com os melhores parceiros e integradores para entregar performance real em qualquer escala.
-              </p>
-            </div>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
+          <div className="section-label" style={{ justifyContent: 'center' }}>
+            <LayoutGrid size={18} /> Rede de Confiança
           </div>
-          
-          <div className="carousel-container">
-            <div className="carousel-track">
-              {[...displayPartners, ...displayPartners, ...displayPartners].map((p, i) => (
-                <div key={i} className="partner-item">
-                  <div className="partner-logo-circle" style={{ background: 'white', border: '1px solid var(--border)', width: '56px', height: '56px' }}>
+          <h2 style={{ fontSize: 'clamp(36px, 5vw, 64px)', letterSpacing: '-0.04em', marginBottom: '24px' }}>
+            Ecossistema de Qualidade
+          </h2>
+          <p style={{ color: 'var(--text-dim)', fontSize: '18px', lineHeight: 1.6, fontWeight: 500 }}>
+            Conectamos você apenas a parceiros que compartilham nosso compromisso com a transparência e a excelência automotiva.
+          </p>
+        </div>
+        
+        <div className="carousel-wrapper" style={{ marginTop: '80px' }}>
+          <div className="carousel-container-clean">
+            <div className="carousel-track-clean">
+              {Array.from({ length: 20 }).flatMap(() => displayPartners).map((p, i) => (
+                <div key={i} className="partner-item-clean">
+                  <div className="partner-logo-circle-clean">
                     {p.initial}
                   </div>
-                  <span className="partner-name" style={{ fontSize: '24px', letterSpacing: '-0.02em', fontWeight: 800 }}>
+                  <span className="partner-name-clean">
                     {p.name}
                   </span>
                 </div>
@@ -294,47 +542,52 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
         </div>
       </section>
 
-      {/* ── TECHNOLOGY ───────────────────────────────────────── */}
-      <section id="tecnologia" style={{ padding: '160px 24px', background: '#0F172A', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'radial-gradient(var(--motorz-gold) 0.5px, transparent 0.5px)', backgroundSize: '32px 32px' }} />
-        
-        <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div style={{ textAlign: 'center', marginBottom: '100px' }}>
-            <div className="section-label" style={{ justifyContent: 'center', color: 'var(--motorz-gold)', border: 'none' }}>
-              <Zap size={16} fill="var(--motorz-gold)" /> Por que motorz
+      {/* ── COMPARISON ────────────────────────────────────────── */}
+      <section style={{ padding: '140px 24px', background: 'linear-gradient(to bottom, #1243B2 0%, #0A1931 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.15), transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              fontSize: '12px', 
+              fontWeight: 800, 
+              color: '#FFB800', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.3em', 
+              marginBottom: '40px' 
+            }}>
+              <span style={{ width: '40px', height: '2px', background: '#FFB800' }} />
+              A diferença é visível
+              <span style={{ width: '40px', height: '2px', background: '#FFB800' }} />
             </div>
-            <h2 style={{ fontSize: 'clamp(44px, 7vw, 84px)', marginBottom: '32px', color: 'white', letterSpacing: '-0.06em', lineHeight: 0.9 }}>
-              Inteligência que <br />
-              <span style={{ background: 'linear-gradient(135deg, #FFC700, #FFE066)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                acelera seu negócio.
-              </span>
+            <h2 style={{ fontSize: 'clamp(48px, 8vw, 96px)', color: 'white', letterSpacing: '-0.04em', lineHeight: 1.05, fontWeight: 900 }}>
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>Antes. Depois.</span><br />
+              Com a Motorz.
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '22px', maxWidth: '640px', margin: '0 auto', lineHeight: 1.6, fontWeight: 400 }}>
-              Não somos apenas um portal. Somos a infraestrutura tecnológica que conecta o estoque real ao cliente qualificado.
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '20px', maxWidth: '600px', margin: '32px auto 0', lineHeight: 1.6, fontWeight: 500 }}>
+              Arraste para ver como a Motorz transforma horas de busca frustrante em segundos de clareza e confiança.
             </p>
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
-            {TECH_FEATURES.map((item, i) => (
-              <div key={i} className="tech-card">
-                <div style={{ color: item.color, marginBottom: '28px' }}>{item.icon}</div>
-                <h4 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px', letterSpacing: '-0.02em' }}>
-                  {item.title}
-                </h4>
-                <p style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, fontSize: '15px', marginBottom: '24px', flexGrow: 1 }}>
-                  {item.desc}
-                </p>
-                <div style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 12px', borderRadius: '100px', background: `${item.color}18`, border: `1px solid ${item.color}35`, color: item.color, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  {item.tag}
-                </div>
-              </div>
-            ))}
+          <div style={{ borderRadius: '32px', padding: '1px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(255,255,255,0.05))', boxShadow: '0 40px 80px rgba(0,0,0,0.5)' }}>
+            <div style={{ borderRadius: '31px', overflow: 'hidden', background: '#0A1931' }}>
+              <ComparisonSlider
+                beforeImage="/assets/images/searching-chaos.png"
+                afterImage="/assets/images/motorz-success.png"
+              />
+            </div>
           </div>
-
-          <div style={{ textAlign: 'center', marginTop: '100px' }}>
-            <a href="#estoque" className="btn-premium-gold" style={{ padding: '20px 56px', fontSize: '17px', borderRadius: '16px' }}>
-              Explorar Estoque <ArrowRight size={20} />
-            </a>
+          
+          <div style={{ marginTop: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.4 }}>
+            <div style={{ width: '24px', height: '40px', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.8)', display: 'flex', justifyContent: 'center', paddingTop: '6px' }}>
+              <motion.div
+                animate={{ y: [0, 12, 0], opacity: [1, 0, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ width: '4px', height: '6px', background: 'white', borderRadius: '2px' }}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -344,6 +597,8 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
       />
+      
+      <ZmChat />
     </div>
   );
 }
