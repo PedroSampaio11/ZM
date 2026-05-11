@@ -4,10 +4,12 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, ArrowRight, CheckCircle,
+  CheckCircle,
   Building2, User, Mail, Phone, MapPin, Database, Car, MessageSquare,
   ShieldCheck, Zap, Globe, Cpu, Instagram, Linkedin, MessageCircle
 } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 
 const BR_STATES = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA',
@@ -92,7 +94,7 @@ export function EmbaixadorClient() {
           <div style={{ display: 'inline-flex', padding: '24px', borderRadius: '30px', background: 'rgba(18, 67, 178, 0.05)', marginBottom: '32px' }}>
             <CheckCircle size={56} color="var(--mz-royal)" />
           </div>
-          <h1 style={{ fontSize: '36px', fontWeight: 900, color: 'var(--mz-ink)', marginBottom: '16px', letterSpacing: '-0.04em' }}>Solicitação Enviada!</h1>
+          <h1 style={{ fontSize: '36px', fontWeight: 900, color: 'var(--mz-ink)', marginBottom: '16px', letterSpacing: '-0.02em' }}>Solicitação Enviada!</h1>
           <p style={{ color: 'var(--text-dim)', fontSize: '17px', lineHeight: 1.6, marginBottom: '40px' }}>Nossa equipe de parcerias entrará em contato em breve com você.</p>
           <Link href="/" className="btn-primary" style={{ padding: '16px 40px', borderRadius: '16px', textDecoration: 'none' }}>Voltar ao Início</Link>
         </motion.div>
@@ -127,10 +129,10 @@ export function EmbaixadorClient() {
             transition={{ duration: 0.8 }}
           >
             <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', marginBottom: '48px' }}>
-              <ArrowLeft size={16} /> VOLTAR PARA MOTORZ
+              <HugeiconsIcon icon={ArrowLeft02Icon} size={16} /> VOLTAR PARA MOTORZ
             </Link>
 
-            <h1 style={{ fontSize: 'clamp(48px, 6vw, 84px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: '-0.06em', color: 'white', marginBottom: '40px' }}>
+            <h1 style={{ fontSize: 'clamp(48px, 6vw, 84px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: '-0.03em', color: 'white', marginBottom: '40px' }}>
               Seja a voz<br />
               da <span style={{ color: 'var(--motorz-gold)' }}>Motorz</span>.
             </h1>
@@ -177,7 +179,7 @@ export function EmbaixadorClient() {
             }}
           >
             <div style={{ marginBottom: '48px' }}>
-              <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#0A1931', letterSpacing: '-0.04em', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#0A1931', letterSpacing: '-0.02em', marginBottom: '24px' }}>
                 Seja um Embaixador
               </h2>
               
@@ -269,7 +271,7 @@ export function EmbaixadorClient() {
                 onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <span>Enviar Solicitação</span>
-                <ArrowRight size={22} style={{ opacity: 0.8 }} />
+                <HugeiconsIcon icon={ArrowRight02Icon} size={22} style={{ opacity: 0.8 }} />
               </button>
             </form>
           </motion.div>

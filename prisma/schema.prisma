@@ -188,6 +188,7 @@ model Vehicle {
 
   status     VehicleStatus @default(AVAILABLE)
   externalId String?       @unique // deduplicação do sync
+  viewCount  Int           @default(0)
   lastSyncAt DateTime      @default(now())
 
   leads Lead[]

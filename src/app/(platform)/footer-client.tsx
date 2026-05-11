@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUp } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowUp02Icon } from '@hugeicons/core-free-icons';
 
 export function Footer() {
   return (
@@ -69,7 +70,7 @@ export function Footer() {
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFB800'; e.currentTarget.style.color = '#FFB800'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
           >
-            <ArrowUp size={28} strokeWidth={1.5} />
+            <HugeiconsIcon icon={ArrowUp02Icon} size={28} strokeWidth={1.5} />
           </button>
         </div>
 

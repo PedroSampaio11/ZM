@@ -2,7 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, X, ChevronRight, MessageSquare } from 'lucide-react';
+import { Sparkles, X, MessageSquare } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
 
 type Message = {
   id: string;
@@ -13,23 +15,23 @@ type Message = {
 const FAQ_LIST = [
   {
     id: 'q1',
-    q: 'Por que a Motorz é diferente?',
-    a: 'Não somos apenas um portal de anúncios. Somos a infraestrutura tecnológica que conecta o estoque real das lojas ao cliente qualificado, eliminando os anúncios fantasmas e fraudes.'
+    q: 'O que é uma Auto-Tech?',
+    a: 'Diferente de um portal de anúncios, uma Auto-Tech como a Motorz usa tecnologia para gerenciar o próprio estoque certificado. Nós controlamos toda a jornada para garantir que você compre direto da fonte, com segurança e preço justo.'
   },
   {
     id: 'q2',
-    q: 'Como sei se o carro está mesmo disponível?',
-    a: 'Nossa tecnologia sincroniza em tempo real com o sistema dos lojistas parceiros. Se você está vendo o carro aqui, ele está disponível no pátio da loja.'
+    q: 'O estoque é realmente próprio?',
+    a: 'Sim! Todos os veículos que você vê no nosso catálogo passaram pela nossa curadoria e vistoria. Nós somos os responsáveis pela procedência e qualidade de cada unidade disponível.'
   },
   {
     id: 'q3',
-    q: 'Os lojistas são de confiança?',
-    a: 'Absolutamente. Apenas lojas que passam por nossa rigorosa auditoria podem anunciar. Dados, histórico e preços são validados pela nossa equipe para garantir sua segurança.'
+    q: 'Como funcionam os Hubs físicos?',
+    a: 'Nossos Hubs são pontos estratégicos no ABC onde nossos veículos ficam expostos. Você escolhe o carro online e agenda uma visita ao Hub mais próximo para conhecer o veículo e fazer o test-drive.'
   },
   {
     id: 'q4',
-    q: 'Quanto custa usar a plataforma?',
-    a: 'Para você, comprador, é 100% gratuito! Nossa plataforma apenas facilita e acelera sua conexão direta com a loja, sem adicionar nenhuma taxa ao valor do veículo.'
+    q: 'Como agendar um test-drive?',
+    a: 'É super simples! Você pode agendar diretamente pelo site no botão de interesse do veículo ou falar com um de nossos consultores agora mesmo. O carro estará te esperando no Hub escolhido.'
   }
 ];
 
@@ -80,35 +82,99 @@ export function ZmChat() {
 
   return (
     <>
-      {/* Floating Button — hides near footer */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: nearFooter ? 0 : 1, opacity: nearFooter ? 0 : 1 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        onClick={() => !nearFooter && setIsOpen(true)}
-        style={{
-          position: 'fixed',
-          bottom: '32px',
-          right: '32px',
-          width: '64px',
-          height: '64px',
-          borderRadius: '32px',
-          background: 'var(--mz-ink)',
-          color: 'white',
-          border: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: nearFooter ? 'default' : 'pointer',
-          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.25)',
-          zIndex: 9999,
-          pointerEvents: nearFooter ? 'none' : 'auto',
-        }}
-        whileHover={nearFooter ? {} : { scale: 1.05 }}
-        whileTap={nearFooter ? {} : { scale: 0.95 }}
-      >
-        <Sparkles size={26} color="var(--motorz-gold)" />
-      </motion.button>
+      {/* Floating Button — Pro Max UI */}
+      {!isOpen && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: nearFooter ? 0 : 1, opacity: nearFooter ? 1 : 1 }}
+          transition={{ 
+            type: 'spring',
+            stiffness: 260,
+            damping: 20,
+            delay: 0.1 
+          }}
+          style={{
+            position: 'fixed',
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 88px)',
+            right: '24px',
+            zIndex: 9998,
+          }}
+        >
+          {/* Pulsing Glow Ring */}
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.1, 0.3],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              position: 'absolute',
+              top: '-8px',
+              left: '-8px',
+              right: '-8px',
+              bottom: '-8px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, var(--motorz-gold) 0%, transparent 70%)',
+              zIndex: -1,
+            }}
+          />
+
+          <motion.button
+            onClick={() => !nearFooter && setIsOpen(true)}
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              position: 'fixed',
+              bottom: 'calc(env(safe-area-inset-bottom, 0px) + 88px)',
+              right: '24px',
+              height: '52px',
+              padding: '0 24px',
+              borderRadius: '26px',
+              background: 'var(--mz-ink)',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              cursor: nearFooter ? 'default' : 'pointer',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+              zIndex: 9998,
+              pointerEvents: nearFooter ? 'none' : 'auto',
+            }}
+          >
+
+
+            <Sparkles size={20} color="white" />
+            
+            <span style={{ 
+              fontSize: '14px', 
+              fontWeight: 700, 
+              fontFamily: 'Cal Sans, sans-serif',
+              letterSpacing: '0.02em',
+              whiteSpace: 'nowrap'
+            }}>
+              MOTORZ IA
+            </span>
+
+            {/* Subtle light streak */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: '20%',
+              width: '1px',
+              height: '100%',
+              background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent)',
+              transform: 'skewX(-20deg)'
+            }} />
+          </motion.button>
+        </motion.div>
+      )}
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -129,21 +195,50 @@ export function ZmChat() {
               background: 'var(--mz-snow)',
               borderRadius: '24px',
               boxShadow: '0 24px 48px rgba(0, 0, 0, 0.12)',
-              border: '1px solid var(--border)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
               overflow: 'hidden',
               zIndex: 9999,
               display: 'flex',
               flexDirection: 'column',
             }}
           >
-            {/* Header */}
-            <div style={{ padding: '20px', background: 'var(--mz-ink)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Sparkles size={18} color="var(--motorz-gold)" />
+            {/* Header — Pro Max Gradient */}
+            <div style={{ 
+              padding: '24px 20px', 
+              background: 'linear-gradient(135deg, var(--mz-ink) 0%, #1e293b 100%)', 
+              color: 'white', 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+              position: 'relative'
+            }}>
+              {/* Header Glow */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)'
+              }} />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '14px', 
+                  background: 'rgba(255, 255, 255, 0.08)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)'
+                }}>
+                  <Sparkles size={20} color="var(--motorz-gold)" />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, fontFamily: 'Cal Sans, sans-serif' }}>ZM</h3>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, fontFamily: 'Cal Sans, sans-serif', letterSpacing: '-0.01em' }}>ZM</h3>
                   <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22C55E' }} />
                     Online agora
@@ -226,7 +321,7 @@ export function ZmChat() {
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = 'var(--mz-royal)'; }}
                     >
                       {faq.q}
-                      <ChevronRight size={16} />
+                      <HugeiconsIcon icon={ArrowRight02Icon} size={16} />
                     </button>
                   ))}
                 </div>

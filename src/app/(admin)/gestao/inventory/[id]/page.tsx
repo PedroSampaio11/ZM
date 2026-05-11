@@ -1,4 +1,6 @@
-import { ArrowLeft, Car, Building2, Tag, Fuel, Gauge, Palette, Calendar, Hash } from 'lucide-react'
+import { Car, Building2, Tag, Fuel, Gauge, Palette, Calendar, Hash } from 'lucide-react'
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -83,7 +85,7 @@ export default async function VehicleDetailPage({ params }: Params) {
             href="/gestao/inventory"
             className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-3"
           >
-            <ArrowLeft size={13} /> Estoque
+            <HugeiconsIcon icon={ArrowLeft02Icon} size={13} /> Estoque
           </Link>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-black text-white tracking-tight">

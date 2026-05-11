@@ -1,12 +1,88 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Vehicle } from '@/modules/inventory/types';
 import { VehicleCard } from '@/components/vehicle-card';
 import { LeadBottomSheet } from '@/components/lead-bottom-sheet';
-import { Search, ArrowLeft, ArrowRight, MapPin } from 'lucide-react';
+import { Search, MapPin, Sparkles, X } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
+
+type SemanticFilters = {
+  brand?:        string;
+  model?:        string;
+  priceMax?:     number;
+  priceMin?:     number;
+  fuel?:         'FLEX' | 'GASOLINE' | 'ETHANOL' | 'DIESEL' | 'ELECTRIC' | 'HYBRID';
+  transmission?: 'AUTOMATIC' | 'MANUAL' | 'CVT';
+  keywords?:     string[];
+};
+
+const BRAND_ALIASES: Record<string, string> = {
+  'volkswagen': 'Volkswagen', 'vw': 'Volkswagen',
+  'honda': 'Honda', 'toyota': 'Toyota', 'hyundai': 'Hyundai',
+  'chevrolet': 'Chevrolet', 'chevy': 'Chevrolet',
+  'ford': 'Ford', 'fiat': 'Fiat', 'nissan': 'Nissan',
+  'renault': 'Renault', 'mitsubishi': 'Mitsubishi',
+  'jeep': 'Jeep', 'bmw': 'BMW', 'mercedes': 'Mercedes-Benz',
+  'audi': 'Audi', 'kia': 'Kia', 'peugeot': 'Peugeot',
+  'citroen': 'Citroën', 'subaru': 'Subaru', 'chery': 'Chery',
+  'caoa': 'CAOA', 'byd': 'BYD', 'volvo': 'Volvo',
+};
+
+function parseQuery(raw: string, knownBrands: string[]): SemanticFilters | null {
+  if (raw.trim().length < 8 || !raw.includes(' ')) return null;
+
+  // Normaliza: minúsculas, sem acento
+  const q = raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+  const f: SemanticFilters = {};
+
+  // Preço máximo: "até 80k", "até 80 mil", "menos de 80000", "até R$ 80.000"
+  const priceMax = q.match(/(?:ate|menos de|abaixo de|por ate|max)\s*r?\$?\s*([\d.,]+)\s*(mil|k)?/);
+  if (priceMax) {
+    let n = parseFloat(priceMax[1].replace('.', '').replace(',', '.'));
+    const unit = priceMax[2];
+    if (unit === 'mil' || unit === 'k') n *= 1000;
+    else if (n < 2000) n *= 1000;
+    f.priceMax = n;
+  }
+
+  // Câmbio
+  if (/automat|cambio auto/.test(q))  f.transmission = 'AUTOMATIC';
+  else if (/\bmanual\b/.test(q))       f.transmission = 'MANUAL';
+  else if (/\bcvt\b/.test(q))          f.transmission = 'CVT';
+
+  // Combustível
+  if (/eletric|electric|ev\b/.test(q)) f.fuel = 'ELECTRIC';
+  else if (/hibrid/.test(q))            f.fuel = 'HYBRID';
+  else if (/diesel/.test(q))            f.fuel = 'DIESEL';
+  else if (/etanol/.test(q))            f.fuel = 'ETHANOL';
+  else if (/gasolina/.test(q))          f.fuel = 'GASOLINE';
+  else if (/\bflex\b/.test(q))          f.fuel = 'FLEX';
+
+  // Marca via aliases fixos
+  for (const [alias, brand] of Object.entries(BRAND_ALIASES)) {
+    if (new RegExp(`\\b${alias}\\b`).test(q)) { f.brand = brand; break; }
+  }
+  // Marca via lista real do estoque
+  if (!f.brand) {
+    for (const brand of knownBrands) {
+      if (q.includes(brand.toLowerCase())) { f.brand = brand; break; }
+    }
+  }
+
+  // Palavras-chave de carroceria
+  const bodyMap: Record<string, string> = { suv: 'SUV', sedan: 'sedan', hatch: 'hatch', pickup: 'pickup', caminhonete: 'pickup', minivan: 'minivan' };
+  for (const [pt, en] of Object.entries(bodyMap)) {
+    if (q.includes(pt)) { f.keywords = [en]; break; }
+  }
+
+  const hasContent = Object.values(f).some(v => v !== undefined);
+  return hasContent ? f : null;
+}
 
 export type EstoqueVehicle = Vehicle & { partnerCity?: string | null };
 
@@ -70,18 +146,36 @@ function EstoqueInner({ vehicles, totalVehicles, brands, cities }: Props) {
   const [isSheetOpen,  setIsSheetOpen]  = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
 
+  const semanticFilters = useMemo(() => parseQuery(searchQuery, brands), [searchQuery, brands]);
+
   const allBrands = ['Todos', ...brands];
   const allCities = ['Todas', ...cities];
 
   const filtered = vehicles.filter(v => {
     const matchBrand  = activeBrand === 'Todos' || v.brand?.toLowerCase() === activeBrand.toLowerCase();
-    const matchSearch = !searchQuery || `${v.brand} ${v.model} ${v.version}`.toLowerCase().includes(searchQuery.toLowerCase());
     const matchPrice  = matchesPrice(v.price, priceRange);
     const matchCity   = activeCity === 'Todas' || v.partnerCity === activeCity;
+
+    if (semanticFilters) {
+      const sf = semanticFilters;
+      if (sf.brand       && !v.brand?.toLowerCase().includes(sf.brand.toLowerCase())) return false;
+      if (sf.model       && !v.model?.toLowerCase().includes(sf.model.toLowerCase())) return false;
+      if (sf.priceMax    && v.price > sf.priceMax)   return false;
+      if (sf.priceMin    && v.price < sf.priceMin)   return false;
+      if (sf.fuel        && v.fuel !== sf.fuel)        return false;
+      if (sf.transmission && v.transmission !== sf.transmission) return false;
+      if (sf.keywords?.length) {
+        const haystack = `${v.brand} ${v.model} ${v.version} ${v.description}`.toLowerCase();
+        if (!sf.keywords.every(k => haystack.includes(k.toLowerCase()))) return false;
+      }
+      return matchCity && matchBrand && matchPrice;
+    }
+
+    const matchSearch = !searchQuery || `${v.brand} ${v.model} ${v.version}`.toLowerCase().includes(searchQuery.toLowerCase());
     return matchBrand && matchSearch && matchPrice && matchCity;
   });
 
-  const hasFilter = activeBrand !== 'Todos' || priceRange !== 'all' || activeCity !== 'Todas' || !!searchQuery;
+  const hasFilter = activeBrand !== 'Todos' || priceRange !== 'all' || activeCity !== 'Todas' || !!searchQuery || !!semanticFilters;
 
   function syncUrl(marca: string, preco: string, cidade: string, q: string) {
     router.replace('/estoque' + buildParams(marca, preco, cidade, q), { scroll: false });
@@ -119,7 +213,7 @@ function EstoqueInner({ vehicles, totalVehicles, brands, cities }: Props) {
           {/* Breadcrumb */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '40px' }}>
             <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--mz-slate)', textDecoration: 'none' }}>
-              <ArrowLeft size={14} /> Início
+              <HugeiconsIcon icon={ArrowLeft02Icon} size={14} /> Início
             </Link>
             <span style={{ color: 'var(--border)', fontSize: '13px' }}>·</span>
             <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--mz-royal)' }}>Catálogo Completo</span>
@@ -128,7 +222,7 @@ function EstoqueInner({ vehicles, totalVehicles, brands, cities }: Props) {
           {/* Title row */}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '32px', flexWrap: 'wrap', marginBottom: '40px' }}>
             <div>
-              <h1 style={{ fontSize: 'clamp(40px, 6vw, 72px)', fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1, color: 'var(--mz-ink)', margin: 0 }}>
+              <h1 style={{ fontSize: 'clamp(40px, 6vw, 72px)', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.1, color: 'var(--mz-ink)', margin: 0 }}>
                 Todo o estoque
               </h1>
               <p style={{ color: 'var(--text-dim)', fontSize: '17px', fontWeight: 500, marginTop: '12px', marginBottom: 0 }}>
@@ -157,6 +251,25 @@ function EstoqueInner({ vehicles, totalVehicles, brands, cities }: Props) {
               <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', background: 'var(--mz-ash)', border: 'none', width: '24px', height: '24px', borderRadius: '50%', cursor: 'pointer', color: 'var(--mz-slate)', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
             )}
           </div>
+
+          {/* Busca Inteligente indicator */}
+          {semanticFilters && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', background: 'rgba(18,67,178,0.06)', border: '1px solid rgba(18,67,178,0.15)', borderRadius: '12px', marginTop: '8px' }}>
+              <Sparkles size={15} style={{ color: '#1243B2', flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#1243B2', flex: 1 }}>
+                Busca inteligente ativa
+                {semanticFilters.brand && ` · ${semanticFilters.brand}`}
+                {semanticFilters.model && ` ${semanticFilters.model}`}
+                {semanticFilters.priceMax && ` · até ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(semanticFilters.priceMax)}`}
+                {semanticFilters.transmission === 'AUTOMATIC' && ' · Automático'}
+                {semanticFilters.transmission === 'MANUAL' && ' · Manual'}
+                {semanticFilters.fuel && ` · ${semanticFilters.fuel}`}
+              </span>
+              <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1243B2', display: 'flex', padding: 0 }}>
+                <X size={14} />
+              </button>
+            </div>
+          )}
 
           {/* Filters — stacked vertically, each row scrolls horizontal */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
@@ -234,7 +347,7 @@ function EstoqueInner({ vehicles, totalVehicles, brands, cities }: Props) {
 
           {visibleCount < filtered.length && (
             <button className="btn-load-more" onClick={() => setVisibleCount(prev => prev + 12)} style={{ marginTop: '80px' }}>
-              Carregar mais veículos <ArrowRight size={20} />
+              Carregar mais veículos <HugeiconsIcon icon={ArrowRight02Icon} size={20} />
             </button>
           )}
         </div>

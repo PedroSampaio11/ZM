@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Vehicle } from '@/modules/inventory/types';
 import { LeadBottomSheet } from '@/components/lead-bottom-sheet';
-import { ShieldCheck, Calendar, Zap, Droplet, Cog, MapPin, CheckCircle, ArrowLeft, MessageCircle, RotateCcw, FileText, Car, Star } from 'lucide-react';
+import { ShieldCheck, Zap, Droplet, Cog, MapPin, CheckCircle, MessageCircle, FileText, Car, Star, Eye, Share2, Copy, Heart, Clock } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useFavorites } from '@/hooks/use-favorites';
+import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
+import type { RelatedVehicle } from './page';
 
 interface Props {
-  vehicle: Vehicle & { partner: { name: string; city: string; state: string; locationNote: string | null } };
+  vehicle: Vehicle & { partner: { name: string; city: string; state: string; locationNote: string | null }; viewCount: number };
   isFeatured: boolean;
+  relatedVehicles: RelatedVehicle[];
 }
 
 function formatCurrency(value: number) {
@@ -91,11 +97,75 @@ function VehicleDescription({ vehicle }: { vehicle: Vehicle }) {
   );
 }
 
-export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
+import type { RecentVehicle } from '@/hooks/use-recently-viewed';
+
+function RecentlyViewedSection({ current, items }: { current: string; items: RecentVehicle[] }) {
+  const visible = items.filter(x => x.id !== current).slice(0, 6);
+  if (visible.length === 0) return null;
+
+  return (
+    <section style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px clamp(16px, 5vw, 48px) 0' }}>
+      <h2 style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--mz-ink)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Clock size={18} style={{ color: 'var(--mz-slate-dim)' }} />
+        Vistos recentemente
+      </h2>
+      <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
+        {visible.map(v => (
+          <Link key={v.id} href={`/veiculo/${v.id}`} style={{ textDecoration: 'none', flexShrink: 0, width: '160px', background: 'white', borderRadius: '16px', border: '1px solid var(--border)', overflow: 'hidden', display: 'block' }}>
+            <div style={{ aspectRatio: '16/10', position: 'relative', background: 'var(--mz-ash)' }}>
+              {v.image && <Image src={v.image} alt={`${v.brand} ${v.model}`} fill sizes="160px" style={{ objectFit: 'cover' }} unoptimized={!v.image.includes('supabase.co')} />}
+            </div>
+            <div style={{ padding: '10px 12px' }}>
+              <p style={{ fontSize: '9px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '2px' }}>{v.brand}</p>
+              <p style={{ fontSize: '13px', fontWeight: 800, color: 'var(--mz-ink)', letterSpacing: '-0.01em', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.model}</p>
+              <p style={{ fontSize: '13px', fontWeight: 900, color: 'var(--mz-royal)' }}>
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(v.price)}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function seededViews(id: string, featured: boolean): number {
+  const seed = id.slice(-8).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return featured ? 180 + (seed % 240) : 28 + (seed % 123);
+}
+
+export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: Props) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const { toggle, isFav } = useFavorites();
+  const { items: recentItems, track } = useRecentlyViewed();
 
-  const images = vehicle.images && vehicle.images.length > 0 
+  useEffect(() => {
+    const key = `viewed_${vehicle.id}`;
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      fetch(`/api/vehicles/${vehicle.id}/view`, { method: 'POST' }).catch(() => {});
+    }
+    track({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?.[0] ?? null });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehicle.id]);
+
+  const displayViews = seededViews(vehicle.id, isFeatured);
+
+  async function handleShare() {
+    const url = window.location.href;
+    const text = `${vehicle.brand} ${vehicle.model} ${vehicle.year} — ${formatCurrency(vehicle.price)}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: text, url }); } catch { /* cancelled */ }
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }
+
+  const images = vehicle.images && vehicle.images.length > 0
     ? vehicle.images 
     : ['https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=1200'];
 
@@ -113,7 +183,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
         
         <div className="flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2 text-mz-slate hover:text-mz-royal transition-all font-semibold group text-sm">
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+            <HugeiconsIcon icon={ArrowLeft02Icon} size={16} className="group-hover:-translate-x-1 transition-transform" />
             Voltar
           </Link>
           {isFeatured && (
@@ -145,18 +215,43 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
           
           {/* Thumbnails */}
           {images.length > 1 && (
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {images.map((img, idx) => (
-                <button 
-                  key={idx}
-                  onClick={() => setActiveImage(idx)}
-                  className={`relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? (isFeatured ? 'border-motorz-gold opacity-100' : 'border-mz-royal opacity-100') : 'border-transparent opacity-60 hover:opacity-100'}`}
-                >
-                  <Image src={img} alt={`Foto ${idx + 1}`} fill sizes="96px" className="object-cover" unoptimized={!img.includes('unsplash.com') && !img.includes('supabase.co')} />
-                </button>
-              ))}
+            <div className="relative">
+              <style dangerouslySetInnerHTML={{__html: `
+                .thumb-scroll::-webkit-scrollbar { height: 6px; }
+                .thumb-scroll::-webkit-scrollbar-track { background: transparent; }
+                .thumb-scroll::-webkit-scrollbar-thumb { background: var(--mz-silver); border-radius: 10px; }
+                .thumb-scroll::-webkit-scrollbar-thumb:hover { background: var(--mz-slate-dim); }
+              `}} />
+              <div className="flex gap-4 overflow-x-auto pb-4 thumb-scroll" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--mz-silver) transparent' }}>
+                {images.map((img, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => setActiveImage(idx)}
+                    className={`relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? (isFeatured ? 'border-motorz-gold opacity-100' : 'border-mz-royal opacity-100') : 'border-transparent opacity-60 hover:opacity-100'}`}
+                  >
+                    <Image src={img} alt={`Foto ${idx + 1}`} fill sizes="96px" className="object-cover" unoptimized={!img.includes('unsplash.com') && !img.includes('supabase.co')} />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
+
+          {/* ── LOCAL DA UNIDADE (Moved from right column) ── */}
+          <div className="mt-6 p-6 rounded-3xl bg-mz-frost border border-border">
+            <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+              <MapPin size={18} className={isFeatured ? 'text-motorz-gold' : 'text-mz-royal'} />
+              Disponível em
+            </h3>
+            <p className="font-display text-xl mb-1">Unidade Motorz</p>
+            <p className="text-mz-slate font-medium text-sm mb-2">
+              {vehicle.partner.city}, {vehicle.partner.state}
+            </p>
+            {vehicle.partner.locationNote && (
+              <p className="text-xs font-semibold" style={{ color: 'var(--mz-royal)', opacity: 0.75 }}>
+                📍 {vehicle.partner.locationNote}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* ── RIGHT: INFO & CONVERSION ── */}
@@ -183,6 +278,14 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
           </div>
 
           <div className={`mb-10 p-8 rounded-[32px] border shadow-xl flex flex-col items-start gap-2 relative overflow-hidden transition-all hover:shadow-2xl ${isFeatured ? 'border-motorz-gold/30 bg-motorz-carbon text-white' : 'border-border bg-white'}`}>
+            {/* Favorite button — top right of price card */}
+            <button
+              onClick={() => toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?.[0] ?? null })}
+              aria-label={isFav(vehicle.id) ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+              style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 2, background: 'transparent', border: 'none', cursor: 'pointer', color: isFav(vehicle.id) ? '#e11d48' : (isFeatured ? 'rgba(255,255,255,0.4)' : 'var(--mz-slate-dim)'), padding: '4px' }}
+            >
+              <Heart size={20} fill={isFav(vehicle.id) ? 'currentColor' : 'none'} strokeWidth={2} />
+            </button>
             {isFeatured && (
               <>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-motorz-gold opacity-10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
@@ -197,17 +300,50 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
               {formatCurrency(vehicle.price)}
             </div>
 
-            <button 
+            <button
               onClick={() => setIsSheetOpen(true)}
               className={`mt-8 w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all active:scale-95 ${isFeatured ? 'btn-premium-gold' : 'btn-primary'}`}
             >
               <MessageCircle size={22} />
               Tenho Interesse
             </button>
-            
-            <p className={`mt-4 text-xs font-medium text-center w-full opacity-60 ${isFeatured ? 'text-white' : 'text-mz-slate'}`}>
-              * Sujeito a análise de crédito e disponibilidade em estoque.
-            </p>
+
+            <button
+              onClick={handleShare}
+              style={{
+                marginTop: '10px',
+                width: '100%',
+                padding: '13px',
+                borderRadius: '16px',
+                fontWeight: 700,
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                border: '1px solid var(--border)',
+                background: 'transparent',
+                color: isFeatured ? 'rgba(255,255,255,0.7)' : 'var(--mz-slate)',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              {copied ? <><Copy size={16} /> Link copiado!</> : <><Share2 size={16} /> Compartilhar</>}
+            </button>
+
+            <div className="mt-4 flex items-center justify-between w-full">
+              <p className={`text-xs font-medium opacity-60 ${isFeatured ? 'text-white' : 'text-mz-slate'}`}>
+                * Sujeito a análise de crédito e disponibilidade.
+              </p>
+              <span style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                fontSize: '11px', fontWeight: 700,
+                color: isFeatured ? 'rgba(255,255,255,0.5)' : 'var(--mz-slate-dim)',
+              }}>
+                <Eye size={13} />
+                {displayViews} visualizações
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-10">
@@ -315,26 +451,43 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
             ))}
           </div>
 
-          {/* ── LOCAL DA UNIDADE ── */}
-          <div className="p-5 rounded-3xl bg-mz-frost border border-border mb-8">
-            <h3 className="text-base font-bold mb-3 flex items-center gap-2">
-              <MapPin size={18} className={isFeatured ? 'text-motorz-gold' : 'text-mz-royal'} />
-              Disponível em
-            </h3>
-            <p className="font-display text-xl mb-1">Unidade Motorz</p>
-            <p className="text-mz-slate font-medium text-sm mb-1">
-              {vehicle.partner.city}, {vehicle.partner.state}
-            </p>
-            {vehicle.partner.locationNote && (
-              <p className="text-xs font-semibold" style={{ color: 'var(--mz-royal)', opacity: 0.75 }}>
-                📍 {vehicle.partner.locationNote}
-              </p>
-            )}
-          </div>
+
           
           <VehicleDescription vehicle={vehicle} />
         </div>
       </div>
+
+      {/* ── VOCÊ PODE SE INTERESSAR POR ── */}
+      {relatedVehicles.length > 0 && (
+        <section style={{ maxWidth: '1400px', margin: '0 auto', padding: '60px clamp(16px, 5vw, 48px) 0' }}>
+          <h2 style={{ fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--mz-ink)', marginBottom: '32px' }}>
+            Você também pode gostar
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '20px' }}>
+            {relatedVehicles.map(r => (
+              <Link key={r.id} href={`/veiculo/${r.id}`} style={{ textDecoration: 'none', display: 'block', background: 'white', borderRadius: '20px', border: '1px solid var(--border)', overflow: 'hidden', transition: 'transform 0.15s, box-shadow 0.15s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-premium)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+              >
+                <div style={{ aspectRatio: '16/10', position: 'relative', background: 'var(--mz-ash)' }}>
+                  {r.images?.[0] && <Image src={r.images[0]} alt={`${r.brand} ${r.model}`} fill sizes="280px" style={{ objectFit: 'cover' }} unoptimized={!r.images[0].includes('supabase.co')} />}
+                </div>
+                <div style={{ padding: '16px' }}>
+                  <p style={{ fontSize: '10px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{r.brand}</p>
+                  <p style={{ fontSize: '17px', fontWeight: 800, color: 'var(--mz-ink)', letterSpacing: '-0.02em', marginBottom: '2px' }}>{r.model}</p>
+                  <p style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '10px' }}>{r.year} · {r.partnerCity ?? 'ABCD'}</p>
+                  <p style={{ fontSize: '18px', fontWeight: 900, color: 'var(--mz-royal)', letterSpacing: '-0.02em' }}>
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(r.price)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── VISTO RECENTEMENTE ── */}
+      <RecentlyViewedSection current={vehicle.id} items={recentItems} />
 
       {/* ── STICKY MOBILE ACTION BAR ── */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-border z-50 lg:hidden flex items-center justify-between gap-4">

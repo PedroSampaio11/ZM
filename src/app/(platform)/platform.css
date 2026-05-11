@@ -95,7 +95,8 @@ body {
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-cal), sans-serif;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em; /* Relaxed from -0.04em for better readability */
+  line-height: 1.1;
 }
 
 /* ── NAVIGATION ────────────────────────────────────── */
@@ -327,19 +328,7 @@ h1, h2, h3, h4, .font-display {
   position: relative;
 }
 
-.card-featured::after {
-  content: 'DESTAQUE';
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: var(--motorz-gold);
-  color: var(--mz-ink);
-  font-size: 10px;
-  font-weight: 900;
-  padding: 4px 10px;
-  border-radius: 6px;
-  letter-spacing: 0.1em;
-}
+
 
 .zoom-container {
   overflow: hidden;

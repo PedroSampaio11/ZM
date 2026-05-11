@@ -5,6 +5,11 @@ import { prisma, withRetry } from '@/lib/prisma';
 import { Vehicle } from '@/modules/inventory/types';
 import { VehicleDetailsClient } from './vehicle-details-client';
 
+export type RelatedVehicle = {
+  id: string; brand: string; model: string; year: number;
+  price: number; images: string[]; partnerCity: string | null;
+};
+
 export const revalidate = 60;
 export const dynamicParams = true;
 
@@ -77,6 +82,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const getRelated = (id: string, brand: string, price: number) =>
+  withRetry(() =>
+    prisma.vehicle.findMany({
+      where: {
+        status: 'AVAILABLE',
+        id:     { not: id },
+        OR: [
+          { brand },
+          { price: { gte: price * 0.75, lte: price * 1.25 } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      take:    4,
+      select:  { id: true, brand: true, model: true, year: true, price: true, images: true, partner: { select: { city: true } } },
+    })
+  );
+
 export default async function VehiclePage({ params }: Props) {
   const { id } = await params;
   const [rawVehicle, newestIds] = await Promise.all([
@@ -86,7 +108,14 @@ export default async function VehiclePage({ params }: Props) {
 
   if (!rawVehicle) notFound();
 
-  const vehicle: Vehicle & { partner: { name: string; city: string; state: string; locationNote: string | null } } = {
+  const rawRelated = await getRelated(id, rawVehicle.brand, Number(rawVehicle.price));
+  const relatedVehicles: RelatedVehicle[] = rawRelated.map(r => ({
+    id: r.id, brand: r.brand, model: r.model, year: r.year,
+    price: Number(r.price), images: r.images,
+    partnerCity: r.partner?.city ?? null,
+  }));
+
+  const vehicle: Vehicle & { partner: { name: string; city: string; state: string; locationNote: string | null }; viewCount: number } = {
     ...rawVehicle,
     price: Number(rawVehicle.price),
   };
@@ -137,7 +166,7 @@ export default async function VehiclePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(vehicleSchema) }}
       />
-      <VehicleDetailsClient vehicle={vehicle} isFeatured={newestIds.has(vehicle.id)} />
+      <VehicleDetailsClient vehicle={vehicle} isFeatured={newestIds.has(vehicle.id)} relatedVehicles={relatedVehicles} />
     </>
   );
 }

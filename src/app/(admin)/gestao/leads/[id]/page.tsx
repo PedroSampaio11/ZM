@@ -1,4 +1,6 @@
-import { ArrowLeft, User, Phone, Mail, Car, MessageSquare, TrendingUp, Clock, Send } from 'lucide-react'
+import { User, Phone, Mail, Car, MessageSquare, TrendingUp, Clock, Send } from 'lucide-react'
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -73,7 +75,7 @@ export default async function LeadDetailPage({ params }: Params) {
       {/* Breadcrumb */}
       <div className="flex items-center gap-3">
         <Link href="/gestao/leads" className="flex items-center gap-1.5 text-zinc-500 hover:text-white text-sm transition-colors">
-          <ArrowLeft size={14} /> Leads
+          <HugeiconsIcon icon={ArrowLeft02Icon} size={14} /> Leads
         </Link>
         <span className="text-zinc-700">/</span>
         <span className="text-zinc-300 text-sm font-bold">{lead.name}</span>

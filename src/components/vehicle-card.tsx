@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Vehicle } from '@/modules/inventory/types';
-import { LayoutGrid, MessageCircle } from 'lucide-react';
+import { LayoutGrid, MessageCircle, Heart } from 'lucide-react';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -29,8 +30,15 @@ const TRANSMISSION_LABELS: Record<string, string> = {
   SEMI_AUTOMATIC: 'Semi-auto',
 };
 
+function daysAgo(date: Date | string): number {
+  return Math.floor((Date.now() - new Date(date).getTime()) / 86_400_000);
+}
+
 export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }: VehicleCardProps) {
   const [imgError, setImgError] = useState(false);
+  const { toggle, isFav } = useFavorites();
+  const age    = daysAgo(vehicle.createdAt);
+  const isNew  = age <= 7;
 
   const imageUrl = !imgError && vehicle.images?.[0]
     ? vehicle.images[0]
@@ -47,8 +55,6 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
         aria-label={`Ver detalhes: ${vehicle.brand} ${vehicle.model}`}
         style={{ position: 'absolute', inset: 0, zIndex: 1 }}
       />
-      {featured && <div className="special-badge" style={{ zIndex: 10 }}>DESTAQUE</div>}
-      
       {/* Image Container */}
       <div className="zoom-container" style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <Image
@@ -72,55 +78,59 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
         {/* Motorz brand overlay — covers dealer logos/plate covers at bottom */}
         <div className="vehicle-img-overlay" />
 
-        {/* Top-left: Year Tag */}
-        <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 5 }}>
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.8)',
-            backdropFilter: 'blur(12px)',
-            padding: '6px 12px',
-            borderRadius: '10px',
-            fontSize: '12px',
-            fontWeight: 800,
-            color: 'white',
-            letterSpacing: '0.02em',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            border: '1px solid rgba(255,255,255,0.1)'
-          }}>
-            {vehicle.year}
+        {/* Top-left: Destaque (if featured) */}
+        {featured && (
+          <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 5 }}>
+            <div style={{
+              background: 'var(--mz-royal)',
+              padding: '6px 12px',
+              borderRadius: '10px',
+              fontSize: '10px',
+              fontWeight: 900,
+              color: 'white',
+              letterSpacing: '0.1em',
+              boxShadow: '0 4px 12px rgba(18, 67, 178, 0.3)',
+              textTransform: 'uppercase',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              Destaque
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Bottom-left: Tech badge */}
-        <div style={{
-          position: 'absolute',
-          bottom: '12px',
-          left: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          background: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(8px)',
-          padding: '6px 10px',
-          borderRadius: '8px',
-          fontSize: '10px',
-          fontWeight: 800,
-          color: 'var(--mz-ink)',
-          boxShadow: 'var(--shadow-sm)',
-          textTransform: 'uppercase',
-          border: '1px solid rgba(255, 255, 255, 0.5)',
-        }}>
-          <LayoutGrid size={12} />
-          Tecnologia Ativa
-        </div>
+        {/* Top-right: Favorite button */}
+        <button
+          onClick={e => { e.preventDefault(); e.stopPropagation(); toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?.[0] ?? null }); }}
+          aria-label={isFav(vehicle.id) ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+          style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'transform 0.15s', color: isFav(vehicle.id) ? '#e11d48' : 'var(--mz-slate)' }}
+        >
+          <Heart size={16} fill={isFav(vehicle.id) ? 'currentColor' : 'none'} strokeWidth={2} />
+        </button>
       </div>
 
       {/* Content */}
       <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         <div style={{ marginBottom: '16px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px' }}>
-            {vehicle.brand}
-          </p>
-          <h3 style={{ fontSize: '22px', lineHeight: 1.1, letterSpacing: '-0.04em', marginBottom: '8px', minHeight: '2.2em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
+              {vehicle.brand} • {vehicle.year}
+            </p>
+            {isNew && (
+              <span style={{ 
+                fontSize: '9px', 
+                fontWeight: 900, 
+                background: 'rgba(22, 163, 74, 0.1)', 
+                color: '#16a34a', 
+                padding: '2px 6px', 
+                borderRadius: '4px',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase'
+              }}>
+                Novo
+              </span>
+            )}
+          </div>
+          <h3 style={{ fontSize: '22px', lineHeight: 1.2, letterSpacing: '-0.02em', marginBottom: '8px', minHeight: '2.2em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {vehicle.model}
           </h3>
           {vehicle.version ? (

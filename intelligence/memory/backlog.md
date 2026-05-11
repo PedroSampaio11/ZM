@@ -1,5 +1,5 @@
 # Backlog — motorz
-**Sessão**: 7 | **Data**: 2026-05-11 | **TypeScript**: 0 erros ✅
+**Sessão**: 8 | **Data**: 2026-05-11 | **TypeScript**: 0 erros ✅
 
 ---
 
@@ -48,6 +48,55 @@
 - `min-width: 0` nas scroll rows de filtros (causa raiz do overflow lateral)
 
 > ✅ **Sessão 7 commitada e em deploy** — commit `39f4fc2`, push para Vercel concluído em 2026-05-11.
+
+### ✅ Sessão 8 — UX/Engajamento + SEO Programático + Busca Inteligente
+
+**Share button + Seeded views (Sessão 8 início):**
+- `vehicle-details-client.tsx`: `seededViews(id, featured)` — hash do ID gera número estável (featured: 180–420, demais: 28–150)
+- Botão Compartilhar: `navigator.share` nativo no mobile, clipboard fallback no desktop com toast "Link copiado!" 2.5s
+
+**Badge NOVO + "Chegou há X dias" (`vehicle-card.tsx`):**
+- Badge verde `NOVO` (bottom-right da imagem) para veículos ≤7 dias
+- Texto "Chegou hoje / ontem / Há X dias" ao lado da marca para ≤30 dias (verde para novos, cinza para os demais)
+
+**Favoritos sem cadastro (`src/hooks/use-favorites.ts` + card + `/favoritos`):**
+- Hook `useFavorites`: toggle em `localStorage`, sem cadastro
+- Coração no canto superior direito de cada imagem do card
+- Botão de favorito na página de detalhe (topo do price card)
+- Página `/favoritos`: grid de salvos, botão remover individual, estado vazio com CTA
+
+**Visto recentemente (`src/hooks/use-recently-viewed.ts` + vehicle-details):**
+- Hook `useRecentlyViewed`: salva até 8 veículos em `localStorage`
+- Ao abrir `/veiculo/[id]`, rastreia automaticamente
+- Seção horizontal scrollável "Vistos recentemente" no rodapé do detalhe (some se vazio)
+
+**Você também pode gostar (`veiculo/[id]/page.tsx` + client):**
+- Query no servidor: mesma marca OU faixa de preço ±25%, máx 4 veículos
+- Grid de cards compactos abaixo do conteúdo principal
+- Tipo `RelatedVehicle` exportado de `page.tsx`, importado no client
+
+**Landing pages programáticas (`/comprar/[brand]/[model]/page.tsx`):**
+- Rota `src/app/(platform)/comprar/[brand]/[model]/page.tsx`
+- `generateStaticParams` → todas combinações marca+modelo em estoque
+- URL: `/comprar/honda/hrv`, `/comprar/toyota/corolla`, etc.
+- Metadata SEO + JSON-LD `ItemList` + hero com contagem e faixa de preço
+- `revalidate = 3600` (revalida por hora)
+
+**Busca inteligente local — zero custo (`estoque-client.tsx`):**
+- Parser TypeScript puro com `useMemo` — sem API, sem custo, instantâneo
+- Detecta: preço máximo, câmbio, combustível, marca (20+ aliases), carroceria (SUV, sedan, hatch...)
+- Ativa com query ≥ 8 chars e espaço; exibe pill azul "Busca inteligente ativa · Honda · Automático · até R$ 80.000"
+- API route `/api/search/semantic` removida (era paga, foi descartada)
+
+**Fix global `@hugeicons/react`:**
+- Todos os `ArrowLeft01Icon` / `ArrowRight01Icon` do pacote quebrado substituídos por `ArrowLeft` / `ArrowRight` do `lucide-react`
+- Arquivos corrigidos: `platform-client.tsx`, `estoque-client.tsx`, `vehicle-details-client.tsx`, `embaixador-client.tsx`, `zm-chat.tsx`, `not-found.tsx`, `favoritos/page.tsx`
+
+**Decisão de produto — descartadas com motivo:**
+- ~~Badge FIPE~~: descartado — preços das lojas podem estar acima da FIPE, badge negativo na conversão
+- ~~Simulador de parcelas~~: descartado — sem taxa/condições definidas pelos parceiros, gera expectativa errada; retomado quando Lico fechar banco parceiro (Fase 4)
+
+> ⚠️ **Sessão 8 não commitada ainda** — pendente commit + push Vercel.
 
 ### ✅ Sessão 6 — SEO/GEO + Performance + Segurança Admin
 
@@ -117,6 +166,38 @@
 ### ~~6. URL params para filtros do estoque~~ ✅ FEITO (Sessão 7)
 - `estoque-client.tsx` com `useSearchParams` + `router.replace({ scroll: false })`
 - Suporte a `?cidade=...&marca=...&preco=...` na URL
+
+---
+
+## 💡 Ideias — Valor, Tech & UX (brainstorm 2026-05-11)
+
+> Não priorizadas ainda. Discutir com Pedro/Vitor antes de implementar.
+
+### Conversão (impacto direto no lead)
+- ~~**Simulador de parcelas inline**~~ — ❌ descartado: sem taxa/condições definidas pelos parceiros. Retomar na Fase 4 (F&I) quando Lico fechar banco.
+- ~~**Badge FIPE**~~ — ❌ descartado: preços dos parceiros podem estar acima da FIPE, badge seria negativo.
+- **Social proof ao vivo (simulado)** — "X pessoas viram esse carro hoje", seeded por hora do dia. Cria urgência. *(não implementado)*
+- ~~**Badge NOVO / "chegou há X dias"**~~ — ✅ implementado (Sessão 8)
+
+### Engajamento & Retenção
+- ~~**Favoritos sem cadastro**~~ — ✅ implementado (Sessão 8): hook + card + página `/favoritos`
+- ~~**Visto recentemente**~~ — ✅ implementado (Sessão 8): hook + seção no detalhe
+- ~~**Você também pode gostar**~~ — ✅ implementado (Sessão 8): query server-side + grid no detalhe
+- **PWA (Progressive Web App)** — `next-pwa` + `manifest.json` + ícones → usuário instala o site como app na tela inicial sem precisar de loja. Vitrine `/(platform)/` vira instalável; admin excluído do escopo. Estimativa: 2–4h. *(não implementado)*
+- **Alerta por WhatsApp** — usuário salva perfil de busca, recebe mensagem quando novo veículo bate os critérios. Requer Evolution API (Fase 3).
+- **Comparador de veículos** — botão "Comparar" nos cards → floating bar → tabela lado a lado (máx 3 veículos).
+
+### SEO / Crescimento orgânico
+- ~~**Landing pages programáticas por modelo**~~ — ✅ implementado (Sessão 8): `/comprar/[brand]/[model]` com SEO + JSON-LD
+
+### Tecnologia / IA
+- **Auto-geração de descrição com IA** — botão "Gerar com IA" no cadastro manual → Claude gera descrição pipe-formatted a partir das specs.
+- ~~**Busca inteligente**~~ — ✅ implementado (Sessão 8): parser local gratuito com `useMemo`, sem API.
+- **Trade-in / Avaliação do usado** — "usar meu carro como entrada" → formulário modelo/ano/km → lead qualificado para Lico.
+
+### Negócio Interno
+- **Dashboard do parceiro** — login separado, parceiro vê views/leads/conversão dos próprios carros. Justifica mensalidade.
+- **Relatório semanal automático** — email toda segunda (Resend + Cron): leads da semana, top veículos, carros parados >30 dias.
 
 ---
 

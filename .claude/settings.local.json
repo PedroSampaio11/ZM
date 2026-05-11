@@ -20,7 +20,18 @@
       "PowerShell(Invoke-WebRequest -Uri \"https://cdn.jsdelivr.net/npm/cal-sans@1.0.1/fonts/webfonts/CalSans-SemiBold.woff2\" -OutFile \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\" -UseBasicParsing; \\(Get-Item \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\public\\\\fonts\\\\CalSans-SemiBold.woff2\"\\).Length)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\" -Force)",
       "Bash(Select-Object Name, PSIsContainer)",
-      "Bash(Remove-Item -Recurse -Force .next/types)"
+      "Bash(Remove-Item -Recurse -Force .next/types)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\\\\src\\\\app\\\\api\\\\search\")",
+      "Bash(node -e \"const h = require\\('@hugeicons/react'\\); const arrows = Object.keys\\(h\\).filter\\(k => k.toLowerCase\\(\\).includes\\('arrow'\\)\\).sort\\(\\); console.log\\(arrows.join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const h = require\\('@hugeicons/react'\\); console.log\\(Object.keys\\(h\\).filter\\(k => /[Aa]rrow/.test\\(k\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node --input-type=module -e \"import * as h from '@hugeicons/react'; const keys = Object.keys\\(h\\).filter\\(k => /[Aa]rrow/.test\\(k\\)\\); console.log\\(keys.join\\('\\\\n'\\)\\);\")",
+      "Bash(npm install *)",
+      "Bash(npm search *)",
+      "Bash(npm list *)",
+      "Bash(node *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('main',''\\), indent=2\\)\\); print\\(json.dumps\\(d.get\\('exports',''\\), indent=2\\)\\)\")",
+      "Bash(wait)",
+      "Read(//c/Users/pedro/AppData/Local/Temp/claude/C--Users-pedro-Downloads-ZM/5cea7e2d-481a-4254-a63b-7721b77971d5/tasks/**)"
     ]
   }
 }
