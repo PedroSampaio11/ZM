@@ -37,7 +37,7 @@
 - Leads salvos no banco antes de qualquer redirect; visíveis em `/gestao/leads`
 
 **Auto Sync (Vercel Cron):**
-- `vercel.json`: cron `*/30 * * * *` → `GET /api/cron/sync`
+- `vercel.json`: cron `0 0 * * *` (meia-noite diário) → `GET /api/cron/sync` — Hobby plan só aceita diário; Pro suportaria `*/30 * * * *`
 - `src/app/api/cron/sync/route.ts`: protegido por `Authorization: Bearer CRON_SECRET`, roda `syncStore()` para todas stores ativas, loga summary
 
 **Fix deploy Vercel:**
@@ -47,7 +47,7 @@
 - `overflow-x: hidden` em `html, body, .platform-container`
 - `min-width: 0` nas scroll rows de filtros (causa raiz do overflow lateral)
 
-> ⚠️ **NADA DESTA SESSÃO FOI COMMITADO** — Pedro pediu revisão antes. Commitar quando aprovado.
+> ✅ **Sessão 7 commitada e em deploy** — commit `39f4fc2`, push para Vercel concluído em 2026-05-11.
 
 ### ✅ Sessão 6 — SEO/GEO + Performance + Segurança Admin
 
@@ -80,9 +80,7 @@
 
 ## 🔴 Alta Prioridade (próxima sessão)
 
-### 1. Commitar sessão 7 ⚠️
-- Pedro pediu revisão antes de commitar. Quando aprovado: `git add` nos arquivos modificados e criar commit descritivo.
-- Arquivos pendentes: `platform-client.tsx`, `estoque-client.tsx`, `estoque/page.tsx`, `(platform)/page.tsx`, `vehicle-details-client.tsx`, `vehicle-card.tsx`, `lead-actions.ts`, `lead-bottom-sheet.tsx`, `types.ts`, `platform.css`, `vercel.json`, `src/app/api/cron/sync/route.ts`
+### ~~1. Commitar sessão 7~~ ✅ FEITO — commit `39f4fc2`, push Vercel 2026-05-11
 
 ### 2. Adicionar `CRON_SECRET` na Vercel
 - Env var necessária para o auto sync funcionar em produção
