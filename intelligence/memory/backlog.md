@@ -1,5 +1,5 @@
 # Backlog — motorz
-**Sessão**: 6 | **Data**: 2026-05-08 | **TypeScript**: 0 erros ✅
+**Sessão**: 7 | **Data**: 2026-05-11 | **TypeScript**: 0 erros ✅
 
 ---
 
@@ -17,6 +17,37 @@
 - Vitrine pública: layout, nav, hero, grid de veículos, bottom sheet de lead, footer
 - `updateLoja` DMS-aware: merge seletivo por adapter
 - Página de detalhe do veículo: `/veiculo/[id]` com galeria, specs, breadcrumbs
+
+### ✅ Sessão 7 — Ghost Inventory + Filtros + Trust Signals + Lead Flow + Auto Sync
+
+**Ghost Inventory Model (posicionamento como curadoria, sem expor parceiros):**
+- `vehicle-card.tsx`: sem nome de parceiro, overlay CSS azul Motorz no bottom das fotos (`vehicle-img-overlay`)
+- `vehicle-details-client.tsx`: exibe "Unidade Motorz + cidade/estado", sem `partner.name`
+- Trust Signals na página de detalhe: card escuro "Inspeção Motorz — 30 pontos" (checklist 2 colunas) + "Garantia Motorz 90 dias" + 4 mini badges (7 dias, Preço final, Sem restrição, Test drive)
+
+**Filtros por Região/Cidade:**
+- `Vehicle` type em `types.ts`: campo `partnerCity?: string | null` adicionado
+- `page.tsx` (home) e `estoque/page.tsx`: queries incluem `partner: { select: { city: true } }`, passam `cities[]` para client
+- `platform-client.tsx` (home): estado `activeCity`, filtro `matchCity`, row "Região" com pills scroll horizontal — layout convertido de grid 3-col para vertical empilhado (Região → Marca → Valor)
+- `estoque-client.tsx`: URL sync via `useSearchParams` + `router.replace({ scroll: false })`; filtros Região, Marca, Preço refletidos em `/estoque?cidade=...&marca=...&preco=...`
+
+**Lead Flow corrigido (nunca mais direto ao WhatsApp):**
+- `lead-actions.ts`: normaliza telefone (strip não-dígitos, prepend `55`), busca veículo para mensagem personalizada, retorna `whatsappUrl`
+- `lead-bottom-sheet.tsx`: step detail → form (captura nome+telefone) → sucesso → abre WhatsApp após 1200ms
+- Leads salvos no banco antes de qualquer redirect; visíveis em `/gestao/leads`
+
+**Auto Sync (Vercel Cron):**
+- `vercel.json`: cron `*/30 * * * *` → `GET /api/cron/sync`
+- `src/app/api/cron/sync/route.ts`: protegido por `Authorization: Bearer CRON_SECRET`, roda `syncStore()` para todas stores ativas, loga summary
+
+**Fix deploy Vercel:**
+- Next.js `15.1.6` → `16.2.6` (CVE-2025-66478 bloqueava Vercel)
+
+**Mobile responsiveness:**
+- `overflow-x: hidden` em `html, body, .platform-container`
+- `min-width: 0` nas scroll rows de filtros (causa raiz do overflow lateral)
+
+> ⚠️ **NADA DESTA SESSÃO FOI COMMITADO** — Pedro pediu revisão antes. Commitar quando aprovado.
 
 ### ✅ Sessão 6 — SEO/GEO + Performance + Segurança Admin
 
@@ -49,21 +80,28 @@
 
 ## 🔴 Alta Prioridade (próxima sessão)
 
-### 1. ~~Vincular Store ao Pedro~~ ✅ FEITO (Sessão 6)
-- SQL executado: `UPDATE "Store" SET "ownerId" = 'da3a4523-2d30-401f-b95c-2fa470c1c8d8' WHERE slug = 'motorz';`
-- Fallback inseguro removido de `getActiveStore()` — agora retorna `null` se não achar store do usuário
-- Isolamento multi-tenant agora é real
+### 1. Commitar sessão 7 ⚠️
+- Pedro pediu revisão antes de commitar. Quando aprovado: `git add` nos arquivos modificados e criar commit descritivo.
+- Arquivos pendentes: `platform-client.tsx`, `estoque-client.tsx`, `estoque/page.tsx`, `(platform)/page.tsx`, `vehicle-details-client.tsx`, `vehicle-card.tsx`, `lead-actions.ts`, `lead-bottom-sheet.tsx`, `types.ts`, `platform.css`, `vercel.json`, `src/app/api/cron/sync/route.ts`
 
-### 2. Testar adapters Cockpit / Revenda Mais / Motor21
-- Adapters implementados mas **nunca testados com API real**
-- Precisa: credenciais reais de um parceiro com cada DMS
-- Arquivos: `src/lib/inventory-sync/cockpit-adapter.ts`, `revenda-mais-adapter.ts`, `motor21-adapter.ts`
+### 2. Adicionar `CRON_SECRET` na Vercel
+- Env var necessária para o auto sync funcionar em produção
+- Valor: qualquer string aleatória segura (ex: `openssl rand -hex 32`)
+- Adicionar no painel Vercel: Settings → Environment Variables → `CRON_SECRET`
 
 ### 3. OG Image — criar imagem para compartilhamento social
 - Metadata referencia `/assets/brand/og-image.png` mas o arquivo **não existe ainda**
 - Dimensões: 1200×630px
 - Sem ela, links compartilhados no WhatsApp/Instagram mostram preview em branco
 - Criar em Canva ou Figma e salvar em `public/assets/brand/og-image.png`
+
+### 4. ~~Vincular Store ao Pedro~~ ✅ FEITO (Sessão 6)
+- SQL executado: `UPDATE "Store" SET "ownerId" = 'da3a4523-2d30-401f-b95c-2fa470c1c8d8' WHERE slug = 'motorz';`
+
+### 5. Testar adapters Cockpit / Revenda Mais / Motor21
+- Adapters implementados mas **nunca testados com API real**
+- Precisa: credenciais reais de um parceiro com cada DMS
+- Arquivos: `src/lib/inventory-sync/cockpit-adapter.ts`, `revenda-mais-adapter.ts`, `motor21-adapter.ts`
 
 ---
 
@@ -78,10 +116,9 @@
 
 ### 5. ~~Remover fallback perigoso do getActiveStore()~~ ✅ FEITO (Sessão 6)
 
-### 6. URL params para filtros do estoque
-- Filtros rodam 100% client-side sem refletir na URL
-- Impacto SEO: `/estoque?marca=Honda&preco=ate300k` não funciona
-- Benefício: usuário pode compartilhar/bookmarkar filtros
+### ~~6. URL params para filtros do estoque~~ ✅ FEITO (Sessão 7)
+- `estoque-client.tsx` com `useSearchParams` + `router.replace({ scroll: false })`
+- Suporte a `?cidade=...&marca=...&preco=...` na URL
 
 ---
 

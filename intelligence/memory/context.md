@@ -1,9 +1,9 @@
 # Contexto: motorz
 
 **Data de Início**: 2026-04-30
-**Última Atualização**: 2026-05-07 (Sessão 4)
-**Status**: 🟢 Em Desenvolvimento Ativo — Painel Admin completo, Financeiro implementado
-**Stack Principal**: Next.js 15 (App Router), TypeScript 5.7, Prisma, PostgreSQL (Supabase), Tailwind CSS, Zod.
+**Última Atualização**: 2026-05-11 (Sessão 7)
+**Status**: 🟢 Em Desenvolvimento Ativo — Ghost Inventory Model, filtros regionais, lead flow, auto sync (aguardando commit)
+**Stack Principal**: Next.js 16 (App Router), TypeScript 5.7, Prisma, PostgreSQL (Supabase), Tailwind CSS, Zod.
 
 ---
 
