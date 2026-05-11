@@ -167,7 +167,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
 
   const displayPartners = partners.length > 0 ? partners : [
     { name: 'Sua loja aqui', initial: 'SL' },
-    { name: 'Seja parceiro', initial: 'SP' },
+    { name: 'Faça parte', initial: 'FP' },
   ];
 
   return (
@@ -684,8 +684,8 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
               <p style={{ color: 'var(--text-dim)', fontSize: '18px', lineHeight: 1.7, fontWeight: 500, marginBottom: '48px' }}>
                 Conectamos compradores a lojas certificadas com sincronização em tempo real — sem intermediários, sem surpresas.
               </p>
-              <Link href="/seja-parceiro" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '16px 36px', fontSize: '16px', borderRadius: '16px', textDecoration: 'none' }}>
-                Quero ser parceiro <ArrowRight size={20} />
+              <Link href="/embaixador" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '16px 36px', fontSize: '16px', borderRadius: '16px', textDecoration: 'none' }}>
+                Quero fazer parte <ArrowRight size={20} />
               </Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

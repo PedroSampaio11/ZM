@@ -15,8 +15,8 @@ const BR_STATES = [
   'RS','RO','RR','SC','SP','SE','TO',
 ];
 
-const DMS_OPTIONS    = ['AutoCerto', 'Cockpit', 'Revenda Mais', 'Motor21', 'Webmotors', 'Outro', 'Nenhum'];
-const FLEET_OPTIONS  = ['Menos de 10 veículos', '10 a 50 veículos', '50 a 200 veículos', 'Mais de 200 veículos'];
+const PLATFORM_OPTIONS = ['Instagram', 'TikTok', 'YouTube', 'Outro'];
+const FOLLOWERS_OPTIONS = ['Até 10k', '10k a 50k', '50k a 100k', 'Mais de 100k'];
 
 // ── Components ───────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ const INPUT_STYLE: React.CSSProperties = {
 
 // ── Main Page ────────────────────────────────────────────────
 
-export function SejaParceiroClient() {
+export function EmbaixadorClient() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     empresa: '', responsavel: '', cargo: '',
@@ -69,14 +69,13 @@ export function SejaParceiroClient() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const text =
-      `Olá! Tenho interesse em ser parceiro da Motorz.\n\n` +
-      `🏢 Empresa: ${form.empresa}\n` +
-      `👤 Responsável: ${form.responsavel}${form.cargo ? ` (${form.cargo})` : ''}\n` +
+      `Olá! Tenho interesse em ser Embaixador da Motorz.\n\n` +
+      `👤 Perfil: ${form.empresa}\n` +
+      `👤 Nome: ${form.responsavel}\n` +
       `📧 Email: ${form.email}\n` +
       `📱 WhatsApp: ${form.telefone}\n` +
       `📍 Localização: ${form.cidade}, ${form.estado}\n` +
-      `💻 DMS utilizado: ${form.dms || 'Não informado'}\n` +
-      `🚗 Frota atual: ${form.frota || 'Não informado'}` +
+      `💻 Principal Rede: ${form.dms || 'Não informado'}\n` +
       (form.mensagem ? `\n\n💬 ${form.mensagem}` : '');
 
     window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(text)}`, '_blank');
@@ -94,7 +93,7 @@ export function SejaParceiroClient() {
             <CheckCircle size={56} color="var(--mz-royal)" />
           </div>
           <h1 style={{ fontSize: '36px', fontWeight: 900, color: 'var(--mz-ink)', marginBottom: '16px', letterSpacing: '-0.04em' }}>Solicitação Enviada!</h1>
-          <p style={{ color: 'var(--text-dim)', fontSize: '17px', lineHeight: 1.6, marginBottom: '40px' }}>Um consultor entrará em contato em breve para dar início à sua certificação.</p>
+          <p style={{ color: 'var(--text-dim)', fontSize: '17px', lineHeight: 1.6, marginBottom: '40px' }}>Nossa equipe de parcerias entrará em contato em breve com você.</p>
           <Link href="/" className="btn-primary" style={{ padding: '16px 40px', borderRadius: '16px', textDecoration: 'none' }}>Voltar ao Início</Link>
         </motion.div>
       </div>
@@ -132,8 +131,8 @@ export function SejaParceiroClient() {
             </Link>
 
             <h1 style={{ fontSize: 'clamp(48px, 6vw, 84px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: '-0.06em', color: 'white', marginBottom: '40px' }}>
-              Vamos construir<br />
-              algo <span style={{ color: 'var(--motorz-gold)' }}>grande</span> juntos.
+              Seja a voz<br />
+              da <span style={{ color: 'var(--motorz-gold)' }}>Motorz</span>.
             </h1>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', marginTop: '60px' }}>
@@ -179,16 +178,16 @@ export function SejaParceiroClient() {
           >
             <div style={{ marginBottom: '48px' }}>
               <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#0A1931', letterSpacing: '-0.04em', marginBottom: '24px' }}>
-                Solicitar Credenciamento
+                Seja um Embaixador
               </h2>
               
               {/* Benefits Section: Clean & Subtle */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {[
-                  { icon: <Zap size={14} />, text: 'Visibilidade Premium' },
-                  { icon: <Cpu size={14} />, text: 'Sincronização 24h' },
-                  { icon: <CheckCircle size={14} />, text: 'Leads Qualificados' },
-                  { icon: <ShieldCheck size={14} />, text: 'Selo de Confiança' },
+                  { icon: <Zap size={14} />, text: 'Monetização' },
+                  { icon: <Globe size={14} />, text: 'Reconhecimento' },
+                  { icon: <CheckCircle size={14} />, text: 'Eventos VIPs' },
+                  { icon: <ShieldCheck size={14} />, text: 'Parceria Exclusiva' },
                 ].map((b, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', background: 'var(--mz-snow)', border: '1px solid rgba(0,0,0,0.03)' }}>
                     <div style={{ color: 'var(--mz-royal)', display: 'flex' }}>{b.icon}</div>
@@ -199,12 +198,12 @@ export function SejaParceiroClient() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <Field icon={<Building2 size={14} />} label="Nome da Empresa" delay={0.3}>
-                <input name="empresa" value={form.empresa} onChange={handle} required placeholder="Ex: Auto Premium" style={INPUT_STYLE} />
+              <Field icon={<User size={14} />} label="Link do Perfil principal" delay={0.3}>
+                <input name="empresa" value={form.empresa} onChange={handle} required placeholder="Ex: @seunome ou youtube.com/..." style={INPUT_STYLE} />
               </Field>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <Field icon={<User size={14} />} label="Responsável" delay={0.4}>
+                <Field icon={<User size={14} />} label="Nome Completo" delay={0.4}>
                   <input name="responsavel" value={form.responsavel} onChange={handle} required placeholder="Seu nome" style={INPUT_STYLE} />
                 </Field>
                 <Field icon={<Phone size={14} />} label="WhatsApp" delay={0.5}>
@@ -212,8 +211,8 @@ export function SejaParceiroClient() {
                 </Field>
               </div>
 
-              <Field icon={<Mail size={14} />} label="E-mail Profissional" delay={0.6}>
-                <input name="email" type="email" value={form.email} onChange={handle} required placeholder="email@empresa.com.br" style={INPUT_STYLE} />
+              <Field icon={<Mail size={14} />} label="E-mail de Contato" delay={0.6}>
+                <input name="email" type="email" value={form.email} onChange={handle} required placeholder="seuemail@exemplo.com.br" style={INPUT_STYLE} />
               </Field>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -226,10 +225,10 @@ export function SejaParceiroClient() {
                     </select>
                   </div>
                 </Field>
-                <Field icon={<Database size={14} />} label="Sistema Atual" delay={0.8}>
+                <Field icon={<Database size={14} />} label="Rede Principal" delay={0.8}>
                   <select name="dms" value={form.dms} onChange={handle} style={INPUT_STYLE}>
                     <option value="">Selecione...</option>
-                    {DMS_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                    {PLATFORM_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </Field>
               </div>
@@ -269,7 +268,7 @@ export function SejaParceiroClient() {
                 onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                 onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
               >
-                <span>Enviar Solicitação de Parceria</span>
+                <span>Enviar Solicitação</span>
                 <ArrowRight size={22} style={{ opacity: 0.8 }} />
               </button>
             </form>

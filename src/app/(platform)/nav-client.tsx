@@ -52,12 +52,12 @@ export function TopNav() {
               </Link>
             ))}
             <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 8px' }} />
-            {pathname !== '/seja-parceiro' && (
+            {pathname !== '/embaixador' && (
               <Link
-                href="/seja-parceiro"
+                href="/embaixador"
                 style={{ padding: '8px 20px', fontSize: '13px', borderRadius: '12px', background: 'var(--mz-ink)', color: 'white', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
               >
-                Seja Parceiro →
+                Faça Parte 
               </Link>
             )}
           </div>
@@ -92,12 +92,12 @@ export function TopNav() {
               </Link>
             ))}
             <Link
-              href="/seja-parceiro"
+              href="/embaixador"
               onClick={() => setIsMobileMenuOpen(false)}
               className="btn-primary"
               style={{ padding: '20px 40px', fontSize: '18px', textDecoration: 'none' }}
             >
-              Seja Parceiro
+              Faça Parte
             </Link>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
@@ -114,9 +114,16 @@ export function TopNav() {
 }
 
 export function BottomNav() {
+  const pathname = usePathname();
+
+  // Hide the global bottom nav on vehicle details pages to avoid overlapping the lead capture bar
+  if (pathname?.startsWith('/veiculo/')) {
+    return null;
+  }
+
   return (
     <nav className="bottom-nav md:hidden" aria-label="Navegação mobile">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', height: '100%', alignItems: 'center' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', height: '100%', alignItems: 'center' }}>
         <Link href="/" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--mz-royal)' }}>
           <Home size={20} />
           <span style={{ fontSize: '10px', fontWeight: 700 }}>Início</span>
@@ -125,10 +132,6 @@ export function BottomNav() {
           <Package size={20} />
           <span style={{ fontSize: '10px', fontWeight: 700 }}>Estoque</span>
         </Link>
-        <a href="https://wa.me/5511999999999" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', textDecoration: 'none', color: 'var(--mz-slate-dim)' }}>
-          <MessageCircle size={20} />
-          <span style={{ fontSize: '10px', fontWeight: 700 }}>WhatsApp</span>
-        </a>
       </div>
     </nav>
   );

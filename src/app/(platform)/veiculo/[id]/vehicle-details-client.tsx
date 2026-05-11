@@ -8,7 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 interface Props {
-  vehicle: Vehicle & { partner: { name: string; city: string; state: string } };
+  vehicle: Vehicle & { partner: { name: string; city: string; state: string; locationNote: string | null } };
   isFeatured: boolean;
 }
 
@@ -148,49 +148,49 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-10">
-            <div className="p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
-                <Zap size={24} />
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-10">
+            <div className="p-3 sm:p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-2 sm:gap-4">
+              <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
+                <Zap size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <p className="text-xs font-bold text-mz-slate-dim uppercase tracking-wider">Quilometragem</p>
-                <p className="font-bold text-mz-ink">{formatMileage(vehicle.mileage)}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs font-bold text-mz-slate-dim uppercase tracking-wide truncate">Quilometragem</p>
+                <p className="font-bold text-sm sm:text-base text-mz-ink truncate">{formatMileage(vehicle.mileage)}</p>
               </div>
             </div>
             
             {vehicle.transmission && (
-              <div className="p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
-                  <Cog size={24} />
+              <div className="p-3 sm:p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-2 sm:gap-4">
+                <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
+                  <Cog size={20} className="sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-mz-slate-dim uppercase tracking-wider">Câmbio</p>
-                  <p className="font-bold text-mz-ink">{TRANSMISSION_LABELS[vehicle.transmission] || vehicle.transmission}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs font-bold text-mz-slate-dim uppercase tracking-wide truncate">Câmbio</p>
+                  <p className="font-bold text-sm sm:text-base text-mz-ink truncate">{TRANSMISSION_LABELS[vehicle.transmission] || vehicle.transmission}</p>
                 </div>
               </div>
             )}
 
             {vehicle.fuel && (
-              <div className="p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
-                  <Droplet size={24} />
+              <div className="p-3 sm:p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-2 sm:gap-4">
+                <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
+                  <Droplet size={20} className="sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-mz-slate-dim uppercase tracking-wider">Combustível</p>
-                  <p className="font-bold text-mz-ink">{vehicle.fuel}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs font-bold text-mz-slate-dim uppercase tracking-wide truncate">Combustível</p>
+                  <p className="font-bold text-sm sm:text-base text-mz-ink truncate">{vehicle.fuel}</p>
                 </div>
               </div>
             )}
             
             {vehicle.color && (
-              <div className="p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
-                  <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: vehicle.color.toLowerCase() === 'branco' ? '#fff' : vehicle.color.toLowerCase() === 'preto' ? '#000' : vehicle.color.toLowerCase() === 'prata' ? '#ccc' : vehicle.color.toLowerCase() }} />
+              <div className="p-3 sm:p-4 rounded-2xl bg-mz-frost border border-border flex items-center gap-2 sm:gap-4">
+                <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${isFeatured ? 'bg-motorz-gold/10 text-motorz-gold' : 'bg-mz-royal/10 text-mz-royal'}`}>
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: vehicle.color.toLowerCase() === 'branco' ? '#fff' : vehicle.color.toLowerCase() === 'preto' ? '#000' : vehicle.color.toLowerCase() === 'prata' ? '#ccc' : vehicle.color.toLowerCase() }} />
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-mz-slate-dim uppercase tracking-wider">Cor</p>
-                  <p className="font-bold text-mz-ink capitalize">{vehicle.color}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs font-bold text-mz-slate-dim uppercase tracking-wide truncate">Cor</p>
+                  <p className="font-bold text-sm sm:text-base text-mz-ink capitalize truncate">{vehicle.color}</p>
                 </div>
               </div>
             )}
@@ -260,9 +260,14 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
               Disponível em
             </h3>
             <p className="font-display text-xl mb-1">Unidade Motorz</p>
-            <p className="text-mz-slate flex items-center gap-2 font-medium text-sm">
+            <p className="text-mz-slate font-medium text-sm mb-1">
               {vehicle.partner.city}, {vehicle.partner.state}
             </p>
+            {vehicle.partner.locationNote && (
+              <p className="text-xs font-semibold" style={{ color: 'var(--mz-royal)', opacity: 0.75 }}>
+                📍 {vehicle.partner.locationNote}
+              </p>
+            )}
           </div>
           
           {vehicle.description && (

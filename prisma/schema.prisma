@@ -116,9 +116,10 @@ model Partner {
   address     String?
   city        String
   state       String
-  commission  Float    @default(0.0) // % de success fee negociada
-  monthlyGoal Decimal? @db.Decimal(12, 2) // meta de receita mensal (R$)
-  isActive    Boolean  @default(true)
+  commission    Float    @default(0.0) // % de success fee negociada
+  monthlyGoal   Decimal? @db.Decimal(12, 2) // meta de receita mensal (R$)
+  locationNote  String?  // ex: "12 min do centro" — exibido na página do veículo
+  isActive      Boolean  @default(true)
 
   vehicles     Vehicle[]
   leads        Lead[]

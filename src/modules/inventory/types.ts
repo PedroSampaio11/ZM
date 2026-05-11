@@ -16,7 +16,7 @@ export type Vehicle = Omit<PrismaVehicle, 'price'> & {
 
 export type Partner = Pick<
   PrismaPartner,
-  'id' | 'storeId' | 'name' | 'document' | 'city' | 'state' | 'commission' | 'isActive'
+  'id' | 'storeId' | 'name' | 'document' | 'city' | 'state' | 'commission' | 'isActive' | 'locationNote'
 >;
 
 export type Store = Pick<

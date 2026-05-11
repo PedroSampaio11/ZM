@@ -90,6 +90,12 @@ export function NewPartnerDialog({ storeId }: Props) {
               <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Comissão (%)</Label>
               <Input name="commission" type="number" step="0.1" min="0" max="100" defaultValue="2.5" className={inputCls} />
             </div>
+
+            <div className="col-span-2 space-y-2">
+              <Label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Referência de Localização</Label>
+              <Input name="locationNote" placeholder="Ex: 12 min do centro, Próximo ao Shopping Grand Plaza" maxLength={120} className={inputCls} />
+              <p className="text-[10px] text-zinc-600">Aparece na página do veículo como gatilho de proximidade.</p>
+            </div>
           </div>
 
           {error && (

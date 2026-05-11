@@ -27,7 +27,7 @@ const getVehicle = cache((id: string) =>
   withRetry(() =>
     prisma.vehicle.findUnique({
       where: { id },
-      include: { partner: { select: { name: true, city: true, state: true } } },
+      include: { partner: { select: { name: true, city: true, state: true, locationNote: true } } },
     })
   )
 );
@@ -86,7 +86,7 @@ export default async function VehiclePage({ params }: Props) {
 
   if (!rawVehicle) notFound();
 
-  const vehicle: Vehicle & { partner: { name: string; city: string; state: string } } = {
+  const vehicle: Vehicle & { partner: { name: string; city: string; state: string; locationNote: string | null } } = {
     ...rawVehicle,
     price: Number(rawVehicle.price),
   };

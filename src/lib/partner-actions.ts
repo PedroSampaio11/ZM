@@ -11,15 +11,16 @@ import { Prisma } from '@prisma/client'
 export async function createPartner(formData: FormData) {
   try {
     const raw = {
-      storeId:    formData.get('storeId')    as string,
-      name:       formData.get('name')       as string,
-      document:   formData.get('document')   as string,
-      email:      (formData.get('email')     as string) || undefined,
-      phone:      (formData.get('phone')     as string) || undefined,
-      address:    (formData.get('address')   as string) || undefined,
-      city:       formData.get('city')       as string,
-      state:      formData.get('state')      as string,
-      commission: parseFloat(formData.get('commission') as string) || 0,
+      storeId:      formData.get('storeId')      as string,
+      name:         formData.get('name')         as string,
+      document:     formData.get('document')     as string,
+      email:        (formData.get('email')       as string) || undefined,
+      phone:        (formData.get('phone')       as string) || undefined,
+      address:      (formData.get('address')     as string) || undefined,
+      city:         formData.get('city')         as string,
+      state:        formData.get('state')        as string,
+      commission:   parseFloat(formData.get('commission') as string) || 0,
+      locationNote: (formData.get('locationNote') as string) || undefined,
     }
     const input = CreatePartnerSchema.parse(raw)
 
@@ -31,13 +32,14 @@ export async function createPartner(formData: FormData) {
         storeId:    input.storeId,
         name:       input.name,
         document:   input.document,
-        email:      input.email    ?? null,
-        phone:      input.phone    ?? null,
-        address:    input.address  ?? null,
-        city:       input.city,
-        state:      input.state,
-        commission: input.commission,
-        isActive:   true,
+        email:        input.email        ?? null,
+        phone:        input.phone        ?? null,
+        address:      input.address      ?? null,
+        city:         input.city,
+        state:        input.state,
+        commission:   input.commission,
+        locationNote: input.locationNote ?? null,
+        isActive:     true,
       },
     })
 
@@ -183,17 +185,18 @@ export async function createLoja(formData: FormData) {
 
 export async function updateLoja(formData: FormData) {
   try {
-    const partnerId = (formData.get('partnerId') as string)?.trim()
-    const name      = (formData.get('name')      as string)?.trim()
-    const city      = (formData.get('city')      as string)?.trim()
-    const state     = (formData.get('state')     as string)?.trim()
-    const dms       = (formData.get('dms')       as string)?.trim() || ''
+    const partnerId    = (formData.get('partnerId')    as string)?.trim()
+    const name         = (formData.get('name')         as string)?.trim()
+    const city         = (formData.get('city')         as string)?.trim()
+    const state        = (formData.get('state')        as string)?.trim()
+    const dms          = (formData.get('dms')          as string)?.trim() || ''
+    const locationNote = (formData.get('locationNote') as string)?.trim() || null
 
     if (!partnerId || !name || !city || !state) return { error: 'Preencha todos os campos obrigatórios' }
 
     await prisma.partner.update({
       where: { id: partnerId },
-      data:  { name, city, state },
+      data:  { name, city, state, locationNote },
     })
 
     if (dms && dms !== 'MANUAL') {

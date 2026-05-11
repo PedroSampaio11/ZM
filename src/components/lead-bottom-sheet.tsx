@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import { createLead } from '@/lib/lead-actions';
 import { Vehicle } from '@/modules/inventory/types';
-import { CheckCircle, Shield, MessageCircle, LayoutGrid, Route, Fuel, Settings, ArrowLeft } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 
 interface LeadSheetProps {
   vehicle: Vehicle | null;
@@ -15,39 +15,28 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(value);
 }
 
-const FUEL_LABELS: Record<string, string> = {
-  FLEX: 'Flex',
-  GASOLINE: 'Gasolina',
-  ETHANOL: 'Etanol',
-  DIESEL: 'Diesel',
-  ELECTRIC: 'Elétrico',
-  HYBRID: 'Híbrido',
-};
-
-const TRANSMISSION_LABELS: Record<string, string> = {
-  MANUAL: 'Manual',
-  AUTOMATIC: 'Automático',
-  CVT: 'CVT',
-  SEMI_AUTOMATIC: 'Semi-auto',
-};
-
 export function LeadBottomSheet({ vehicle, isOpen, onClose }: LeadSheetProps) {
   const [isPending, startTransition] = useTransition();
-  const [step, setStep] = useState<'detail' | 'form' | 'success'>('detail');
+  const [done, setDone]   = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setStep('detail');
-      setError(null);
-    }
+    if (isOpen) { setDone(false); setError(null); }
   }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
+    else        document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
+
+  // close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !vehicle) return null;
 
@@ -59,12 +48,11 @@ export function LeadBottomSheet({ vehicle, isOpen, onClose }: LeadSheetProps) {
     startTransition(async () => {
       const result = await createLead(formData);
       if (result.success) {
-        setStep('success');
-        // Abre WhatsApp com mensagem pré-preenchida após breve delay (UX: usuário vê o sucesso primeiro)
+        setDone(true);
         if (result.whatsappUrl) {
           setTimeout(() => { window.open(result.whatsappUrl, '_blank'); }, 1200);
         }
-        setTimeout(() => { onClose(); }, 5000);
+        setTimeout(() => { onClose(); }, 4500);
       } else {
         setError(result.error || 'Erro ao enviar. Tente novamente.');
       }
@@ -72,98 +60,105 @@ export function LeadBottomSheet({ vehicle, isOpen, onClose }: LeadSheetProps) {
   }
 
   return (
-    <>
-      <div className="bottom-sheet-overlay" onClick={onClose} aria-hidden="true" />
-      <div className="bottom-sheet" role="dialog">
-        <div className="bottom-sheet-handle" />
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal-premium" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px' }}>
 
-        <div style={{ padding: '32px 24px 40px' }}>
-          {step === 'detail' && (
-            <div className="anim-fade-up">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-                <div>
-                  <p style={{ fontSize: '12px', fontWeight: 800, color: 'var(--mz-royal)', textTransform: 'uppercase', marginBottom: '4px' }}>{vehicle.brand}</p>
-                  <h2 style={{ fontSize: '28px', marginBottom: '4px' }}>{vehicle.model}</h2>
-                  <p style={{ color: 'var(--text-dim)', fontSize: '15px' }}>{vehicle.version}</p>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="price-tag" style={{ fontSize: '28px' }}>{formatCurrency(vehicle.price)}</div>
-                  <p style={{ fontSize: '12px', color: 'var(--text-faint)', fontWeight: 600 }}>Curadoria Premium</p>
-                </div>
-              </div>
+        {/* close */}
+        <button
+          onClick={onClose}
+          aria-label="Fechar"
+          style={{
+            position: 'absolute', top: '20px', right: '20px',
+            background: 'var(--mz-frost)', border: '1px solid var(--border)',
+            borderRadius: '50%', width: '36px', height: '36px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: 'var(--mz-slate)',
+          }}
+        >
+          <X size={16} />
+        </button>
 
-              <div className="zoom-container" style={{ aspectRatio: '16/10', marginBottom: '32px', boxShadow: 'var(--shadow-lg)', borderRadius: '24px' }}>
-                <img src={vehicle.images?.[0] || 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=1200'} alt={vehicle.model} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
+        <div style={{ padding: '40px 36px 36px' }}>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
-                {[
-                  { label: 'KM', value: `${vehicle.mileage?.toLocaleString() || 0}`, icon: <Route size={20} /> },
-                  { label: 'Câmbio', value: TRANSMISSION_LABELS[vehicle.transmission || ''] || 'Automático', icon: <Settings size={20} /> },
-                  { label: 'Combustível', value: FUEL_LABELS[vehicle.fuel || ''] || 'Flex', icon: <Fuel size={20} /> },
-                ].map((spec, i) => (
-                  <div key={i} style={{ background: 'var(--mz-frost)', padding: '16px', borderRadius: '20px', border: '1px solid var(--border)' }}>
-                    <div style={{ color: 'var(--mz-royal)', marginBottom: '8px' }}>{spec.icon}</div>
-                    <p style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-faint)', textTransform: 'uppercase', marginBottom: '2px' }}>{spec.label}</p>
-                    <p style={{ fontSize: '13px', fontWeight: 800 }}>{spec.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ marginBottom: '32px', background: 'var(--mz-frost)', padding: '24px', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                <h4 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Shield size={20} color="var(--mz-royal)" />
-                  Segurança Motorz
-                </h4>
-                <p style={{ color: 'var(--text-dim)', fontSize: '14px', lineHeight: 1.6 }}>
-                  Veículo com vistoria aprovada e procedência garantida. Incluímos higienização premium e transferência digital no processo.
+          {!done ? (
+            <>
+              {/* vehicle context — minimal */}
+              <div style={{ marginBottom: '28px' }}>
+                <p style={{ fontSize: '11px', fontWeight: 800, color: 'var(--mz-royal)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>
+                  {vehicle.brand}
+                </p>
+                <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--mz-ink)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
+                  {vehicle.model}
+                </h2>
+                <p style={{ fontSize: '18px', fontWeight: 800, color: 'var(--mz-royal)' }}>
+                  {formatCurrency(vehicle.price)}
                 </p>
               </div>
 
-              <button onClick={() => setStep('form')} className="btn-primary" style={{ width: '100%', padding: '20px', fontSize: '16px' }}>
-                <MessageCircle size={20} style={{ display: 'inline', marginRight: '8px' }} />
-                Tenho Interesse
-              </button>
-            </div>
-          )}
+              <p style={{ fontSize: '14px', color: 'var(--text-dim)', marginBottom: '28px', lineHeight: 1.5 }}>
+                Deixe seu contato e um consultor Motorz entra em contacto agora.
+              </p>
 
-          {step === 'form' && (
-            <div className="anim-fade-up">
-              <button onClick={() => setStep('detail')} style={{ background: 'none', border: 'none', color: 'var(--mz-royal)', fontWeight: 700, fontSize: '14px', marginBottom: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ArrowLeft size={18} /> Voltar
-              </button>
-              <h2 style={{ fontSize: '28px', marginBottom: '8px' }}>Seu próximo carro está aqui.</h2>
-              <p style={{ color: 'var(--text-dim)', marginBottom: '32px' }}>Deixe seu contato para receber o laudo técnico.</p>
-              
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <input type="hidden" name="vehicleId" value={vehicle.id} />
-                <input type="hidden" name="origin" value="PLATFORM_WEB" />
-                <input name="name" type="text" placeholder="Seu nome completo" required className="input-light" autoComplete="name" />
-                <input name="phone" type="tel" placeholder="WhatsApp com DDD (ex: 11 9 9999-9999)" required className="input-light" autoComplete="tel" inputMode="numeric" />
-                {error && <div style={{ color: '#ef4444', fontSize: '14px', fontWeight: 600 }}>{error}</div>}
-                <button type="submit" disabled={isPending} className="btn-primary" style={{ width: '100%', padding: '20px', fontSize: '16px' }}>
+                <input type="hidden" name="origin"    value="PLATFORM_WEB" />
+
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Seu nome"
+                  required
+                  className="input-premium"
+                  autoComplete="name"
+                  autoFocus
+                />
+                <input
+                  name="phone"
+                  type="tel"
+                  placeholder="WhatsApp com DDD (11 9 9999-9999)"
+                  required
+                  className="input-premium"
+                  autoComplete="tel"
+                  inputMode="numeric"
+                />
+
+                {error && (
+                  <p style={{ fontSize: '13px', color: '#ef4444', fontWeight: 600 }}>{error}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: '18px', fontSize: '15px', marginTop: '4px' }}
+                >
                   {isPending ? 'Enviando...' : 'Solicitar Proposta'}
                 </button>
               </form>
+
+              <p style={{ fontSize: '11px', color: 'var(--text-faint)', textAlign: 'center', marginTop: '16px', lineHeight: 1.5 }}>
+                Sem compromisso. Seus dados são usados apenas para este contato.
+              </p>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '20px 0 12px' }} className="anim-fade-up">
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: 'rgba(37, 211, 102, 0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 20px',
+              }}>
+                <CheckCircle size={36} color="#25D366" />
+              </div>
+              <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '10px', color: 'var(--mz-ink)' }}>Recebido!</h2>
+              <p style={{ color: 'var(--text-dim)', fontSize: '15px', lineHeight: 1.6 }}>
+                Abrindo WhatsApp para continuar o atendimento...
+              </p>
             </div>
           )}
 
-          {step === 'success' && (
-            <div style={{ textAlign: 'center', padding: '60px 0' }} className="anim-fade-up">
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(37, 211, 102, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-                <CheckCircle size={48} color="#25D366" />
-              </div>
-              <h2 style={{ fontSize: '32px', marginBottom: '12px' }}>Perfeito!</h2>
-              <p style={{ color: 'var(--text-dim)', fontSize: '17px', maxWidth: '300px', margin: '0 auto 8px' }}>
-                Seu interesse foi registrado.
-              </p>
-              <p style={{ color: 'var(--text-dim)', fontSize: '15px', maxWidth: '300px', margin: '0 auto', opacity: 0.7 }}>
-                Abrindo WhatsApp para você continuar o atendimento...
-              </p>
-            </div>
-          )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

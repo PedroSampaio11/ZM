@@ -110,10 +110,11 @@ export const CreatePartnerSchema = z.object({
   document:   z.string().regex(/^\d{14}$/, 'CNPJ deve ter 14 dígitos (sem pontuação)'),
   email:      z.string().email().optional(),
   phone:      z.string().optional(),
-  address:    z.string().optional(),
-  city:       z.string().min(2),
-  state:      z.string().length(2, 'Use a sigla do estado (ex: SP)'),
-  commission: z.number().min(0).max(100).default(0),
+  address:      z.string().optional(),
+  city:         z.string().min(2),
+  state:        z.string().length(2, 'Use a sigla do estado (ex: SP)'),
+  commission:   z.number().min(0).max(100).default(0),
+  locationNote: z.string().max(120).optional(),
 });
 
 export type CreatePartnerInput = z.infer<typeof CreatePartnerSchema>;

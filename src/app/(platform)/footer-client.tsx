@@ -44,7 +44,7 @@ export function Footer() {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {[
                 { label: 'Lojas Parceiras', href: '/#parceiros' },
-                { label: 'Seja Parceiro', href: '/seja-parceiro' },
+                { label: 'Faça Parte', href: '/embaixador' },
                 { label: 'Falar com Consultor', href: 'https://wa.me/5511999999999' },
               ].map(({ label, href }) => (
                 <li key={label}>

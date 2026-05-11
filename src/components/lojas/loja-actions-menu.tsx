@@ -12,11 +12,12 @@ interface Integration {
 }
 
 interface Loja {
-  id:           string
-  name:         string
-  city:         string
-  state:        string
-  integrations: Integration[]
+  id:            string
+  name:          string
+  city:          string
+  state:         string
+  locationNote:  string | null
+  integrations:  Integration[]
 }
 
 // ── Config de campos por DMS ─────────────────────────────────────────────────
@@ -155,6 +156,18 @@ export function LojaActionsMenu({ loja }: { loja: Loja }) {
                   <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Estado *</label>
                   <input name="state" required defaultValue={loja.state} maxLength={2} className={inputCls} placeholder="Ex: SP" />
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Referência de Localização</label>
+                <input
+                  name="locationNote"
+                  defaultValue={loja.locationNote ?? ''}
+                  maxLength={120}
+                  className={inputCls}
+                  placeholder="Ex: 12 min do centro, Próximo ao Shopping Grand Plaza"
+                />
+                <p className="text-[10px] text-zinc-600">Aparece na página do veículo como gatilho de proximidade.</p>
               </div>
 
               {primaryInteg && editFields.length > 0 && (
