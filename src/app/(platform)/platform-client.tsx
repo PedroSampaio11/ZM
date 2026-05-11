@@ -114,6 +114,58 @@ function useTypingAnimation(texts: string[], typingSpeed = 100, deletingSpeed = 
   return displayText;
 }
 
+const ROTATING_WORDS = ['próximo carro.', 'grande movimento.', 'novo nível.'];
+
+function RotatingBadge() {
+  const [index, setIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimating(true);
+      setTimeout(() => {
+        setIndex(prev => (prev + 1) % ROTATING_WORDS.length);
+        setAnimating(false);
+      }, 600);
+    }, 3800);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        background: 'rgba(18, 67, 178, 0.12)',
+        border: '1.5px solid rgba(18, 67, 178, 0.25)',
+        borderRadius: '100px',
+        padding: '0 20px',
+        height: '1.15em',
+        overflow: 'hidden',
+        verticalAlign: 'middle',
+        marginLeft: '10px',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}
+    >
+      <span
+        style={{
+          color: 'var(--mz-royal)',
+          fontWeight: 900,
+          fontSize: '0.92em',
+          display: 'inline-block',
+          transition: 'transform 0.6s cubic-bezier(0.16,1,0.3,1), opacity 0.6s ease',
+          transform: animating ? 'translateY(-120%)' : 'translateY(0)',
+          opacity: animating ? 0 : 1,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {ROTATING_WORDS[index]}
+      </span>
+    </span>
+  );
+}
+
 export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands, cities, partners }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isSheetOpen,     setIsSheetOpen]     = useState(false);
@@ -133,9 +185,9 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const typingText = useTypingAnimation([
-    'Escolha.',
-    'Agende.',
-    'Dirija.'
+    'próximo carro.',
+    'grande movimento.',
+    'novo nível.'
   ]);
 
   const allBrands = ['Todos', ...brands];
@@ -267,16 +319,24 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             style={{ 
-              fontSize: 'clamp(40px, 5.5vw, 72px)', 
+              fontSize: 'clamp(30px, 6.5vw, 68px)', 
               lineHeight: 1.15, 
-              marginBottom: '40px', 
-              letterSpacing: '-0.04em', 
+              letterSpacing: '-0.01em', 
               fontWeight: 900, 
-              color: 'var(--mz-ink)' 
+              color: 'var(--mz-ink)',
+              maxWidth: '1000px',
+              marginTop: 0,
+              marginRight: 'auto',
+              marginBottom: '40px',
+              marginLeft: 'auto',
+              display: 'block'
             }}
           >
-            Seu novo carro está em<br />
-            uma de nossas unidades.
+            <span style={{ display: 'block' }}>A escolha inteligente para</span>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '0' }}>
+              o seu
+              <RotatingBadge />
+            </span>
           </motion.h1>
 
 

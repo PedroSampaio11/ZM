@@ -33,7 +33,12 @@ export default async function LojasPage() {
     ? await prisma.partner.findMany({
         where:   { storeId: store.id, isActive: true },
         orderBy: { name: 'asc' },
-        include: {
+        select: {
+          id:           true,
+          name:         true,
+          city:         true,
+          state:        true,
+          locationNote: true,
           _count:       { select: { vehicles: { where: { status: { not: 'ARCHIVED' } } } } },
           integrations: { select: { id: true, adapter: true, isActive: true, lastSyncAt: true, lastSyncStatus: true, credentials: true } },
         },
@@ -134,10 +139,11 @@ export default async function LojasPage() {
                       ATIVO
                     </Badge>
                     <LojaActionsMenu loja={{
-                      id:   partner.id,
-                      name: partner.name,
-                      city: partner.city,
-                      state: partner.state,
+                      id:           partner.id,
+                      name:         partner.name,
+                      city:         partner.city,
+                      state:        partner.state,
+                      locationNote: partner.locationNote ?? null,
                       integrations: partner.integrations.map(i => ({
                         adapter:     i.adapter,
                         credentials: decryptCredentials((i.credentials ?? {}) as Record<string, unknown>),

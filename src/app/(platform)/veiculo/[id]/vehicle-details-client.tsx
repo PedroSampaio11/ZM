@@ -29,6 +29,68 @@ const TRANSMISSION_LABELS: Record<string, string> = {
   SEMI_AUTOMATIC: 'Semi-auto',
 };
 
+const FUEL_LABELS: Record<string, string> = {
+  FLEX: 'Flex', GASOLINE: 'Gasolina', ETHANOL: 'Etanol',
+  DIESEL: 'Diesel', ELECTRIC: 'Elétrico', HYBRID: 'Híbrido',
+};
+
+// Extrai chips de specs do campo description (pipe-separated) e descarta marketing text
+function parseDescription(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  const lines = raw.split(/\n/).map(l => l.trim()).filter(Boolean);
+  // linha com pipes = specs do veículo; linha sem pipe = marketing/branding → ignora
+  const specLines = lines.filter(l => l.includes('|'));
+  if (specLines.length === 0) return [];
+  return specLines
+    .join(' | ')
+    .split('|')
+    .map(s => s.trim())
+    .filter(s => s.length > 0 && s.length < 60);
+}
+
+function VehicleDescription({ vehicle }: { vehicle: Vehicle }) {
+  const chips = parseDescription(vehicle.description);
+  const fuel  = vehicle.fuel ? FUEL_LABELS[vehicle.fuel] ?? vehicle.fuel : null;
+  const trans = vehicle.transmission ? TRANSMISSION_LABELS[vehicle.transmission] ?? vehicle.transmission : null;
+
+  const intro = [
+    `${vehicle.brand} ${vehicle.model}`,
+    vehicle.version,
+    `${vehicle.year}`,
+    vehicle.mileage === 0 ? '0 km rodados' : `${vehicle.mileage.toLocaleString('pt-BR')} km`,
+    fuel,
+    trans,
+  ].filter(Boolean).join(' · ');
+
+  return (
+    <div>
+      <h3 className="text-xl font-display mb-3">Sobre o Veículo</h3>
+      <p className="text-mz-slate text-sm leading-relaxed mb-4">{intro}</p>
+      {chips.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {chips.map((chip, i) => (
+            <span
+              key={i}
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                padding: '5px 12px',
+                borderRadius: '8px',
+                background: 'var(--mz-frost)',
+                border: '1px solid var(--border)',
+                color: 'var(--mz-slate)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
@@ -270,14 +332,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
             )}
           </div>
           
-          {vehicle.description && (
-             <div>
-                <h3 className="text-xl font-display mb-4">Sobre o Veículo</h3>
-                <p className="text-mz-slate leading-relaxed whitespace-pre-line">
-                  {vehicle.description}
-                </p>
-             </div>
-          )}
+          <VehicleDescription vehicle={vehicle} />
         </div>
       </div>
 
