@@ -8,7 +8,7 @@ import { VehicleCard } from '@/components/vehicle-card';
 import { LeadBottomSheet } from '@/components/lead-bottom-sheet';
 import {
   ShieldCheck, Search, ArrowRight, Mouse, Shield,
-  Cloud, Zap, MessageSquare, Cpu, LayoutGrid, Database, Car, Globe, Heart
+  Cloud, Zap, MessageSquare, Cpu, LayoutGrid, Database, Car, Globe, Heart, MapPin
 } from 'lucide-react';
 import { ComparisonSlider } from '@/components/comparison-slider';
 import { LiveTimeBadge } from '@/components/live-time-badge';
@@ -31,6 +31,7 @@ interface Props {
   totalVehicles: number;
   totalPartners: number;
   brands:        string[];
+  cities:        string[];
   partners:      { name: string; initial: string }[];
 }
 
@@ -113,10 +114,11 @@ function useTypingAnimation(texts: string[], typingSpeed = 100, deletingSpeed = 
   return displayText;
 }
 
-export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands, partners }: Props) {
+export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands, cities, partners }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isSheetOpen,     setIsSheetOpen]     = useState(false);
   const [activeBrand,     setActiveBrand]     = useState('Todos');
+  const [activeCity,      setActiveCity]      = useState('Todas');
   const [priceRange,      setPriceRange]      = useState<PriceRange>('all');
   const [searchQuery,     setSearchQuery]     = useState('');
   const [visibleCount,    setVisibleCount]    = useState(6);
@@ -131,22 +133,24 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const typingText = useTypingAnimation([
-    'ganha movimento.',
-    'acelera escolhas.',
-    'trabalha por você.'
+    'Escolha.',
+    'Agende.',
+    'Dirija.'
   ]);
 
   const allBrands = ['Todos', ...brands];
+  const allCities = ['Todas', ...cities];
 
   const filtered = vehicles.filter(v => {
     const matchBrand  = activeBrand === 'Todos' || v.brand?.toLowerCase() === activeBrand.toLowerCase();
     const matchSearch = !searchQuery || `${v.brand} ${v.model} ${v.version}`.toLowerCase().includes(searchQuery.toLowerCase());
     const matchPrice  = matchesPrice(v.price, priceRange);
-    return matchBrand && matchSearch && matchPrice;
+    const matchCity   = activeCity === 'Todas' || v.partnerCity === activeCity;
+    return matchBrand && matchSearch && matchPrice && matchCity;
   });
 
   const featuredVehicles = vehicles.slice(0, 3);
-  const hasActiveFilter  = activeBrand !== 'Todos' || priceRange !== 'all' || searchQuery !== '';
+  const hasActiveFilter  = activeBrand !== 'Todos' || priceRange !== 'all' || searchQuery !== '' || activeCity !== 'Todas';
 
   function openSheet(vehicle: Vehicle) {
     setSelectedVehicle(vehicle);
@@ -157,6 +161,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
     setActiveBrand('Todos');
     setPriceRange('all');
     setSearchQuery('');
+    setActiveCity('Todas');
     setVisibleCount(6);
   }
 
@@ -178,25 +183,25 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
         <div className="hidden lg:block" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
           {[
             { size: 900, duration: 80, nodes: [ 
-              { label: 'AutoCerto', icon: <Database size={14}/>, angle: 45,  delay: 0 }, 
-              { label: 'Eurobike',  icon: <Car size={14}/>,      angle: 135, delay: 1.2 },
-              { label: 'Revenda Mais', icon: <Cloud size={14}/>, angle: 225, delay: 2.4 },
-              { label: 'Stuttgart', icon: <Zap size={14}/>,      angle: 315, delay: 3.6 }
+              { label: 'Garantia Motorz', icon: <ShieldCheck size={14}/>, angle: 45,  delay: 0 }, 
+              { label: 'Inspeção 30 Pontos',  icon: <Search size={14}/>,      angle: 135, delay: 1.2 },
+              { label: 'Sem Leilão', icon: <Shield size={14}/>, angle: 225, delay: 2.4 },
+              { label: 'Auditado', icon: <ShieldCheck size={14}/>,      angle: 315, delay: 3.6 }
             ] },
             { size: 1250, duration: 110, nodes: [ 
-              { label: 'Cockpit',       icon: <Cpu size={14}/>,    angle: 0,   delay: 0.5 }, 
-              { label: 'Avantgarde',    icon: <Globe size={14}/>,  angle: 72,  delay: 1.3 },
-              { label: 'Socarros',      icon: <Car size={14}/>,    angle: 144, delay: 2.1 },
-              { label: 'Select Motors', icon: <Shield size={14}/>, angle: 216, delay: 3.0 },
-              { label: 'Personal Car',  icon: <Heart size={14}/>,  angle: 288, delay: 3.8 }
+              { label: 'Unidades ABC',       icon: <MapPin size={14}/>,    angle: 0,   delay: 0.5 }, 
+              { label: 'Estoque Real',    icon: <Zap size={14}/>,  angle: 72,  delay: 1.3 },
+              { label: 'Preço Final',      icon: <Database size={14}/>,    angle: 144, delay: 2.1 },
+              { label: 'Sem Pegadinhas', icon: <Zap size={14}/>, angle: 216, delay: 3.0 },
+              { label: 'Curadoria Premium',  icon: <Heart size={14}/>,  angle: 288, delay: 3.8 }
             ] },
             { size: 1600, duration: 140, nodes: [ 
-              { label: 'Motor21',    icon: <Globe size={14}/>,  angle: 30,  delay: 0.8 }, 
-              { label: 'By Motors',  icon: <Car size={14}/>,    angle: 90,  delay: 1.6 },
-              { label: 'Webmotors', icon: <Search size={14}/>, angle: 150, delay: 2.4 },
-              { label: 'Icarros',   icon: <Car size={14}/>,    angle: 210, delay: 3.2 },
-              { label: 'Kavak',     icon: <Zap size={14}/>,    angle: 270, delay: 4.0 },
-              { label: 'Karvi',     icon: <Shield size={14}/>, angle: 330, delay: 4.8 }
+              { label: 'Atendimento Especialista',    icon: <MessageSquare size={14}/>,  angle: 30,  delay: 0.8 }, 
+              { label: 'Procedência',  icon: <Shield size={14}/>,    angle: 90,  delay: 1.6 },
+              { label: 'Transparência', icon: <Search size={14}/>, angle: 150, delay: 2.4 },
+              { label: 'Tecnologia',   icon: <Cpu size={14}/>,    angle: 210, delay: 3.2 },
+              { label: 'Sincronizado',     icon: <Zap size={14}/>,    angle: 270, delay: 4.0 },
+              { label: 'Qualidade',     icon: <ShieldCheck size={14}/>, angle: 330, delay: 4.8 }
             ] }
           ].map((ring, ringIdx) => (
             <div key={`ring-${ringIdx}`} style={{ position: 'absolute', top: '50%', left: '50%', width: ring.size, height: ring.size, transform: 'translate(-50%, -50%)', border: '1px solid rgba(18, 67, 178, 0.04)', borderRadius: '50%' }}>
@@ -251,7 +256,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
           style={{ y: heroY, opacity: heroOpacity }}
           className="max-w-5xl mx-auto w-full relative z-10 text-center"
         >
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px', paddingTop: '20px' }}>
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <LiveTimeBadge />
             </motion.div>
@@ -261,21 +266,27 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            style={{ fontSize: 'clamp(48px, 6vw, 84px)', lineHeight: 1.0, marginBottom: '32px', letterSpacing: '-0.05em', fontWeight: 900, color: 'var(--mz-ink)' }}
+            style={{ 
+              fontSize: 'clamp(40px, 5.5vw, 72px)', 
+              lineHeight: 1.15, 
+              marginBottom: '40px', 
+              letterSpacing: '-0.04em', 
+              fontWeight: 900, 
+              color: 'var(--mz-ink)' 
+            }}
           >
-            Onde o estoque<br />
-            <span style={{ display: 'inline-block', whiteSpace: 'nowrap', minHeight: '1.2em' }}>
-              {typingText}<span className="cursor-blink" />
-            </span>
+            Seu novo carro está em<br />
+            uma de nossas unidades.
           </motion.h1>
+
 
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            style={{ fontSize: 'clamp(16px, 1.5vw, 18px)', color: 'var(--text-dim)', maxWidth: '520px', margin: '0 auto 48px', fontWeight: 500, lineHeight: 1.6 }}
+            style={{ fontSize: 'clamp(16px, 1.5vw, 18px)', color: 'var(--text-dim)', maxWidth: '640px', margin: '0 auto 48px', fontWeight: 500, lineHeight: 1.6 }}
           >
-            Estoque real, lojas certificadas e conexão direta com o consultor — sem anúncios fantasmas.
+            A forma mais inteligente de comprar seu próximo carro no ABC paulista. Curadoria exclusiva com unidades físicas para estar sempre perto de você.
           </motion.p>
 
           <motion.div 
@@ -288,17 +299,25 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
               Explorar Estoque <ArrowRight size={22} />
             </a>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '10px 24px', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(10px)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.3)' }}>
-              <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 28px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.4)', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+              <div style={{ display: 'flex', position: 'relative' }}>
                 {[1,2,3].map(i => (
-                  <div key={i} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid white', background: 'var(--mz-frost)', marginLeft: '-10px', overflow: 'hidden' }}>
-                    <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="User" />
+                  <div key={i} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid white', background: 'var(--mz-frost)', marginLeft: i === 1 ? 0 : '-12px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                    <img src={`https://i.pravatar.cc/100?img=${i+25}`} alt="User" />
                   </div>
                 ))}
+                <div style={{ position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', background: '#22C55E', borderRadius: '50%', border: '2px solid white' }} />
               </div>
               <div style={{ textAlign: 'left' }}>
-                <p style={{ fontSize: '14px', fontWeight: 800, color: 'var(--mz-ink)', margin: 0 }}>+500 negociações</p>
-                <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--mz-slate-dim)', margin: 0 }}>realizadas este mês</p>
+                <p style={{ fontSize: '15px', fontWeight: 800, color: 'var(--mz-ink)', margin: 0 }}>+500 negociações</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <motion.div 
+                    animate={{ opacity: [0.4, 1, 0.4] }} 
+                    transition={{ duration: 2, repeat: Infinity }}
+                    style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22C55E' }} 
+                  />
+                  <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--mz-slate-dim)', margin: 0 }}>+2 conversas agora</p>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -345,7 +364,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
 
         {/* ── Featured Carousel (bleeds into next section) ── */}
         {featuredVehicles.length > 0 && (
-          <div style={{ position: 'relative', zIndex: 10 }}>
+          <div style={{ position: 'relative', zIndex: 10, overflow: 'hidden' }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FFB800', boxShadow: '0 0 8px rgba(255,184,0,0.5)' }} />
@@ -395,12 +414,43 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
             )}
           </div>
 
-          {/* 3-column filter row */}
-          <div className="grid-filter-3">
-            {/* Brand */}
+          {/* Stacked filter rows */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '8px' }}>
+
+            {/* Região */}
+            {allCities.length > 1 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Região</span>
+                <div className="filter-scroll-row">
+                  {allCities.map(city => (
+                    <button
+                      key={city}
+                      onClick={() => { setActiveCity(city); setVisibleCount(6); }}
+                      style={{
+                        flexShrink: 0,
+                        padding: '8px 16px',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        fontFamily: 'inherit',
+                        borderRadius: '10px',
+                        border: '1px solid',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        whiteSpace: 'nowrap',
+                        background: activeCity === city ? '#1243B2' : 'var(--mz-frost)',
+                        borderColor: activeCity === city ? '#1243B2' : 'var(--border)',
+                        color: activeCity === city ? 'white' : 'var(--mz-slate)',
+                      }}
+                    >{city}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Marca */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Marca</span>
-              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' } as React.CSSProperties}>
+              <div className="filter-scroll-row">
                 {allBrands.map(brand => (
                   <button
                     key={brand}
@@ -425,7 +475,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
               </div>
             </div>
 
-            {/* Price */}
+            {/* Valor */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Valor</span>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

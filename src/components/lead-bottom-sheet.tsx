@@ -60,7 +60,11 @@ export function LeadBottomSheet({ vehicle, isOpen, onClose }: LeadSheetProps) {
       const result = await createLead(formData);
       if (result.success) {
         setStep('success');
-        setTimeout(() => { onClose(); }, 4000);
+        // Abre WhatsApp com mensagem pré-preenchida após breve delay (UX: usuário vê o sucesso primeiro)
+        if (result.whatsappUrl) {
+          setTimeout(() => { window.open(result.whatsappUrl, '_blank'); }, 1200);
+        }
+        setTimeout(() => { onClose(); }, 5000);
       } else {
         setError(result.error || 'Erro ao enviar. Tente novamente.');
       }
@@ -116,10 +120,10 @@ export function LeadBottomSheet({ vehicle, isOpen, onClose }: LeadSheetProps) {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setStep('form')} className="btn-primary" style={{ flex: 1, padding: '20px', fontSize: '16px' }}>Tenho Interesse</button>
-                <a href={`https://wa.me/5511999999999`} className="btn-cta-whatsapp" style={{ padding: '20px' }}><MessageCircle size={24} /></a>
-              </div>
+              <button onClick={() => setStep('form')} className="btn-primary" style={{ width: '100%', padding: '20px', fontSize: '16px' }}>
+                <MessageCircle size={20} style={{ display: 'inline', marginRight: '8px' }} />
+                Tenho Interesse
+              </button>
             </div>
           )}
 
@@ -134,8 +138,8 @@ export function LeadBottomSheet({ vehicle, isOpen, onClose }: LeadSheetProps) {
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <input type="hidden" name="vehicleId" value={vehicle.id} />
                 <input type="hidden" name="origin" value="PLATFORM_WEB" />
-                <input name="name" type="text" placeholder="Nome completo" required className="input-light" />
-                <input name="phone" type="tel" placeholder="WhatsApp (DDD)" required className="input-light" />
+                <input name="name" type="text" placeholder="Seu nome completo" required className="input-light" autoComplete="name" />
+                <input name="phone" type="tel" placeholder="WhatsApp com DDD (ex: 11 9 9999-9999)" required className="input-light" autoComplete="tel" inputMode="numeric" />
                 {error && <div style={{ color: '#ef4444', fontSize: '14px', fontWeight: 600 }}>{error}</div>}
                 <button type="submit" disabled={isPending} className="btn-primary" style={{ width: '100%', padding: '20px', fontSize: '16px' }}>
                   {isPending ? 'Enviando...' : 'Solicitar Proposta'}
@@ -149,8 +153,13 @@ export function LeadBottomSheet({ vehicle, isOpen, onClose }: LeadSheetProps) {
               <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(37, 211, 102, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
                 <CheckCircle size={48} color="#25D366" />
               </div>
-              <h2 style={{ fontSize: '32px', marginBottom: '12px' }}>Recebemos!</h2>
-              <p style={{ color: 'var(--text-dim)', fontSize: '18px', maxWidth: '320px', margin: '0 auto' }}>Em instantes você receberá o atendimento premium via WhatsApp.</p>
+              <h2 style={{ fontSize: '32px', marginBottom: '12px' }}>Perfeito!</h2>
+              <p style={{ color: 'var(--text-dim)', fontSize: '17px', maxWidth: '300px', margin: '0 auto 8px' }}>
+                Seu interesse foi registrado.
+              </p>
+              <p style={{ color: 'var(--text-dim)', fontSize: '15px', maxWidth: '300px', margin: '0 auto', opacity: 0.7 }}>
+                Abrindo WhatsApp para você continuar o atendimento...
+              </p>
             </div>
           )}
         </div>

@@ -8,7 +8,11 @@ import type {
 } from '@prisma/client';
 
 // Vehicle com price convertido de Decimal para number
-export type Vehicle = Omit<PrismaVehicle, 'price'> & { price: number };
+// partnerCity é populado opcionalmente quando a query inclui { partner: { select: { city: true } } }
+export type Vehicle = Omit<PrismaVehicle, 'price'> & {
+  price:       number;
+  partnerCity?: string | null;
+};
 
 export type Partner = Pick<
   PrismaPartner,

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { prisma, withRetry } from '@/lib/prisma';
-import { Vehicle } from '@/modules/inventory/types';
+import type { Vehicle } from '@/modules/inventory/types';
 import { PlatformClient } from './platform-client';
 
 export const revalidate = 60;
@@ -80,6 +80,7 @@ export default async function PlatformHome() {
         where:   { status: 'AVAILABLE' },
         orderBy: { createdAt: 'desc' },
         take:    60,
+        include: { partner: { select: { city: true } } },
       }),
       prisma.vehicle.count({ where: { status: 'AVAILABLE' } }),
       prisma.partner.count({ where: { isActive: true } }),
@@ -98,8 +99,13 @@ export default async function PlatformHome() {
     ])
   );
 
-  const vehicles: Vehicle[] = rawVehicles.map(v => ({ ...v, price: Number(v.price) }));
-  const brands = brandsRaw.map(v => v.brand).filter(Boolean) as string[];
+  const vehicles: Vehicle[] = rawVehicles.map(({ partner, ...v }) => ({
+    ...v,
+    price:       Number(v.price),
+    partnerCity: partner?.city ?? null,
+  }));
+  const brands  = brandsRaw.map(v => v.brand).filter(Boolean) as string[];
+  const cities  = [...new Set(rawVehicles.map(v => v.partner?.city).filter(Boolean) as string[])].sort();
   const partners = partnersRaw.map(p => {
     const parts = p.name.trim().split(' ');
     const initial = ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
@@ -121,6 +127,7 @@ export default async function PlatformHome() {
         totalVehicles={totalVehicles}
         totalPartners={totalPartners}
         brands={brands}
+        cities={cities}
         partners={partners}
       />
     </>

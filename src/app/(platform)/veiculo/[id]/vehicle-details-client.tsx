@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Vehicle } from '@/modules/inventory/types';
 import { LeadBottomSheet } from '@/components/lead-bottom-sheet';
-import { ShieldCheck, Calendar, Zap, Droplet, Cog, MapPin, CheckCircle, ArrowLeft, MessageCircle } from 'lucide-react';
+import { ShieldCheck, Calendar, Zap, Droplet, Cog, MapPin, CheckCircle, ArrowLeft, MessageCircle, RotateCcw, FileText, Car, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -196,14 +196,72 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
             )}
           </div>
 
-          <div className="p-6 rounded-3xl bg-mz-frost border border-border mb-8">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <ShieldCheck size={20} className={isFeatured ? 'text-motorz-gold' : 'text-mz-royal'} />
-              Curadoria e Entrega
+          {/* ── INSPEÇÃO MOTORZ ── */}
+          <div className="rounded-3xl overflow-hidden mb-4" style={{ background: '#0A1931' }}>
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2.5 rounded-2xl" style={{ background: 'rgba(255,193,7,0.12)' }}>
+                  <ShieldCheck size={20} style={{ color: '#FFC107' }} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base leading-tight">Inspeção Motorz</h3>
+                  <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>30 pontos verificados</p>
+                </div>
+                <span className="ml-auto text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1" style={{ background: 'rgba(255,193,7,0.15)', color: '#FFC107' }}>
+                  <Star size={10} fill="currentColor" /> Aprovado
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 mb-5">
+                {[
+                  'Motor sem vazamentos',   'Histórico sem leilão',
+                  'Câmbio funcionando',     'Documentação em dia',
+                  'Freios calibrados',      'Ar-condicionado ok',
+                  'Suspensão alinhada',     'Elétrica testada',
+                  'Lataria sem solda',      'Vidros e borrachas ok',
+                ].map(item => (
+                  <div key={item} className="flex items-center gap-1.5">
+                    <CheckCircle size={12} style={{ color: '#FFC107', flexShrink: 0 }} />
+                    <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 rounded-2xl flex items-center gap-3" style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.15)' }}>
+                <ShieldCheck size={18} style={{ color: '#FFC107', flexShrink: 0 }} />
+                <div>
+                  <p className="text-sm font-bold" style={{ color: '#FFC107' }}>Padrão de Qualidade Motorz</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Veículo verificado e aprovado pela nossa rede</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── MINI TRUST BADGES ── */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {[
+              { Icon: ShieldCheck, title: 'Procedência', desc: 'histórico verificado' },
+              { Icon: CheckCircle, title: 'Preço final', desc: 'sem taxas extras'  },
+              { Icon: FileText,  title: 'Sem restrição', desc: 'histórico limpo'   },
+              { Icon: Car,       title: 'Test drive',    desc: 'agende grátis'     },
+            ].map(({ Icon, title, desc }) => (
+              <div key={title} className="p-3 rounded-2xl text-center flex flex-col items-center gap-1" style={{ background: 'var(--mz-frost)', border: '1px solid var(--border)' }}>
+                <Icon size={18} style={{ color: 'var(--mz-royal)', marginBottom: '2px' }} />
+                <p className="font-bold text-mz-ink text-sm leading-tight">{title}</p>
+                <p className="text-xs text-mz-slate-dim">{desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── LOCAL DA UNIDADE ── */}
+          <div className="p-5 rounded-3xl bg-mz-frost border border-border mb-8">
+            <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+              <MapPin size={18} className={isFeatured ? 'text-motorz-gold' : 'text-mz-royal'} />
+              Disponível em
             </h3>
-            <p className="font-display text-2xl mb-2">Estoque Motorz</p>
-            <p className="text-mz-slate flex items-center gap-2 font-medium">
-              <MapPin size={16} /> {vehicle.partner.city}, {vehicle.partner.state}
+            <p className="font-display text-xl mb-1">Unidade Motorz</p>
+            <p className="text-mz-slate flex items-center gap-2 font-medium text-sm">
+              {vehicle.partner.city}, {vehicle.partner.state}
             </p>
           </div>
           

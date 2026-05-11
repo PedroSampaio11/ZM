@@ -53,8 +53,18 @@
   --glass-border: rgba(255, 255, 255, 0.4);
 }
 
-html {
+html, body {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Previne scroll lateral global */
+.main-content,
+.platform-container {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
 }
 
 /* ── ORBITAL ECOSYSTEM ANIMATIONS ─────────────────── */
@@ -776,6 +786,32 @@ h1, h2, h3, h4, .font-display {
   -webkit-text-fill-color: transparent;
   font-weight: 900;
 }
+
+/* ── FILTER ROWS ───────────────────────────────────────── */
+.filter-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mz-slate-dim);
+  padding-left: 4px;
+  margin-bottom: 8px;
+}
+
+.filter-scroll-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  /* Crítico: sem min-width: auto o scroll não funciona dentro de grid/flex */
+  min-width: 0;
+}
+.filter-scroll-row::-webkit-scrollbar { display: none; }
 
 /* ── BOTTOM NAV ────────────────────────────────────────── */
 .bottom-nav {
