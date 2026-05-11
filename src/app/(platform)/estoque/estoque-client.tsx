@@ -81,7 +81,7 @@ export function EstoqueClient({ vehicles, totalVehicles, totalPartners, brands }
 
       {/* ── HEADER / FILTERS ── */}
       <section style={{ background: 'var(--mz-snow)', paddingTop: '140px', paddingBottom: '48px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)' }}>
 
           {/* Breadcrumb */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '40px' }}>
@@ -99,7 +99,7 @@ export function EstoqueClient({ vehicles, totalVehicles, totalPartners, brands }
                 Todo o estoque
               </h1>
               <p style={{ color: 'var(--text-dim)', fontSize: '18px', fontWeight: 500, marginTop: '12px', marginBottom: 0 }}>
-                {totalVehicles} veículos disponíveis · {totalPartners} lojas verificadas
+                {totalVehicles} veículos disponíveis · curadoria motorz
               </p>
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'rgba(18,67,178,0.06)', border: '1px solid rgba(18,67,178,0.12)', borderRadius: '100px', flexShrink: 0 }}>
@@ -126,7 +126,7 @@ export function EstoqueClient({ vehicles, totalVehicles, totalPartners, brands }
           </div>
 
           {/* Brand + Price filters */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '28px' }}>
             <div>
               <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', display: 'block', marginBottom: '8px', paddingLeft: '4px' }}>Marca</span>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' } as React.CSSProperties}>
@@ -161,7 +161,7 @@ export function EstoqueClient({ vehicles, totalVehicles, totalPartners, brands }
 
       {/* ── VEHICLE GRID ── */}
       <section style={{ background: 'var(--mz-snow)', padding: '60px 0 120px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)' }}>
           {filtered.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '32px' }}>
               {filtered.slice(0, visibleCount).map((v, i) => (

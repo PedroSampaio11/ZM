@@ -199,9 +199,9 @@ export function VehicleDetailsClient({ vehicle, isFeatured }: Props) {
           <div className="p-6 rounded-3xl bg-mz-frost border border-border mb-8">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
               <ShieldCheck size={20} className={isFeatured ? 'text-motorz-gold' : 'text-mz-royal'} />
-              Vendido e Entregue por
+              Curadoria e Entrega
             </h3>
-            <p className="font-display text-2xl mb-2">{vehicle.partner.name}</p>
+            <p className="font-display text-2xl mb-2">Estoque Motorz</p>
             <p className="text-mz-slate flex items-center gap-2 font-medium">
               <MapPin size={16} /> {vehicle.partner.city}, {vehicle.partner.state}
             </p>

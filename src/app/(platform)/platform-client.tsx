@@ -169,7 +169,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
     <div className="platform-container">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section ref={heroRef} className="noise" style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '120px 24px', position: 'relative', overflow: 'hidden' }}>
+      <section ref={heroRef} className="noise" style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(80px, 10svh, 120px) clamp(16px, 5vw, 24px)', position: 'relative', overflow: 'hidden' }}>
         <div className="mesh-bg" />
         <div className="tech-grid" />
         <div className="glow-spot" />
@@ -329,7 +329,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
 
 
         {/* ── Section Header ── */}
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px', marginBottom: '64px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', marginBottom: '64px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '32px', flexWrap: 'wrap' }}>
             <div>
               <SectionEyebrow label="Catálogo Completo" />
@@ -338,7 +338,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
               </h2>
             </div>
             <p style={{ maxWidth: '380px', color: 'var(--text-dim)', fontSize: '17px', lineHeight: 1.6, fontWeight: 500, marginBottom: '8px' }}>
-              {totalVehicles} veículos disponíveis de {totalPartners} lojas parceiras verificadas, com estoque em tempo real.
+              {totalVehicles} veículos disponíveis, com curadoria das melhores revendas do ABC paulista.
             </p>
           </div>
         </div>
@@ -346,16 +346,16 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
         {/* ── Featured Carousel (bleeds into next section) ── */}
         {featuredVehicles.length > 0 && (
           <div style={{ position: 'relative', zIndex: 10 }}>
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px', marginBottom: '20px' }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FFB800', boxShadow: '0 0 8px rgba(255,184,0,0.5)' }} />
                 <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>Seleção Especial</span>
               </div>
             </div>
             {/* Full-width bleed scroll — overflow visible so cards float over section seam */}
-            <div style={{ paddingLeft: '48px', display: 'flex', gap: '24px', overflowX: 'auto', overflowY: 'visible', paddingBottom: '64px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+            <div style={{ paddingLeft: 'clamp(16px, 5vw, 48px)', display: 'flex', gap: '24px', overflowX: 'auto', overflowY: 'visible', paddingBottom: '64px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
               {featuredVehicles.map((v, i) => (
-                <div key={v.id} style={{ minWidth: 'clamp(300px, 30vw, 420px)', flex: '0 0 clamp(300px, 30vw, 420px)', filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.10))' }}>
+                <div key={v.id} style={{ minWidth: 'clamp(260px, 75vw, 420px)', flex: '0 0 clamp(260px, 75vw, 420px)', filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.10))' }}>
                   <VehicleCard vehicle={v} onInterest={openSheet} index={i} featured />
                 </div>
               ))}
@@ -365,7 +365,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
         )}
 
         {/* ── Filter Bar ── */}
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)' }}>
           {/* Search */}
           <div style={{ position: 'relative', marginBottom: '24px' }}>
             <Search size={18} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--mz-slate-dim)', pointerEvents: 'none' }} />
@@ -396,7 +396,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
           </div>
 
           {/* 3-column filter row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '32px' }}>
+          <div className="grid-filter-3">
             {/* Brand */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--mz-slate-dim)', paddingLeft: '4px' }}>Marca</span>
@@ -499,12 +499,12 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
       </section>
 
       {/* ── CURADORIA (PROCESSO) ────────────────────────────────── */}
-      <section id="curadoria" style={{ background: '#fff', padding: '120px 24px', borderTop: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+      <section id="curadoria" style={{ background: '#fff', padding: 'clamp(64px, 10vw, 120px) clamp(16px, 5vw, 24px)', borderTop: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
 
           {/* Eyebrow + headline — full left-align, editorial */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '80px', marginBottom: '96px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(24px, 5vw, 80px)', marginBottom: 'clamp(48px, 6vw, 96px)', flexWrap: 'wrap' }}>
             <div style={{ flex: '0 0 auto' }}>
               <SectionEyebrow label="Curadoria" />
               <h2 style={{ fontSize: 'clamp(40px, 5vw, 68px)', letterSpacing: '-0.05em', fontWeight: 900, color: 'var(--mz-ink)', lineHeight: 0.95, margin: 0, maxWidth: '520px' }}>
@@ -558,10 +558,10 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
                 desc: 'Nosso sistema monitora o estoque 24h. Lojas com quedas de qualidade são suspensas — sem aviso prévio e sem negociação.',
               },
             ].map((item) => (
-              <div key={item.n} style={{ display: 'grid', gridTemplateColumns: '64px 1fr 2fr', gap: '40px', alignItems: 'start', padding: '36px 0', borderBottom: '1px solid var(--border)' }}>
+              <div key={item.n} className="grid-process">
                 <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--mz-ink)', opacity: 0.2, fontFamily: "'Cal Sans', sans-serif", letterSpacing: '0.04em', paddingTop: '3px' }}>{item.n}</span>
                 <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--mz-ink)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{item.title}</h3>
-                <p style={{ fontSize: '15px', color: 'var(--text-dim)', margin: 0, lineHeight: 1.7 }}>{item.desc}</p>
+                <p className="process-desc" style={{ fontSize: '15px', color: 'var(--text-dim)', margin: 0, lineHeight: 1.7 }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -620,9 +620,9 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
       </section>
 
       {/* ── QUEM SOMOS ───────────────────────────────────────────── */}
-      <section id="quem-somos" style={{ background: 'var(--mz-snow)', padding: '140px 24px' }}>
+      <section id="quem-somos" style={{ background: 'var(--mz-snow)', padding: 'clamp(64px, 10vw, 140px) clamp(16px, 5vw, 24px)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+          <div className="grid-about-2">
             <div>
               <SectionEyebrow label="Nossa História" />
               <h2 style={{ fontSize: 'clamp(40px, 5vw, 64px)', letterSpacing: '-0.05em', fontWeight: 900, lineHeight: 1.05, color: 'var(--mz-ink)', marginBottom: '28px' }}>
@@ -656,7 +656,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
       </section>
 
       {/* ── COMPARISON ────────────────────────────────────────── */}
-      <section id="comparacao" style={{ padding: '140px 24px', background: 'linear-gradient(to bottom, #1243B2 0%, #0A1931 100%)', position: 'relative', overflow: 'hidden' }}>
+      <section id="comparacao" style={{ padding: 'clamp(64px, 10vw, 140px) clamp(16px, 5vw, 24px)', background: 'linear-gradient(to bottom, #1243B2 0%, #0A1931 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.15), transparent 60%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: '80px' }}>

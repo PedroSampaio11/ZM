@@ -776,3 +776,112 @@ h1, h2, h3, h4, .font-display {
   -webkit-text-fill-color: transparent;
   font-weight: 900;
 }
+
+/* ── BOTTOM NAV ────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  z-index: 999;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── RESPONSIVE GRIDS ──────────────────────────────────── */
+.grid-filter-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.grid-about-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.grid-process {
+  display: grid;
+  grid-template-columns: 64px 1fr 2fr;
+  gap: 40px;
+  align-items: start;
+  padding: 36px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── VEHICLE IMAGE OVERLAY (cover dealer branding) ─────── */
+.vehicle-img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.vehicle-img-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28%;
+  background: linear-gradient(to top, rgba(18, 67, 178, 0.72) 0%, rgba(18, 67, 178, 0.18) 60%, transparent 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.vehicle-img-overlay::after {
+  content: 'motorz';
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── MOBILE BREAKPOINTS ────────────────────────────────── */
+@media (max-width: 768px) {
+  .grid-filter-3 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .grid-about-2 {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .grid-process {
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+  }
+
+  .grid-process .process-desc {
+    grid-column: 1 / -1;
+    padding-bottom: 8px;
+  }
+
+  .section-pad {
+    padding: 64px 0;
+  }
+
+  .tech-card {
+    padding: 28px 20px;
+  }
+
+  .highlights-item {
+    min-width: 280px;
+    max-width: 280px;
+  }
+
+  .partners-section {
+    padding: 80px 0 60px;
+  }
+}

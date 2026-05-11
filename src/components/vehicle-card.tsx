@@ -69,6 +69,9 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
           background: 'linear-gradient(to bottom, transparent 60%, rgba(15, 23, 42, 0.3) 100%)',
         }} />
 
+        {/* Motorz brand overlay — covers dealer logos/plate covers at bottom */}
+        <div className="vehicle-img-overlay" />
+
         {/* Top-left: Year Tag */}
         <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 5 }}>
           <div style={{
