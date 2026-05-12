@@ -30,6 +30,7 @@ export function Footer() {
               {[
                 { label: 'Início', href: '/' },
                 { label: 'Estoque', href: '/estoque' },
+                { label: 'Blog', href: '/blog' },
                 { label: 'Sobre', href: '/#quem-somos' },
               ].map(({ label, href }) => (
                 <li key={label}>

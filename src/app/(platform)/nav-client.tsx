@@ -32,6 +32,7 @@ export function TopNav() {
 
   const navItems = [
     { name: 'Estoque', href: '/estoque' },
+    { name: 'Blog', href: '/blog' },
     { name: 'Sobre', href: '/#quem-somos' },
   ];
 
