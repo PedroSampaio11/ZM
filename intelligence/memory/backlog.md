@@ -127,7 +127,32 @@
 - Seção na home: grid de cards com imagem blurred, badge pulsante, CTA "Me avise quando chegar"
 - Query em `page.tsx`, prop `incomingVehicles` no `PlatformClient`, componente `IncomingCard`
 
-> ⚠️ **Sessão 9 não commitada ainda.**
+> ✅ **Sessão 9 commitada** — commit `7d183a9`, push Vercel 2026-05-12.
+
+### ✅ Sessão 10 — Blog SEO definitivo + Live Activity inteligente + Bugfixes
+
+**Blog `/blog/[slug]/page.tsx` — reescrita completa:**
+- Removidos `onMouseEnter`/`onMouseLeave` de Server Components (erro fatal de runtime) → CSS class `.blc:hover`
+- Tripla estrutura JSON-LD: `BreadcrumbList` + `FAQPage` + `ItemList` (veículos como entidade)
+- HTML semântico: `<article>`, `<header>`, `<section aria-label>`, breadcrumb `<nav aria-label>`
+- Dual CTA no hero: "Ver estoque" (azul) + "Falar com consultor" (WhatsApp verde)
+- CTA pós-grid com copy de urgência ("Atualizado em tempo real")
+- Seção "Ver também" — artigos relacionados dinâmicos (mesma cidade/outras cidades, marca/outras marcas)
+- Card final de conversão 2 colunas com dois botões
+- Twitter card metadata
+- Filtro `autoFilter` case-insensitive para `transmission` (cobre `'AUTOMATIC'`, `'Automático'`, `'automatico'`, `'AUTO'`, `'CVT'`) — corrige "Nenhum veículo" em suv-automatico e carros-automaticos
+- 4 FAQs por categoria (vs 3 antes)
+
+**Live Activity (`src/components/live-activity.tsx`):**
+- Shuffle de sessão via `Math.random()` — nomes e ordem diferentes a cada visita
+- Personalização: lê `mz_recent` + `mz_favorites` do localStorage → prioriza marcas de interesse do usuário
+- Bloqueia repetição do mesmo nome em exibições consecutivas
+- Reshuffle automático após ciclo completo
+
+**Navegação:**
+- Blog adicionado ao TopNav desktop, menu mobile e footer (coluna Navegação)
+
+> ✅ **Sessão 10 commitada** — commits `ac4f803`, `e847781`, `949bdd0` (2026-05-12).
 
 ### ✅ Sessão 6 — SEO/GEO + Performance + Segurança Admin
 
@@ -160,26 +185,28 @@
 
 ## 🔴 Alta Prioridade (próxima sessão)
 
-### ~~1. Commitar sessão 7~~ ✅ FEITO — commit `39f4fc2`, push Vercel 2026-05-11
-
-### 2. Adicionar `CRON_SECRET` na Vercel
+### 1. Adicionar `CRON_SECRET` na Vercel ⚠️ BLOQUEIA SYNC EM PRODUÇÃO
 - Env var necessária para o auto sync funcionar em produção
 - Valor: qualquer string aleatória segura (ex: `openssl rand -hex 32`)
 - Adicionar no painel Vercel: Settings → Environment Variables → `CRON_SECRET`
 
-### 3. OG Image — criar imagem para compartilhamento social
-- Metadata referencia `/assets/brand/og-image.png` mas o arquivo **não existe ainda**
-- Dimensões: 1200×630px
-- Sem ela, links compartilhados no WhatsApp/Instagram mostram preview em branco
-- Criar em Canva ou Figma e salvar em `public/assets/brand/og-image.png`
+### 2. OG Image estática — fallback para páginas sem veículo
+- `/api/og?id=` dinâmica já funciona para veículos (Sessão 9)
+- Falta imagem estática `public/assets/brand/og-image.png` para home, blog index, embaixador, etc.
+- Dimensões: 1200×630px — criar em Canva/Figma
 
-### 4. ~~Vincular Store ao Pedro~~ ✅ FEITO (Sessão 6)
-- SQL executado: `UPDATE "Store" SET "ownerId" = 'da3a4523-2d30-401f-b95c-2fa470c1c8d8' WHERE slug = 'motorz';`
+### 3. Fix filtro de câmbio no Estoque (`estoque-client.tsx`)
+- Mesmo problema do blog: match exato `v.transmission !== 'AUTOMATIC'` falha se DB tem `'Automático'`
+- Correção: normalizar em lowercase no filter, ou adicionar variações
+- Arquivo: `src/app/(platform)/estoque/estoque-client.tsx` linha 166
+
+### 4. PWA — Instalar como app no celular (quick win)
+- `next-pwa` + `manifest.json` + ícones → usuário instala a vitrine na tela inicial
+- Estimativa: 2–3h. Alto impacto de retenção mobile (foco na audiência ABCD)
 
 ### 5. Testar adapters Cockpit / Revenda Mais / Motor21
-- Adapters implementados mas **nunca testados com API real**
-- Precisa: credenciais reais de um parceiro com cada DMS
-- Arquivos: `src/lib/inventory-sync/cockpit-adapter.ts`, `revenda-mais-adapter.ts`, `motor21-adapter.ts`
+- Adapters implementados mas nunca testados com API real
+- Precisa: credenciais de um parceiro com cada DMS
 
 ---
 
@@ -207,8 +234,9 @@
 ### Conversão (impacto direto no lead)
 - ~~**Simulador de parcelas inline**~~ — ❌ descartado: sem taxa/condições definidas pelos parceiros. Retomar na Fase 4 (F&I) quando Lico fechar banco.
 - ~~**Badge FIPE**~~ — ❌ descartado: preços dos parceiros podem estar acima da FIPE, badge seria negativo.
-- **Social proof ao vivo (simulado)** — "X pessoas viram esse carro hoje", seeded por hora do dia. Cria urgência. *(não implementado)*
+- **Social proof ao vivo no detalhe** — "X pessoas viram esse carro hoje / Y favoritos", seeded por hora. Já há Live Activity na home; falta na página de detalhe.
 - ~~**Badge NOVO / "chegou há X dias"**~~ — ✅ implementado (Sessão 8)
+- **Comparador de veículos** — botão "Comparar" nos cards → floating bar → tabela lado a lado (máx 3). Alto impacto em decisão de compra.
 
 ### Engajamento & Retenção
 - ~~**Favoritos sem cadastro**~~ — ✅ implementado (Sessão 8): hook + card + página `/favoritos`
