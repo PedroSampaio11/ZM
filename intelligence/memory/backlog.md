@@ -185,10 +185,9 @@
 
 ## 🔴 Alta Prioridade (próxima sessão)
 
-### 1. Adicionar `CRON_SECRET` na Vercel ⚠️ BLOQUEIA SYNC EM PRODUÇÃO
-- Env var necessária para o auto sync funcionar em produção
-- Valor: qualquer string aleatória segura (ex: `openssl rand -hex 32`)
-- Adicionar no painel Vercel: Settings → Environment Variables → `CRON_SECRET`
+### ~~1. Adicionar `CRON_SECRET` na Vercel~~ ✅ FEITO (2026-05-12)
+- Adicionada como variável Sensitive no painel Vercel por Pedro
+- Sync automático de estoque (cron diário meia-noite) agora autenticado em produção
 
 ### 2. OG Image estática — fallback para páginas sem veículo
 - `/api/og?id=` dinâmica já funciona para veículos (Sessão 9)
