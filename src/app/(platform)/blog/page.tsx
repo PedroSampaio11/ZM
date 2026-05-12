@@ -56,6 +56,10 @@ export default async function BlogPage() {
 
   return (
     <div style={{ background: 'var(--mz-snow)', minHeight: '100vh', paddingTop: '96px', paddingBottom: '80px' }}>
+      <style>{`
+        .blog-guide-card { text-decoration: none; display: block; background: white; border-radius: 20px; padding: 24px; border: 1px solid var(--border); transition: transform 0.15s, box-shadow 0.15s; }
+        .blog-guide-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.10); }
+      `}</style>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)' }}>
 
         {/* Header */}
@@ -74,10 +78,7 @@ export default async function BlogPage() {
           <p style={{ fontSize: '11px', fontWeight: 800, color: 'var(--mz-slate-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '20px' }}>Guias de compra</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '16px' }}>
             {categoryArticles.map(a => (
-              <Link key={a.slug} href={`/blog/${a.slug}`} style={{ textDecoration: 'none', display: 'block', background: 'white', borderRadius: '20px', padding: '24px', border: '1px solid var(--border)', transition: 'transform 0.15s, box-shadow 0.15s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
-              >
+              <Link key={a.slug} href={`/blog/${a.slug}`} className="blog-guide-card">
                 <span style={{ fontSize: '10px', fontWeight: 800, color: 'var(--mz-royal)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{a.tag}</span>
                 <h2 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--mz-ink)', margin: '8px 0 10px', lineHeight: 1.3, letterSpacing: '-0.01em' }}>{a.title}</h2>
                 <p style={{ fontSize: '13px', color: 'var(--text-dim)', lineHeight: 1.5, margin: 0 }}>{a.desc}</p>
