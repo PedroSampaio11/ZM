@@ -70,14 +70,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: `https://motorz.com.br/veiculo/${id}`,
-      images: vehicle.images?.[0] ? [{ url: vehicle.images[0], width: 1200, height: 630, alt: `${vehicle.brand} ${vehicle.model} ${vehicle.year}` }] : [],
+      images: [{ url: `https://motorz.com.br/api/og?id=${id}`, width: 1200, height: 630, alt: `${vehicle.brand} ${vehicle.model} ${vehicle.year}` }],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: vehicle.images?.[0] ? [vehicle.images[0]] : [],
+      images: [`https://motorz.com.br/api/og?id=${id}`],
     },
   };
 }

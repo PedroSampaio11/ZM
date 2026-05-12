@@ -8,13 +8,14 @@ import { VehicleCard } from '@/components/vehicle-card';
 import { LeadBottomSheet } from '@/components/lead-bottom-sheet';
 import {
   ShieldCheck, Search, Mouse, Shield, Star,
-  Cloud, Zap, MessageSquare, Cpu, LayoutGrid, Database, Car, Globe, Heart, MapPin
+  Cloud, Zap, MessageSquare, Cpu, LayoutGrid, Database, Car, Globe, Heart, MapPin, Bell
 } from 'lucide-react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
 import { ComparisonSlider } from '@/components/comparison-slider';
 import { LiveTimeBadge } from '@/components/live-time-badge';
 import { ZmChat } from '@/components/zm-chat';
+import { LiveActivity } from '@/components/live-activity';
 
 // ── Padronizado: eyebrow de seção ────────────────────────────
 function SectionEyebrow({ label, dark = false }: { label: string; dark?: boolean }) {
@@ -111,7 +112,7 @@ function HubHoverList() {
 
   return (
     <div 
-      style={{ position: 'relative', maxWidth: '1200px', margin: '60px auto 0', padding: '0 clamp(16px, 5vw, 48px)' }}
+      style={{ position: 'relative', maxWidth: '1400px', margin: '60px auto 0', padding: '0 clamp(16px, 5vw, 48px)' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setHoveredHub(null)}
     >
@@ -200,12 +201,13 @@ function HubHoverList() {
 
 
 interface Props {
-  vehicles:      Vehicle[];
-  totalVehicles: number;
-  totalPartners: number;
-  brands:        string[];
-  cities:        string[];
-  partners:      { name: string; initial: string }[];
+  vehicles:         Vehicle[];
+  incomingVehicles: Vehicle[];
+  totalVehicles:    number;
+  totalPartners:    number;
+  brands:           string[];
+  cities:           string[];
+  partners:         { name: string; initial: string }[];
 }
 
 type PriceRange = 'all' | 'under150' | '150to400' | 'over400';
@@ -340,7 +342,45 @@ function RotatingBadge() {
   );
 }
 
-export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands, cities, partners }: Props) {
+function IncomingCard({ vehicle, onNotify }: { vehicle: Vehicle; onNotify: () => void }) {
+  const imageUrl = vehicle.images?.[0] ?? 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800';
+  return (
+    <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(245,158,11,0.2)', background: 'white', position: 'relative' }}>
+      {/* Image blurred */}
+      <div style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden' }}>
+        <img src={imageUrl} alt={`${vehicle.brand} ${vehicle.model}`} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(6px) brightness(0.7)', transform: 'scale(1.05)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ background: 'rgba(245,158,11,0.9)', backdropFilter: 'blur(8px)', padding: '6px 14px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'white', display: 'inline-block' }} />
+            <span style={{ fontSize: '11px', fontWeight: 800, color: 'white', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Em breve</span>
+          </div>
+        </div>
+      </div>
+      {/* Info */}
+      <div style={{ padding: '20px' }}>
+        <p style={{ fontSize: '11px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
+          {vehicle.brand} • {vehicle.year}
+        </p>
+        <h3 style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--mz-ink)', marginBottom: '4px' }}>{vehicle.model}</h3>
+        {vehicle.version && <p style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '12px' }}>{vehicle.version}</p>}
+        <p style={{ fontSize: '12px', color: 'var(--mz-slate-dim)', marginBottom: '16px' }}>
+          {vehicle.partnerCity ? `${vehicle.partnerCity} · ` : ''} Preço a confirmar
+        </p>
+        <button
+          onClick={onNotify}
+          style={{ width: '100%', padding: '11px', borderRadius: '12px', border: '1.5px solid rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.06)', color: '#92400e', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.15s', fontFamily: 'inherit' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(245,158,11,0.12)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(245,158,11,0.06)'; }}
+        >
+          <Bell size={14} />
+          Me avise quando chegar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function PlatformClient({ vehicles, incomingVehicles, totalVehicles, totalPartners, brands, cities, partners }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isSheetOpen,     setIsSheetOpen]     = useState(false);
   const [activeBrand,     setActiveBrand]     = useState('Todos');
@@ -410,7 +450,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
     <div className="platform-container">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section ref={heroRef} className="noise" style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(80px, 10svh, 120px) clamp(16px, 5vw, 24px)', position: 'relative', overflow: 'hidden' }}>
+      <section ref={heroRef} className="noise" style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(80px, 10svh, 120px) clamp(16px, 5vw, 48px)', position: 'relative', overflow: 'hidden' }}>
         <div className="mesh-bg" />
         <div className="tech-grid" />
         <div className="glow-spot" />
@@ -603,23 +643,44 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
           </div>
         </div>
 
-        {/* ── Featured Carousel (bleeds into next section) ── */}
+        {/* ── Featured Carousel ── */}
         {featuredVehicles.length > 0 && (
-          <div style={{ position: 'relative', zIndex: 10, overflow: 'hidden' }}>
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', marginBottom: '20px' }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
+            {/* Label — mesma âncora de padding do scroll */}
+            <div style={{ padding: '0 clamp(16px, 5vw, 48px)', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FFB800', boxShadow: '0 0 8px rgba(255,184,0,0.5)' }} />
                 <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>Seleção Especial</span>
               </div>
             </div>
-            {/* Full-width bleed scroll — overflow visible so cards float over section seam */}
-            <div style={{ paddingLeft: 'clamp(16px, 5vw, 48px)', display: 'flex', gap: '24px', overflowX: 'auto', overflowY: 'visible', paddingBottom: '64px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+            {/* Scroll row */}
+            <div
+              style={{ paddingLeft: 'clamp(16px, 5vw, 48px)', paddingRight: 'clamp(16px, 5vw, 48px)', paddingBottom: '64px', display: 'flex', gap: '24px', overflowX: 'auto', overflowY: 'visible', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+            >
               {featuredVehicles.map((v, i) => (
-                <div key={v.id} style={{ minWidth: 'clamp(260px, 75vw, 420px)', flex: '0 0 clamp(260px, 75vw, 420px)', filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.10))' }}>
+                <div key={v.id} style={{ minWidth: 'clamp(300px, 82vw, 420px)', flex: '0 0 clamp(300px, 82vw, 420px)', filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.10))' }}>
                   <VehicleCard vehicle={v} onInterest={openSheet} index={i} featured />
                 </div>
               ))}
-              <div style={{ minWidth: '48px', flexShrink: 0 }} />
+              <div style={{ minWidth: '16px', flexShrink: 0 }} />
+            </div>
+          </div>
+        )}
+
+        {/* ── Chegando em Breve ── */}
+        {incomingVehicles.length > 0 && (
+          <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', marginBottom: '56px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#F59E0B', display: 'inline-block', boxShadow: '0 0 10px rgba(245,158,11,0.6)', animation: 'pulse 2s infinite' }} />
+              <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--mz-slate-dim)' }}>Chegando em Breve</span>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#F59E0B', background: 'rgba(245,158,11,0.08)', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(245,158,11,0.2)' }}>
+                {incomingVehicles.length} veículo{incomingVehicles.length > 1 ? 's' : ''}
+              </span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '20px' }}>
+              {incomingVehicles.map(v => (
+                <IncomingCard key={v.id} vehicle={v} onNotify={() => openSheet(v)} />
+              ))}
             </div>
           </div>
         )}
@@ -882,7 +943,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
       </section>
 
       <section id="hubs" style={{ padding: 'clamp(64px, 10vw, 120px) 0', background: '#fff', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', textAlign: 'left' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', textAlign: 'left' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
             <SectionEyebrow label="Nossos Hubs" />
           </div>
@@ -899,7 +960,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
 
       {/* ── QUEM SOMOS ───────────────────────────────────────────── */}
       <section id="quem-somos" style={{ background: 'var(--mz-snow)', padding: 'clamp(64px, 10vw, 140px) 0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)' }}>
           <div className="grid-about-2">
             <div>
               <SectionEyebrow label="Nossa História" />
@@ -935,7 +996,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
 
       {/* ── AVALIAÇÕES (REVIEW CAROUSEL) ────────────────────────── */}
       <section id="avaliacoes" style={{ padding: 'clamp(60px, 8vw, 100px) 0', background: '#fff', overflow: 'hidden', position: 'relative' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', textAlign: 'center', marginBottom: '48px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 5vw, 48px)', textAlign: 'center', marginBottom: '48px' }}>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <SectionEyebrow label="Padrão Motorz" />
           </div>
@@ -1019,6 +1080,7 @@ export function PlatformClient({ vehicles, totalVehicles, totalPartners, brands,
       />
       
       <ZmChat />
+      <LiveActivity vehicles={vehicles.slice(0, 12).map(v => ({ id: v.id, brand: v.brand, model: v.model, year: v.year, images: v.images ?? [] }))} />
     </div>
   );
 }

@@ -105,8 +105,8 @@ h1, h2, h3, h4, .font-display {
   top: 20px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 95%;
-  max-width: 1200px;
+  width: calc(100% - clamp(32px, 10vw, 96px));
+  max-width: 1400px;
   height: 64px;
   z-index: 1000;
   display: flex;
@@ -369,9 +369,9 @@ h1, h2, h3, h4, .font-display {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 clamp(16px, 5vw, 48px);
 }
 
 .banner-card {

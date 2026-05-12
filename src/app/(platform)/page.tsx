@@ -74,7 +74,7 @@ const websiteSchema = {
 };
 
 export default async function PlatformHome() {
-  const [rawVehicles, totalVehicles, totalPartners, brandsRaw, partnersRaw] = await withRetry(() =>
+  const [rawVehicles, totalVehicles, totalPartners, brandsRaw, partnersRaw, rawIncoming] = await withRetry(() =>
     Promise.all([
       prisma.vehicle.findMany({
         where:   { status: 'AVAILABLE' },
@@ -96,10 +96,21 @@ export default async function PlatformHome() {
         orderBy: { name: 'asc' },
         take:    20,
       }),
+      prisma.vehicle.findMany({
+        where:   { status: 'INCOMING' },
+        orderBy: { createdAt: 'desc' },
+        take:    6,
+        include: { partner: { select: { city: true } } },
+      }),
     ])
   );
 
   const vehicles: Vehicle[] = rawVehicles.map(({ partner, ...v }) => ({
+    ...v,
+    price:       Number(v.price),
+    partnerCity: partner?.city ?? null,
+  }));
+  const incomingVehicles: Vehicle[] = rawIncoming.map(({ partner, ...v }) => ({
     ...v,
     price:       Number(v.price),
     partnerCity: partner?.city ?? null,
@@ -124,6 +135,7 @@ export default async function PlatformHome() {
       />
       <PlatformClient
         vehicles={vehicles}
+        incomingVehicles={incomingVehicles}
         totalVehicles={totalVehicles}
         totalPartners={totalPartners}
         brands={brands}

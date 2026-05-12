@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Vehicle } from '@/modules/inventory/types';
 import { LeadBottomSheet } from '@/components/lead-bottom-sheet';
-import { ShieldCheck, Zap, Droplet, Cog, MapPin, CheckCircle, MessageCircle, FileText, Car, Star, Eye, Share2, Copy, Heart, Clock } from 'lucide-react';
+import { ShieldCheck, Zap, Droplet, Cog, MapPin, CheckCircle, MessageCircle, FileText, Car, Star, Eye, Share2, Copy, Heart, Clock, Check, X, Minus } from 'lucide-react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
+import { computeMotorzScore, getScoreDisplay } from '@/lib/motorz-score';
 import type { RelatedVehicle } from './page';
 
 interface Props {
@@ -99,6 +100,85 @@ function VehicleDescription({ vehicle }: { vehicle: Vehicle }) {
 
 import type { RecentVehicle } from '@/hooks/use-recently-viewed';
 
+const COMPARISON_ROWS: { label: string; motorz: string; other: string; otherTone: 'bad' | 'warn' }[] = [
+  { label: 'Inspeção veicular',    motorz: 'Padrão 30 pontos',   other: 'Não realizada',       otherTone: 'bad'  },
+  { label: 'Garantia do veículo',  motorz: 'Inclusa na compra',  other: 'Por conta do comprador', otherTone: 'bad' },
+  { label: 'Curadoria do estoque', motorz: 'Só veículos aprovados', other: 'Qualquer anunciante', otherTone: 'bad' },
+  { label: 'Preço transparente',   motorz: 'Sem taxas ocultas',  other: 'Sujeito a negociação', otherTone: 'warn' },
+  { label: 'Suporte pós-compra',   motorz: 'Equipe especializada', other: 'Vendedor particular', otherTone: 'warn' },
+];
+
+function ComparisonTable() {
+  return (
+    <div style={{ marginBottom: '28px', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'linear-gradient(160deg, #0c1f3a 0%, #081426 100%)' }}>
+
+      {/* Header */}
+      <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <p style={{ fontSize: '10px', fontWeight: 800, color: 'var(--mz-royal)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '4px' }}>Análise comparativa</p>
+        <h4 style={{ fontSize: '15px', fontWeight: 800, color: 'white', margin: 0, letterSpacing: '-0.01em' }}>Por que comprar pela Motorz?</h4>
+      </div>
+
+      {/* Column labels */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 88px 88px', gap: '0', padding: '10px 20px 8px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <span />
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <span style={{ fontSize: '10px', fontWeight: 800, color: '#FFC107', textTransform: 'uppercase', letterSpacing: '0.1em', background: 'rgba(255,193,7,0.1)', padding: '3px 10px', borderRadius: '20px' }}>Motorz</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Outros</span>
+        </div>
+      </div>
+
+      {/* Rows */}
+      {COMPARISON_ROWS.map((row, i) => (
+        <div
+          key={row.label}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 88px 88px',
+            padding: '11px 20px',
+            alignItems: 'center',
+            borderBottom: i < COMPARISON_ROWS.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+            transition: 'background 0.15s',
+          }}
+        >
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: '1.3' }}>{row.label}</span>
+
+          {/* Motorz */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(74,222,128,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Check size={13} strokeWidth={3} style={{ color: '#4ADE80' }} />
+            </div>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#4ADE80', textAlign: 'center', lineHeight: '1.3' }}>{row.motorz}</span>
+          </div>
+
+          {/* Competitor */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <div style={{
+              width: '24px', height: '24px', borderRadius: '50%',
+              background: row.otherTone === 'bad' ? 'rgba(248,113,113,0.1)' : 'rgba(251,191,36,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {row.otherTone === 'bad'
+                ? <X size={13} strokeWidth={3} style={{ color: 'rgba(248,113,113,0.9)' }} />
+                : <Minus size={13} strokeWidth={3} style={{ color: 'rgba(251,191,36,0.8)' }} />
+              }
+            </div>
+            <span style={{ fontSize: '10px', fontWeight: 600, color: row.otherTone === 'bad' ? 'rgba(248,113,113,0.7)' : 'rgba(251,191,36,0.65)', textAlign: 'center', lineHeight: '1.3' }}>{row.other}</span>
+          </div>
+        </div>
+      ))}
+
+      {/* Footer disclaimer */}
+      <div style={{ padding: '10px 20px', borderTop: '1px solid rgba(255,255,255,0.04)', background: 'rgba(0,0,0,0.15)' }}>
+        <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.18)', textAlign: 'center', margin: 0, lineHeight: '1.4' }}>
+          Comparação geral com plataformas de anúncio de terceiros. Condições podem variar.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function RecentlyViewedSection({ current, items }: { current: string; items: RecentVehicle[] }) {
   const visible = items.filter(x => x.id !== current).slice(0, 6);
   if (visible.length === 0) return null;
@@ -172,7 +252,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
   return (
     <div className={`platform-container pb-24 ${isFeatured ? 'featured-product-theme' : ''}`}>
       {/* ── BREADCRUMBS ── */}
-      <div className="pt-24 pb-6 px-6 max-w-7xl mx-auto relative z-20">
+      <div style={{ maxWidth: '1400px' }} className="pt-24 pb-6 px-6 mx-auto relative z-20">
         <nav className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-mz-slate-dim mb-4">
           <Link href="/" className="hover:text-mz-royal transition-colors">Home</Link>
           <span className="opacity-30">/</span>
@@ -194,7 +274,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div style={{ maxWidth: '1400px' }} className="mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* ── LEFT: GALLERY ── */}
         <div className="lg:col-span-7 space-y-4">
           <div className={`rounded-3xl overflow-hidden aspect-[16/10] relative shadow-lg ${isFeatured ? 'ring-2 ring-motorz-gold ring-offset-4 ring-offset-mz-snow' : ''}`}>
@@ -252,6 +332,12 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
               </p>
             )}
           </div>
+
+          {/* ── MOTORZ SCORE (Hidden here, moved to right column for better flow) ── */}
+          
+          <div className="mt-8">
+            <VehicleDescription vehicle={vehicle} />
+          </div>
         </div>
 
         {/* ── RIGHT: INFO & CONVERSION ── */}
@@ -280,7 +366,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
           <div className={`mb-10 p-8 rounded-[32px] border shadow-xl flex flex-col items-start gap-2 relative overflow-hidden transition-all hover:shadow-2xl ${isFeatured ? 'border-motorz-gold/30 bg-motorz-carbon text-white' : 'border-border bg-white'}`}>
             {/* Favorite button — top right of price card */}
             <button
-              onClick={() => toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?.[0] ?? null })}
+              onClick={() => toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?. [0] ?? null })}
               aria-label={isFav(vehicle.id) ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
               style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 2, background: 'transparent', border: 'none', cursor: 'pointer', color: isFav(vehicle.id) ? '#e11d48' : (isFeatured ? 'rgba(255,255,255,0.4)' : 'var(--mz-slate-dim)'), padding: '4px' }}
             >
@@ -344,6 +430,57 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
                 {displayViews} visualizações
               </span>
             </div>
+          </div>
+
+          {/* ── SELEÇÃO MOTORZ (Curadoria + Score) ── */}
+          <div className="mb-10 space-y-4">
+            {/* ── NOTA DO CURADOR ── */}
+            {vehicle.curatorNote && (
+              <div style={{ padding: '24px', borderRadius: '24px', background: 'linear-gradient(135deg, #0c1f3a 0%, #081426 100%)', border: '1px solid rgba(255,193,7,0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,193,7,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Star size={16} fill="#FFC107" style={{ color: '#FFC107' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '10px', fontWeight: 900, color: '#FFC107', textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Nota do Curador</p>
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>Destaque exclusivo Motorz</p>
+                  </div>
+                </div>
+                <p style={{ fontSize: '15px', lineHeight: 1.7, color: 'rgba(255,255,255,0.85)', fontStyle: 'italic', margin: '0 0 16px', borderLeft: '3px solid rgba(255,193,7,0.4)', paddingLeft: '16px' }}>
+                  &ldquo;{vehicle.curatorNote}&rdquo;
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                   <div style={{ width: '12px', height: '1px', background: 'rgba(255,193,7,0.3)' }} />
+                   <p style={{ fontSize: '11px', fontWeight: 800, color: '#FFC107', opacity: 0.8, margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Motorz</p>
+                </div>
+              </div>
+            )}
+
+            {/* ── MOTORZ SCORE ── */}
+            {(() => {
+              const score = computeMotorzScore(vehicle);
+              const { label, color, bg, ring } = getScoreDisplay(score);
+              const pct = Math.round(((score - 55) / 45) * 100);
+              return (
+                <div style={{ padding: '24px', borderRadius: '24px', background: bg, border: `1px solid ${ring}25`, boxShadow: `0 8px 24px ${ring}15` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div>
+                      <p style={{ fontSize: '10px', fontWeight: 900, color: ring, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '4px' }}>Motorz Score</p>
+                      <p style={{ fontSize: '24px', fontWeight: 900, color, letterSpacing: '-0.02em', margin: 0 }}>
+                        {score} <span style={{ fontSize: '15px', fontWeight: 700, opacity: 0.8 }}>{label}</span>
+                      </p>
+                    </div>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '50%', border: `3px solid ${ring}`, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 15px ${ring}20` }}>
+                      <span style={{ fontSize: '18px', fontWeight: 900, color: ring }}>{score}</span>
+                    </div>
+                  </div>
+                  <div style={{ height: '8px', borderRadius: '10px', background: `${ring}15`, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, borderRadius: '10px', background: ring, transition: 'width 1s ease-out' }} />
+                  </div>
+                  <p style={{ fontSize: '11px', color, opacity: 0.7, marginTop: '10px', fontWeight: 500 }}>Avaliação técnica baseada em 30 itens e histórico</p>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-10">
@@ -451,9 +588,8 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
             ))}
           </div>
 
-
-          
-          <VehicleDescription vehicle={vehicle} />
+          {/* ── COMPARATIVO DE VALOR ── */}
+          <ComparisonTable />
         </div>
       </div>
 

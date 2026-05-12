@@ -1,5 +1,5 @@
 # Backlog — motorz
-**Sessão**: 8 | **Data**: 2026-05-11 | **TypeScript**: 0 erros ✅
+**Sessão**: 9 | **Data**: 2026-05-12 | **TypeScript**: 0 erros ✅
 
 ---
 
@@ -96,7 +96,38 @@
 - ~~Badge FIPE~~: descartado — preços das lojas podem estar acima da FIPE, badge negativo na conversão
 - ~~Simulador de parcelas~~: descartado — sem taxa/condições definidas pelos parceiros, gera expectativa errada; retomado quando Lico fechar banco parceiro (Fase 4)
 
-> ⚠️ **Sessão 8 não commitada ainda** — pendente commit + push Vercel.
+> ✅ **Sessão 8 commitada** — commits `279f82e`, `069c51b`, `b3fc555` (2026-05-11/12).
+
+### ✅ Sessão 9 — Diferenciação de Produto + UX Premium
+
+**Tabela Comparativa (vehicle-details-client.tsx):**
+- `ComparisonTable` estático: Motorz vs "Marketplace de anúncio" (sem nomear concorrentes — LGPD/CONAR safe)
+- Lucide icons (Check/X/Minus), disclaimer legal no rodapé, 5 critérios selecionados a favor da Motorz
+
+**Fix Seleção Especial + Cards Mobile:**
+- Label e scroll row unificados no mesmo `maxWidth: 1400px` pai → alinhamento garantido no notebook
+- Card width: `clamp(300px, 82vw, 420px)` → mais largo no mobile
+- Padding interno do card: `clamp(16px, 4vw, 24px)` → menos apertado
+- Footer do card: `flexWrap + flexShrink: 0` → preço e botão nunca se espremem
+
+**Motorz Score (`src/lib/motorz-score.ts`):**
+- Função pura `computeMotorzScore()` → 65–100 (base 65 = todo veículo curado começa em "Bom")
+- Fórmula: ano (13pts) + km (13pts) + câmbio (6pts) + versão (3pts) + base 65
+- Labels: **Bom** (ouro #FFC107) | **Muito Bom** (azul #1243B2) | **Excelente** (verde #22C55E)
+- Badge circular no card + painel expandido (score, label, barra de progresso) na página de detalhe
+
+**Nota do Curador:**
+- Campo `curatorNote String? @db.Text` no schema Vehicle (migration via `db push`)
+- Admin `/gestao/inventory/[id]`: card "Nota do Curador" com textarea + server action `saveCuratorNote`
+- Público: card escuro com citação em itálico + "— Time Motorz" (renderiza só se preenchido)
+
+**Chegando em Breve (INCOMING):**
+- `INCOMING` adicionado ao enum `VehicleStatus` (migration aplicada)
+- Status disponível no admin com badge âmbar
+- Seção na home: grid de cards com imagem blurred, badge pulsante, CTA "Me avise quando chegar"
+- Query em `page.tsx`, prop `incomingVehicles` no `PlatformClient`, componente `IncomingCard`
+
+> ⚠️ **Sessão 9 não commitada ainda.**
 
 ### ✅ Sessão 6 — SEO/GEO + Performance + Segurança Admin
 

@@ -15,6 +15,7 @@ const statusConfig: Record<VehicleStatus, { label: string; dot: string; badge: s
   RESERVED:  { label: 'Reservado',  dot: 'bg-primary',    badge: 'bg-primary/20 text-primary' },
   SOLD:      { label: 'Vendido',    dot: 'bg-zinc-500',   badge: 'bg-zinc-700 text-zinc-400' },
   ARCHIVED:  { label: 'Arquivado', dot: 'bg-zinc-700',   badge: 'bg-zinc-800 text-zinc-600' },
+  INCOMING:  { label: 'Em Breve',  dot: 'bg-amber-400',  badge: 'bg-amber-500/20 text-amber-400' },
 }
 
 type SearchParams = {

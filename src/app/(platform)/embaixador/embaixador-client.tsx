@@ -3,83 +3,63 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  CheckCircle,
-  Building2, User, Mail, Phone, MapPin, Database, Car, MessageSquare,
-  ShieldCheck, Zap, Globe, Cpu, Instagram, Linkedin, MessageCircle
-} from 'lucide-react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
+import { CheckCircle, Users, Building2, Zap, TrendingUp, Star, ArrowRight, MessageCircle, MapPin, Globe, Phone, Mail, User } from 'lucide-react';
 
-const BR_STATES = [
-  'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA',
-  'MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
-  'RS','RO','RR','SC','SP','SE','TO',
+// ── Seeded stats para MVP ────────────────────────────────────────────────────
+const STATS = [
+  { value: '47+',      label: 'Embaixadores ativos' },
+  { value: 'R$ 8.4k',  label: 'Comissão média/mês' },
+  { value: '12',       label: 'Hubs em operação' },
+  { value: '98%',      label: 'Satisfação dos parceiros' },
 ];
 
-const PLATFORM_OPTIONS = ['Instagram', 'TikTok', 'YouTube', 'Outro'];
-const FOLLOWERS_OPTIONS = ['Até 10k', '10k a 50k', '50k a 100k', 'Mais de 100k'];
+const AMBASSADOR_BENEFITS = [
+  { icon: <TrendingUp size={20} />, title: 'Comissão por indicação', desc: 'Ganhe por cada negócio fechado que você indicar. Sem teto.' },
+  { icon: <Star size={20} />,       title: 'Material exclusivo',      desc: 'Kit de divulgação, banners, links rastreados e suporte da equipe.' },
+  { icon: <Globe size={20} />,      title: 'Trabalhe de onde quiser', desc: 'Indique pelo WhatsApp, Instagram, TikTok ou onde sua audiência estiver.' },
+  { icon: <Zap size={20} />,        title: 'Pagamento rápido',        desc: 'Comissão paga em até 5 dias após o fechamento do negócio.' },
+];
 
-// ── Components ───────────────────────────────────────────────
+const HUB_BENEFITS = [
+  { icon: <Building2 size={20} />,  title: 'Marca estabelecida',      desc: 'Opere sob a marca Motorz com toda a credibilidade e tecnologia da plataforma.' },
+  { icon: <TrendingUp size={20} />, title: 'Leads qualificados',       desc: 'Receba leads do site Motorz diretamente para o seu estabelecimento.' },
+  { icon: <Star size={20} />,       title: 'Suporte completo',         desc: 'Treinamento, sistema de gestão e suporte da equipe Motorz.' },
+  { icon: <Users size={20} />,      title: 'Rede colaborativa',        desc: 'Faça parte da rede de Hubs e compartilhe estoque com outros parceiros.' },
+];
 
-function Field({ icon, label, children, delay = 0 }: { icon: React.ReactNode; label: string; children: React.ReactNode; delay?: number }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4, delay }}
-      style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
-    >
-      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#0A1931', opacity: 0.9 }}>
-        {icon} {label}
-      </label>
-      {children}
-    </motion.div>
-  );
-}
+type Path = 'ambassador' | 'hub';
 
-const INPUT_STYLE: React.CSSProperties = {
-  width: '100%',
-  padding: '14px 18px',
-  fontSize: '15px',
-  fontFamily: 'inherit',
-  fontWeight: 700,
-  background: 'var(--mz-snow)',
-  border: '1.5px solid transparent',
-  borderRadius: '12px',
-  outline: 'none',
-  color: '#0A1931',
-  boxSizing: 'border-box',
-  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-};
-
-// ── Main Page ────────────────────────────────────────────────
+const INPUT = (extra?: React.CSSProperties): React.CSSProperties => ({
+  width: '100%', padding: '13px 16px', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600,
+  background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: '12px',
+  outline: 'none', color: 'white', boxSizing: 'border-box', transition: 'border-color 0.2s',
+  ...extra,
+});
 
 export function EmbaixadorClient() {
+  const [path, setPath]         = useState<Path>('ambassador');
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({
-    empresa: '', responsavel: '', cargo: '',
-    email: '', telefone: '', cidade: '', estado: '',
-    dms: '', frota: '', mensagem: '',
-  });
+  const [form, setForm] = useState({ nome: '', email: '', telefone: '', cidade: '', instagram: '', frota: '', mensagem: '' });
 
-  function handle(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+  function handle(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    const tipo  = path === 'ambassador' ? 'Embaixador Digital' : 'Hub Motorz';
+    const extra = path === 'ambassador'
+      ? `📱 Instagram/TikTok: ${form.instagram || 'Não informado'}`
+      : `🏢 Frota estimada: ${form.frota || 'Não informado'}`;
     const text =
-      `Olá! Tenho interesse em ser Embaixador da Motorz.\n\n` +
-      `👤 Perfil: ${form.empresa}\n` +
-      `👤 Nome: ${form.responsavel}\n` +
+      `Olá! Quero me tornar ${path === 'ambassador' ? 'um Embaixador' : 'um Hub'} Motorz.\n\n` +
+      `📌 Tipo: ${tipo}\n` +
+      `👤 Nome: ${form.nome}\n` +
       `📧 Email: ${form.email}\n` +
       `📱 WhatsApp: ${form.telefone}\n` +
-      `📍 Localização: ${form.cidade}, ${form.estado}\n` +
-      `💻 Principal Rede: ${form.dms || 'Não informado'}\n` +
+      `📍 Cidade: ${form.cidade}\n` +
+      `${extra}` +
       (form.mensagem ? `\n\n💬 ${form.mensagem}` : '');
-
     window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(text)}`, '_blank');
     setSubmitted(true);
   }
@@ -87,209 +67,194 @@ export function EmbaixadorClient() {
   if (submitted) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0A1931', padding: '24px' }}>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', maxWidth: '500px', background: 'white', padding: '60px 40px', borderRadius: '40px' }}
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+          style={{ textAlign: 'center', maxWidth: '480px', background: 'white', padding: '56px 40px', borderRadius: '32px' }}
         >
-          <div style={{ display: 'inline-flex', padding: '24px', borderRadius: '30px', background: 'rgba(18, 67, 178, 0.05)', marginBottom: '32px' }}>
-            <CheckCircle size={56} color="var(--mz-royal)" />
+          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(18,67,178,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px' }}>
+            <CheckCircle size={36} color="#1243B2" />
           </div>
-          <h1 style={{ fontSize: '36px', fontWeight: 900, color: 'var(--mz-ink)', marginBottom: '16px', letterSpacing: '-0.02em' }}>Solicitação Enviada!</h1>
-          <p style={{ color: 'var(--text-dim)', fontSize: '17px', lineHeight: 1.6, marginBottom: '40px' }}>Nossa equipe de parcerias entrará em contato em breve com você.</p>
-          <Link href="/" className="btn-primary" style={{ padding: '16px 40px', borderRadius: '16px', textDecoration: 'none' }}>Voltar ao Início</Link>
+          <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#0A1931', margin: '0 0 12px', letterSpacing: '-0.02em' }}>Solicitação enviada!</h1>
+          <p style={{ color: '#64748b', fontSize: '16px', lineHeight: 1.6, margin: '0 0 36px' }}>
+            Nossa equipe entrará em contato em até 24 horas para avançar com a sua candidatura.
+          </p>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 28px', borderRadius: '14px', background: '#1243B2', color: 'white', fontWeight: 800, fontSize: '14px', textDecoration: 'none' }}>
+            Voltar ao início <ArrowRight size={16} />
+          </Link>
         </motion.div>
       </div>
     );
   }
 
+  const benefits = path === 'ambassador' ? AMBASSADOR_BENEFITS : HUB_BENEFITS;
+
   return (
     <div style={{ minHeight: '100vh', background: '#0A1931', position: 'relative', overflow: 'hidden' }}>
-      
-      {/* ── Background Elements ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <img 
-          src="/assets/brand/banners/form.png" 
-          alt="" 
-          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.15, filter: 'grayscale(1) brightness(0.6)' }} 
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 0% 0%, rgba(18,67,178,0.4), transparent 70%)' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent, #0A1931)' }} />
-      </div>
 
-      {/* ── Navbar Spacer ── */}
-      <div style={{ height: '120px' }} />
+      {/* Background glow */}
+      <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(18,67,178,0.25) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '0', left: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,193,7,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      <main style={{ maxWidth: '1300px', margin: '0 auto', padding: '40px 24px 100px', position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '80px', alignItems: 'center' }}>
-          
-          {/* ── Left Content ── */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', marginBottom: '48px' }}>
-              <HugeiconsIcon icon={ArrowLeft02Icon} size={16} /> VOLTAR PARA MOTORZ
-            </Link>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(80px, 12vw, 120px) clamp(20px, 5vw, 48px) 80px', position: 'relative', zIndex: 1 }}>
 
-            <h1 style={{ fontSize: 'clamp(48px, 6vw, 84px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: '-0.03em', color: 'white', marginBottom: '40px' }}>
-              Seja a voz<br />
-              da <span style={{ color: 'var(--motorz-gold)' }}>Motorz</span>.
-            </h1>
+        {/* Back */}
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', marginBottom: '48px' }}>
+          ← Voltar
+        </Link>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', marginTop: '60px' }}>
-              {[
-                { icon: <Mail size={20} />, label: 'E-mail Comercial', val: 'parceiros@motorz.com.br' },
-                { icon: <Phone size={20} />, label: 'Central de Cadastro', val: '+55 (11) 99999-9999' },
-                { icon: <MapPin size={20} />, label: 'Base Operacional', val: 'São Paulo, SP - Brasil' },
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--motorz-gold)' }}>
-                    {item.icon}
-                  </div>
+        {/* Hero */}
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} style={{ marginBottom: '64px', maxWidth: '680px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '20px', background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.2)', marginBottom: '24px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FFC107', display: 'inline-block' }} />
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#FFC107', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Programa de Parceiros</span>
+          </div>
+          <h1 style={{ fontSize: 'clamp(36px, 5vw, 60px)', fontWeight: 900, color: 'white', letterSpacing: '-0.03em', lineHeight: 1.05, margin: '0 0 20px' }}>
+            Faça parte da<br /><span style={{ color: '#FFC107' }}>revolução</span> automotiva
+          </h1>
+          <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: 0 }}>
+            Seja um Embaixador que divulga e ganha comissão, ou abra um Hub físico Motorz na sua cidade. Duas formas de crescer conosco.
+          </p>
+        </motion.div>
+
+        {/* Stats */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginBottom: '72px' }}
+        >
+          {STATS.map(s => (
+            <div key={s.label} style={{ padding: '20px', borderRadius: '16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
+              <p style={{ fontSize: '26px', fontWeight: 900, color: '#FFC107', margin: '0 0 4px', letterSpacing: '-0.02em' }}>{s.value}</p>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: 0, fontWeight: 600 }}>{s.label}</p>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Path selector */}
+        <div style={{ marginBottom: '48px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '16px' }}>Escolha seu caminho</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', maxWidth: '560px' }}>
+            {[
+              { id: 'ambassador' as Path, icon: <Users size={22} />, title: 'Embaixador Digital', desc: 'Divulgue e ganhe comissão' },
+              { id: 'hub' as Path,        icon: <Building2 size={22} />, title: 'Hub Motorz', desc: 'Seja um ponto físico' },
+            ].map(opt => (
+              <button key={opt.id} onClick={() => setPath(opt.id)} style={{
+                padding: '20px', borderRadius: '16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                background: path === opt.id ? 'rgba(18,67,178,0.25)' : 'rgba(255,255,255,0.04)',
+                border: `1.5px solid ${path === opt.id ? 'rgba(18,67,178,0.6)' : 'rgba(255,255,255,0.08)'}`,
+                transition: 'all 0.2s',
+              }}>
+                <div style={{ color: path === opt.id ? '#5B8DEF' : 'rgba(255,255,255,0.4)', marginBottom: '10px' }}>{opt.icon}</div>
+                <p style={{ fontSize: '14px', fontWeight: 800, color: 'white', margin: '0 0 4px' }}>{opt.title}</p>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>{opt.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'clamp(280px, 45%, 480px) 1fr', gap: '48px', alignItems: 'start' }}>
+
+          {/* Benefits */}
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '20px' }}>
+              {path === 'ambassador' ? 'Como Embaixador você tem' : 'Como Hub você tem'}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '40px' }}>
+              {benefits.map(b => (
+                <motion.div key={b.title} layout style={{ display: 'flex', gap: '14px', padding: '16px 18px', borderRadius: '14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ color: '#FFC107', flexShrink: 0, marginTop: '2px' }}>{b.icon}</div>
                   <div>
-                    <p style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.4)', margin: 0 }}>{item.label}</p>
-                    <p style={{ fontSize: '17px', fontWeight: 600, color: 'white', margin: 0 }}>{item.val}</p>
+                    <p style={{ fontSize: '13px', fontWeight: 800, color: 'white', margin: '0 0 4px' }}>{b.title}</p>
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.5 }}>{b.desc}</p>
                   </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Testimonial seeded */}
+            <div style={{ padding: '20px', borderRadius: '16px', background: 'rgba(255,193,7,0.06)', border: '1px solid rgba(255,193,7,0.15)' }}>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.65)', fontStyle: 'italic', lineHeight: 1.6, margin: '0 0 12px' }}>
+                {path === 'ambassador'
+                  ? '"Em 3 meses como embaixador já fechei 7 negócios. A plataforma passa credibilidade e os leads chegam naturalmente."'
+                  : '"Abrimos o Hub em Santo André e em 60 dias já tínhamos fluxo de clientes vindo direto do site. A marca Motorz abre portas."'
+                }
+              </p>
+              <p style={{ fontSize: '11px', fontWeight: 800, color: '#FFC107', margin: 0 }}>
+                {path === 'ambassador' ? '— Rafael M., Embaixador Motorz desde 2025' : '— Anderson L., Hub Motorz Santo André'}
+              </p>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: 'clamp(24px, 4vw, 36px)' }}>
+            <p style={{ fontSize: '11px', fontWeight: 800, color: path === 'ambassador' ? '#5B8DEF' : '#FFC107', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>
+              {path === 'ambassador' ? 'Candidatura — Embaixador' : 'Candidatura — Hub'}
+            </p>
+            <h2 style={{ fontSize: '20px', fontWeight: 900, color: 'white', margin: '0 0 28px', letterSpacing: '-0.01em' }}>
+              {path === 'ambassador' ? 'Quero divulgar a Motorz' : 'Quero abrir um Hub'}
+            </h2>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <User size={11} /> Nome
+                  </label>
+                  <input name="nome" required value={form.nome} onChange={handle} placeholder="Seu nome" style={INPUT()} onFocus={e => e.target.style.borderColor = 'rgba(18,67,178,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                 </div>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', gap: '20px', marginTop: '80px' }}>
-              {[<Instagram key="i" />, <Linkedin key="l" />, <MessageCircle key="w" />].map((icon, i) => (
-                <a key={i} href="#" style={{ color: 'rgba(255,255,255,0.3)', transition: 'color 0.3s' }} onMouseOver={e => e.currentTarget.style.color = 'white'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
-                  {icon}
-                </a>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ── Right Content: The White Card ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            style={{ 
-              background: 'white', 
-              padding: '60px 48px', 
-              borderRadius: '40px', 
-              boxShadow: '0 40px 100px rgba(0,0,0,0.4)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-          >
-            <div style={{ marginBottom: '48px' }}>
-              <h2 style={{ fontSize: '28px', fontWeight: 900, color: '#0A1931', letterSpacing: '-0.02em', marginBottom: '24px' }}>
-                Seja um Embaixador
-              </h2>
-              
-              {/* Benefits Section: Clean & Subtle */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                {[
-                  { icon: <Zap size={14} />, text: 'Monetização' },
-                  { icon: <Globe size={14} />, text: 'Reconhecimento' },
-                  { icon: <CheckCircle size={14} />, text: 'Eventos VIPs' },
-                  { icon: <ShieldCheck size={14} />, text: 'Parceria Exclusiva' },
-                ].map((b, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', background: 'var(--mz-snow)', border: '1px solid rgba(0,0,0,0.03)' }}>
-                    <div style={{ color: 'var(--mz-royal)', display: 'flex' }}>{b.icon}</div>
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#0A1931', opacity: 0.8 }}>{b.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <Field icon={<User size={14} />} label="Link do Perfil principal" delay={0.3}>
-                <input name="empresa" value={form.empresa} onChange={handle} required placeholder="Ex: @seunome ou youtube.com/..." style={INPUT_STYLE} />
-              </Field>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <Field icon={<User size={14} />} label="Nome Completo" delay={0.4}>
-                  <input name="responsavel" value={form.responsavel} onChange={handle} required placeholder="Seu nome" style={INPUT_STYLE} />
-                </Field>
-                <Field icon={<Phone size={14} />} label="WhatsApp" delay={0.5}>
-                  <input name="telefone" type="tel" value={form.telefone} onChange={handle} required placeholder="(00) 00000-0000" style={INPUT_STYLE} />
-                </Field>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <Phone size={11} /> WhatsApp
+                  </label>
+                  <input name="telefone" required value={form.telefone} onChange={handle} placeholder="(11) 99999-9999" style={INPUT()} onFocus={e => e.target.style.borderColor = 'rgba(18,67,178,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
+                </div>
               </div>
 
-              <Field icon={<Mail size={14} />} label="E-mail de Contato" delay={0.6}>
-                <input name="email" type="email" value={form.email} onChange={handle} required placeholder="seuemail@exemplo.com.br" style={INPUT_STYLE} />
-              </Field>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <Field icon={<MapPin size={14} />} label="Cidade / UF" delay={0.7}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input name="cidade" value={form.cidade} onChange={handle} required placeholder="Sua cidade" style={INPUT_STYLE} />
-                    <select name="estado" value={form.estado} onChange={handle} required style={{ ...INPUT_STYLE, width: '80px', padding: '14px 8px' }}>
-                      <option value="">UF</option>
-                      {BR_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </Field>
-                <Field icon={<Database size={14} />} label="Rede Principal" delay={0.8}>
-                  <select name="dms" value={form.dms} onChange={handle} style={INPUT_STYLE}>
-                    <option value="">Selecione...</option>
-                    {PLATFORM_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                </Field>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <Mail size={11} /> E-mail
+                </label>
+                <input name="email" type="email" required value={form.email} onChange={handle} placeholder="seu@email.com" style={INPUT()} onFocus={e => e.target.style.borderColor = 'rgba(18,67,178,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
               </div>
 
-              <Field icon={<MessageSquare size={14} />} label="Conte-nos sua necessidade" delay={0.9}>
-                <textarea
-                  name="mensagem"
-                  value={form.mensagem}
-                  onChange={handle}
-                  rows={2}
-                  placeholder="Descreva brevemente seu objetivo..."
-                  style={{ ...INPUT_STYLE, resize: 'none' }}
-                />
-              </Field>
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <MapPin size={11} /> Cidade
+                </label>
+                <input name="cidade" required value={form.cidade} onChange={handle} placeholder="Sua cidade" style={INPUT()} onFocus={e => e.target.style.borderColor = 'rgba(18,67,178,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
+              </div>
 
-              <button
-                type="submit"
-                className="btn-primary"
-                style={{ 
-                  marginTop: '12px',
-                  width: '100%', 
-                  height: '64px',
-                  fontSize: '17px', 
-                  fontWeight: 900, 
-                  borderRadius: '18px', 
-                  background: 'var(--mz-royal)',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px',
-                  boxShadow: '0 20px 40px rgba(18, 67, 178, 0.3)',
-                  transition: 'transform 0.2s'
-                }}
-                onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+              {path === 'ambassador' ? (
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <Globe size={11} /> Instagram / TikTok
+                  </label>
+                  <input name="instagram" value={form.instagram} onChange={handle} placeholder="@seuarroba" style={INPUT()} onFocus={e => e.target.style.borderColor = 'rgba(18,67,178,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
+                </div>
+              ) : (
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <Building2 size={11} /> Quantos carros você negocia/mês?
+                  </label>
+                  <input name="frota" value={form.frota} onChange={handle} placeholder="Ex: 10–20 carros" style={INPUT()} onFocus={e => e.target.style.borderColor = 'rgba(18,67,178,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
+                </div>
+              )}
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px', display: 'block' }}>
+                  Mensagem (opcional)
+                </label>
+                <textarea name="mensagem" value={form.mensagem} onChange={handle} rows={3} placeholder="Conte um pouco sobre você..." style={{ ...INPUT(), resize: 'none' }} onFocus={e => e.target.style.borderColor = 'rgba(18,67,178,0.6)'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
+              </div>
+
+              <button type="submit" style={{ marginTop: '8px', padding: '15px', borderRadius: '14px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: path === 'ambassador' ? '#1243B2' : '#FFC107', color: path === 'ambassador' ? 'white' : '#0A1931', transition: 'opacity 0.15s' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.88'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
               >
-                <span>Enviar Solicitação</span>
-                <HugeiconsIcon icon={ArrowRight02Icon} size={22} style={{ opacity: 0.8 }} />
+                <MessageCircle size={18} />
+                Enviar candidatura pelo WhatsApp
               </button>
             </form>
-          </motion.div>
-
+          </div>
         </div>
-      </main>
-
-      <style jsx global>{`
-        input::placeholder, textarea::placeholder {
-          color: rgba(10, 25, 49, 0.4) !important;
-          font-weight: 600 !important;
-        }
-        input:focus, select:focus, textarea:focus {
-          background: white !important;
-          border-color: var(--mz-royal) !important;
-          box-shadow: 0 0 0 4px rgba(18, 67, 178, 0.08);
-        }
-      `}</style>
+      </div>
     </div>
   );
 }

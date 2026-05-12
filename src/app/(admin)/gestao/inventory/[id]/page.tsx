@@ -1,4 +1,4 @@
-import { Car, Building2, Tag, Fuel, Gauge, Palette, Calendar, Hash } from 'lucide-react'
+import { Car, Building2, Tag, Fuel, Gauge, Palette, Calendar, Hash, PenLine } from 'lucide-react'
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,14 +11,16 @@ import { revalidatePath } from 'next/cache'
 import { VehicleStatus } from '@prisma/client'
 
 const statusConfig: Record<VehicleStatus, { label: string; badge: string; dot: string }> = {
-  AVAILABLE: { label: 'Disponível', badge: 'bg-green-600/20 text-green-400',  dot: 'bg-green-500' },
-  RESERVED:  { label: 'Reservado',  badge: 'bg-primary/20 text-primary',       dot: 'bg-primary' },
-  SOLD:      { label: 'Vendido',    badge: 'bg-zinc-700 text-zinc-400',        dot: 'bg-zinc-500' },
-  ARCHIVED:  { label: 'Arquivado', badge: 'bg-zinc-800 text-zinc-600',        dot: 'bg-zinc-700' },
+  AVAILABLE: { label: 'Disponível',     badge: 'bg-green-600/20 text-green-400',   dot: 'bg-green-500'  },
+  RESERVED:  { label: 'Reservado',      badge: 'bg-primary/20 text-primary',        dot: 'bg-primary'    },
+  SOLD:      { label: 'Vendido',        badge: 'bg-zinc-700 text-zinc-400',         dot: 'bg-zinc-500'   },
+  ARCHIVED:  { label: 'Arquivado',      badge: 'bg-zinc-800 text-zinc-600',         dot: 'bg-zinc-700'   },
+  INCOMING:  { label: 'Em Breve',       badge: 'bg-amber-500/20 text-amber-400',    dot: 'bg-amber-400'  },
 }
 
 const statusActions: { status: VehicleStatus; label: string; style: string }[] = [
   { status: 'AVAILABLE', label: 'Marcar Disponível', style: 'bg-green-600/20 text-green-400 hover:bg-green-600/40 border-green-600/20' },
+  { status: 'INCOMING',  label: 'Em Breve',          style: 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border-amber-500/20' },
   { status: 'RESERVED',  label: 'Marcar Reservado',  style: 'bg-primary/20 text-primary hover:bg-primary/30 border-primary/20' },
   { status: 'SOLD',      label: 'Marcar Vendido',    style: 'bg-zinc-700/50 text-zinc-300 hover:bg-zinc-700 border-white/5' },
   { status: 'ARCHIVED',  label: 'Arquivar',          style: 'bg-red-600/10 text-red-500 hover:bg-red-600/20 border-red-600/10' },
@@ -30,6 +32,13 @@ async function changeStatus(vehicleId: string, formData: FormData) {
   await prisma.vehicle.update({ where: { id: vehicleId }, data: { status } })
   revalidatePath(`/gestao/inventory/${vehicleId}`)
   revalidatePath('/gestao/inventory')
+}
+
+async function saveCuratorNote(vehicleId: string, formData: FormData) {
+  'use server'
+  const curatorNote = (formData.get('curatorNote') as string).trim() || null
+  await prisma.vehicle.update({ where: { id: vehicleId }, data: { curatorNote } })
+  revalidatePath(`/gestao/inventory/${vehicleId}`)
 }
 
 type Params = { params: Promise<{ id: string }> }
@@ -52,7 +61,8 @@ export default async function VehicleDetailPage({ params }: Params) {
 
   const status = statusConfig[vehicle.status]
   const price  = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(Number(vehicle.price))
-  const changeStatusForVehicle = changeStatus.bind(null, vehicle.id)
+  const changeStatusForVehicle  = changeStatus.bind(null, vehicle.id)
+  const saveCuratorNoteForVehicle = saveCuratorNote.bind(null, vehicle.id)
 
   const specs = [
     { icon: Calendar, label: 'Ano',          value: String(vehicle.year) },
@@ -156,6 +166,35 @@ export default async function VehicleDetailPage({ params }: Params) {
               >
                 Ver na página de Lojas →
               </Link>
+            </CardContent>
+          </Card>
+
+          {/* Nota do Curador */}
+          <Card className="bg-card/50 border-white/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                <PenLine size={14} className="text-amber-400" /> Nota do Curador
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form action={saveCuratorNoteForVehicle} className="space-y-3">
+                <textarea
+                  name="curatorNote"
+                  defaultValue={vehicle.curatorNote ?? ''}
+                  placeholder="Ex: Dono único, revisão em dia, histórico impecável..."
+                  rows={3}
+                  className="w-full text-sm bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2.5 text-foreground placeholder:text-zinc-600 resize-none outline-none focus:border-primary/50 transition-colors"
+                />
+                <button
+                  type="submit"
+                  className="w-full px-3 py-2 rounded-lg text-xs font-bold border bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20 transition-all text-left"
+                >
+                  Salvar Nota
+                </button>
+              </form>
+              {vehicle.curatorNote && (
+                <p className="mt-3 text-[10px] text-zinc-600 italic">"{vehicle.curatorNote.slice(0, 60)}{vehicle.curatorNote.length > 60 ? '…' : ''}"</p>
+              )}
             </CardContent>
           </Card>
 

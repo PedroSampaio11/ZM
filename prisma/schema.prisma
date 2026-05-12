@@ -36,6 +36,7 @@ enum VehicleStatus {
   RESERVED
   SOLD
   ARCHIVED
+  INCOMING
 }
 
 enum LeadStatus {
@@ -186,10 +187,11 @@ model Vehicle {
   images       String[]
   videoUrl     String?
 
-  status     VehicleStatus @default(AVAILABLE)
-  externalId String?       @unique // deduplicação do sync
-  viewCount  Int           @default(0)
-  lastSyncAt DateTime      @default(now())
+  status      VehicleStatus @default(AVAILABLE)
+  externalId  String?       @unique // deduplicação do sync
+  viewCount   Int           @default(0)
+  curatorNote String?       @db.Text
+  lastSyncAt  DateTime      @default(now())
 
   leads Lead[]
 
