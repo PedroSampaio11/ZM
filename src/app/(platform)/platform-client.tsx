@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { Vehicle } from '@/modules/inventory/types';
 import { VehicleCard } from '@/components/vehicle-card';
@@ -451,6 +452,16 @@ export function PlatformClient({ vehicles, incomingVehicles, totalVehicles, tota
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section ref={heroRef} className="noise" style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(80px, 10svh, 120px) clamp(16px, 5vw, 48px)', position: 'relative', overflow: 'hidden' }}>
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+          <Image
+            src="/assets/brand/banners/BannerHero.png"
+            alt=""
+            fill
+            priority
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(240, 246, 255, 0.52)' }} />
+        </div>
         <div className="mesh-bg" />
         <div className="tech-grid" />
         <div className="glow-spot" />
@@ -605,18 +616,40 @@ export function PlatformClient({ vehicles, incomingVehicles, totalVehicles, tota
 
           {/* Scroll Indicator */}
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 0.6, y: 0 }}
             transition={{ delay: 2, duration: 1 }}
-            style={{ marginTop: '80px', display: 'flex', justifyContent: 'center', opacity: 0.25 }}
+            style={{ marginTop: '80px', display: 'flex', justifyContent: 'center' }}
           >
-            <div style={{ width: '24px', height: '40px', borderRadius: '12px', border: '1.5px solid var(--mz-slate-dim)', display: 'flex', justifyContent: 'center', paddingTop: '6px' }}>
+            <motion.div 
+              animate={{ y: [0, 5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ 
+                width: '26px', 
+                height: '44px', 
+                borderRadius: '14px', 
+                border: '1.5px solid rgba(18, 67, 178, 0.2)', 
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
+                display: 'flex', 
+                justifyContent: 'center', 
+                paddingTop: '8px',
+                boxShadow: '0 4px 15px rgba(18, 67, 178, 0.05)'
+              }}
+            >
               <motion.div 
-                animate={{ y: [0, 10, 0], opacity: [1, 0, 1] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ width: '4px', height: '6px', background: 'var(--mz-slate-dim)', borderRadius: '2px' }} 
+                animate={{ y: [0, 14, 0], opacity: [1, 0.2, 1], scale: [1, 0.8, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ 
+                  width: '4px', 
+                  height: '8px', 
+                  background: 'var(--mz-royal)', 
+                  borderRadius: '2px',
+                  boxShadow: '0 0 10px rgba(18, 67, 178, 0.6)' 
+                }} 
               />
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </section>

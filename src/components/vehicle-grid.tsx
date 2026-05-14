@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Vehicle } from "@/modules/inventory/types";
 import { LeadCaptureModal } from '@/components/lead-capture-modal';
+import { VehiclePlaceholder } from '@/components/vehicle-placeholder';
 
 interface VehicleGridProps {
   vehicles: Vehicle[];
@@ -23,11 +24,15 @@ export function VehicleGrid({ vehicles }: VehicleGridProps) {
         {vehicles.map((vehicle) => (
           <div key={vehicle.id} className="group bg-card rounded-3xl overflow-hidden border border-white/5 hover:shadow-2xl transition-all duration-300">
             <div className="relative h-64 overflow-hidden">
-              <img 
-                src={vehicle.images?.[0] || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=800'} 
-                alt={`${vehicle.brand} ${vehicle.model}`}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
+              {vehicle.images?.[0] ? (
+                <img
+                  src={vehicle.images[0]}
+                  alt={`${vehicle.brand} ${vehicle.model}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <VehiclePlaceholder brand={vehicle.brand} model={vehicle.model} />
+              )}
               <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-foreground">
                 {vehicle.year}
               </div>

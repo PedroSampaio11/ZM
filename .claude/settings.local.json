@@ -31,7 +31,17 @@
       "Bash(node *)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('main',''\\), indent=2\\)\\); print\\(json.dumps\\(d.get\\('exports',''\\), indent=2\\)\\)\")",
       "Bash(wait)",
-      "Read(//c/Users/pedro/AppData/Local/Temp/claude/C--Users-pedro-Downloads-ZM/5cea7e2d-481a-4254-a63b-7721b77971d5/tasks/**)"
+      "Read(//c/Users/pedro/AppData/Local/Temp/claude/C--Users-pedro-Downloads-ZM/5cea7e2d-481a-4254-a63b-7721b77971d5/tasks/**)",
+      "Bash(Select-Object -First 30)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'fix\\(blog\\): remove onMouseEnter/Leave from Server Component — use CSS hover class *)",
+      "Bash(git commit -m 'fix\\(blog\\): case-insensitive transmission filter for automatic categories *)",
+      "Bash(git commit -m 'docs: update backlog — session 10 complete, next steps prioritized *)",
+      "Bash(git commit -m 'docs: mark CRON_SECRET as done on Vercel *)",
+      "Bash(Get-ChildItem -Path \"src/app/\\(admin\\)/inventory\" -Recurse)",
+      "Bash(xargs grep -l \"storage\\\\|upload\\\\|supabase\\\\|bucket\")",
+      "Bash(xargs grep -l \"upload\\\\|supabase\\\\|bucket\\\\|storage\")",
+      "Bash(xargs grep -l \"FormData\\\\|FileList\\\\|file\\\\|File\")"
     ]
   }
 }

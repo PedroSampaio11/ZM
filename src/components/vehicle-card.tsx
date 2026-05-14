@@ -7,6 +7,7 @@ import { Vehicle } from '@/modules/inventory/types';
 import { MessageCircle, Heart } from 'lucide-react';
 import { useFavorites } from '@/hooks/use-favorites';
 import { computeMotorzScore, getScoreDisplay } from '@/lib/motorz-score';
+import { VehiclePlaceholder } from '@/components/vehicle-placeholder';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -41,9 +42,7 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
   const age    = daysAgo(vehicle.createdAt);
   const isNew  = age <= 7;
 
-  const imageUrl = !imgError && vehicle.images?.[0]
-    ? vehicle.images[0]
-    : `https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800`;
+  const hasImage = !imgError && Boolean(vehicle.images?.[0]);
 
   return (
     <div
@@ -58,16 +57,20 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
       />
       {/* Image Container */}
       <div className="zoom-container" style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-        <Image
-          src={imageUrl}
-          alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          loading={index < 4 ? 'eager' : 'lazy'}
-          onError={() => setImgError(true)}
-          style={{ objectFit: 'cover' }}
-          unoptimized={!imageUrl.includes('unsplash.com') && !imageUrl.includes('supabase.co')}
-        />
+        {hasImage ? (
+          <Image
+            src={vehicle.images![0]}
+            alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading={index < 4 ? 'eager' : 'lazy'}
+            onError={() => setImgError(true)}
+            style={{ objectFit: 'cover' }}
+            unoptimized={!vehicle.images![0].includes('supabase.co')}
+          />
+        ) : (
+          <VehiclePlaceholder brand={vehicle.brand} model={vehicle.model} />
+        )}
 
         {/* Gradient overlay */}
         <div style={{

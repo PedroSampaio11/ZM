@@ -138,3 +138,44 @@ Registro imutável de decisões arquiteturais. Adicionar, nunca editar entradas 
 
 **Prós**: Open/Closed principle — adicionar Cockpit não toca o core. `syncStore(storeId)` itera automaticamente sobre todas as integrações ativas da loja.
 **Contras**: Credenciais em JSON requerem encriptação na camada de aplicação antes do GA (usar KMS ou Vault).
+
+---
+
+## ADR-007: Modelo de Segurança em Fases (MVP → Go-Live → Escala)
+**Data**: 2026-05-13 | **Status**: Aceita
+
+**Contexto**: Auditoria de segurança realizada em 2026-05-13 identificou a diferença entre o que é aceitável para uso interno (MVP) e o que é obrigatório antes do primeiro cliente pagante. O sistema opera em multi-tenant (ADR-005) — vazamento de dados entre stores é o risco crítico principal.
+
+**Decisão**: Adotar modelo de segurança em 3 fases com critérios objetivos de go-live:
+
+### Fase A — MVP (estado atual, uso interno)
+Aceitável enquanto só Pedro usa o sistema:
+- Auth por allowlist de email (`ADMIN_EMAILS` no middleware)
+- `storeId` pode vir parcialmente do request (risco controlado com 1 usuário)
+- Rate limit em memória (aceita reset a cada deploy)
+- Dados de demo misturados com produção (separar antes do 1º cliente)
+- Logs podem conter informações de debug
+
+### Fase B — Pré-1º cliente (obrigatório antes de onboarding)
+Implementar antes de qualquer cliente externo acessar o sistema:
+1. **IDOR fix** — toda mutation verifica ownership via `storeId` (SEC-01)
+2. **storeId do servidor** — remover `storeId` de request bodies, sempre via `getActiveStore()` (SEC-02)
+3. **Fallback legado removido** — `user_metadata.storeId` eliminado de `get-store.ts` (SEC-03)
+4. **Logs sanitizados** — credenciais DMS nunca aparecem em logs/traces (SEC-04)
+5. **Rate limit persistente** — Upstash Redis ou `@vercel/kv` (SEC-05)
+6. **Demo data removida** — `DELETE WHERE externalId LIKE 'DEMO-HUB-%'` (SEC-08)
+
+### Fase C — Escala (primeiros 30 dias com clientes)
+7. **Permissões por role** — `UserRole { OWNER | OPERATOR | VIEWER }` (SEC-06)
+8. **RLS testado multi-tenant** — teste formal com dois tenants (SEC-07)
+9. **Audit log** — tabela `AuditLog` para mutations críticas (SEC-11)
+10. **Headers CSP completos** (SEC-12)
+11. **Limite de storage por parceiro** (SEC-09)
+
+**Invariantes permanentes (nunca negociáveis)**:
+- `storeId` sempre injetado pelo servidor, nunca pelo cliente
+- Credenciais DMS sempre encriptadas em repouso (AES-256-GCM)
+- `SUPABASE_SERVICE_ROLE_KEY` e `CREDENTIALS_ENCRYPTION_KEY` nunca com prefixo `NEXT_PUBLIC_`
+- Toda query de dados filtra por `storeId` (reforça ADR-005)
+
+**Referência de implementação**: `intelligence/memory/backlog.md` seção `🔒 Segurança — Checklist Go-Live` com arquivos, linhas e fixes específicos para cada item SEC-01 a SEC-14.

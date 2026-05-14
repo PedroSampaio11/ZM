@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import { Prisma, VehicleStatus } from '@prisma/client'
-import { NewVehicleDialog } from '@/components/forms/new-vehicle-dialog'
 import { InventoryFilters } from '@/components/inventory-filters'
 import { Suspense } from 'react'
 import Link from 'next/link'
@@ -100,7 +99,12 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
           </p>
         </div>
         {store && partners.length > 0 && (
-          <NewVehicleDialog storeId={store.id} partners={partners} />
+          <Link
+            href="/gestao/inventory/novo"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-mz-royal-light text-white font-bold rounded-xl text-sm transition-all"
+          >
+            + Novo veículo
+          </Link>
         )}
       </div>
 

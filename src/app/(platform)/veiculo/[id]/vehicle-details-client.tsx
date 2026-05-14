@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
 import { computeMotorzScore, getScoreDisplay } from '@/lib/motorz-score';
+import { VehiclePlaceholder } from '@/components/vehicle-placeholder';
 import type { RelatedVehicle } from './page';
 
 interface Props {
@@ -245,9 +246,8 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
     setTimeout(() => setCopied(false), 2500);
   }
 
-  const images = vehicle.images && vehicle.images.length > 0
-    ? vehicle.images 
-    : ['https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=1200'];
+  const images = vehicle.images ?? [];
+  const hasImages = images.length > 0;
 
   return (
     <div className={`platform-container pb-24 ${isFeatured ? 'featured-product-theme' : ''}`}>
@@ -278,15 +278,19 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
         {/* ── LEFT: GALLERY ── */}
         <div className="lg:col-span-7 space-y-4">
           <div className={`rounded-3xl overflow-hidden aspect-[16/10] relative shadow-lg ${isFeatured ? 'ring-2 ring-motorz-gold ring-offset-4 ring-offset-mz-snow' : ''}`}>
-            <Image
-              src={images[activeImage]}
-              alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 58vw"
-              className="object-cover"
-              unoptimized={!images[activeImage].includes('unsplash.com') && !images[activeImage].includes('supabase.co')}
-            />
+            {hasImages ? (
+              <Image
+                src={images[activeImage]}
+                alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 58vw"
+                className="object-cover"
+                unoptimized={!images[activeImage].includes('supabase.co')}
+              />
+            ) : (
+              <VehiclePlaceholder brand={vehicle.brand} model={vehicle.model} />
+            )}
             {/* Featured Overlay */}
             {isFeatured && (
               <div className="absolute inset-0 bg-gradient-to-t from-motorz-carbon/40 to-transparent pointer-events-none" />

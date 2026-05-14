@@ -1,5 +1,5 @@
 # Backlog — motorz
-**Sessão**: 9 | **Data**: 2026-05-12 | **TypeScript**: 0 erros ✅
+**Sessão**: 11 | **Data**: 2026-05-13 | **TypeScript**: 0 erros ✅
 
 ---
 
@@ -154,6 +154,39 @@
 
 > ✅ **Sessão 10 commitada** — commits `ac4f803`, `e847781`, `949bdd0` (2026-05-12).
 
+### ✅ Sessão 11 — Seed Demo + Placeholder Visual + Upload de Fotos (Web)
+
+**Seed de demonstração — Hub de Suzano (`prisma/seed-demo.ts`):**
+- Script idempotente (upsert) com 15 carros reais do mercado BR com specs, descrições e preços reais
+- Parceiro "Hub de Suzano" criado (Suzano/SP, comissão 2.5%, meta R$ 80k)
+- Comando: `npm run seed:demo`
+- `externalId` prefixo `DEMO-HUB-XXX` para não conflitar com sync real
+
+**VehiclePlaceholder (`src/components/vehicle-placeholder.tsx`):**
+- Substitui fallback Unsplash genérico em todos os cards e páginas de detalhe
+- Fundo escuro `#0c0c11` + glow azul radial
+- Nome da marca como watermark gigante (ex: "VOLKSWAGEN" em ghost text)
+- Silhueta SVG de sedan desenhada à mão (corpo, cabine, rodas, faróis)
+- Badge "Fotos em breve" com ponto dourado pulsando + marca "motorz" discreta
+- Aplicado em: `vehicle-card.tsx`, `vehicle-grid.tsx`, `vehicle-details-client.tsx`
+
+**Upload de fotos — fluxo web (`/gestao/inventory/novo`):**
+- `POST /api/gestao/vehicles/upload` — upload multipart para Supabase Storage bucket `vehicles`; usa service role key para bypass de RLS; valida tipo (JPG/PNG/WebP) e tamanho (máx 8 MB)
+- `src/components/forms/vehicle-photo-upload.tsx` — drag & drop, preview grid, badge "Capa" na foto 1, remoção individual, estado de loading, validação client-side
+- `src/app/(admin)/gestao/inventory/novo/page.tsx` + `vehicle-form.tsx` — página dedicada com layout 2 colunas (campos + fotos), toggle "Publicar direto / Salvar rascunho" (AVAILABLE vs INCOMING), botão "Gerar automaticamente" para descrição template, feedback de sucesso com redirect
+- `createVehicleFull()` em `vehicle-actions.ts` — nova server action que aceita `images: string[]` e `status`
+- Botão "+ Novo veículo" no `/gestao/inventory` substitui o dialog antigo
+
+**Infraestrutura Supabase Storage:**
+- Bucket `vehicles` criado no Supabase Dashboard — **PUBLIC** ✅ (Pedro confirmou 2026-05-13)
+
+**Arquitetura WhatsApp → Estoque (projetada, não implementada — aguarda chip):**
+- Fluxo: Evolution API webhook → `/api/whatsapp/intake` → Claude extrai JSON (brand/model/year/km/price/color) → cria Vehicle `INCOMING` → fotos baixadas da Evolution → Supabase Storage → admin aprova 1 clique → `AVAILABLE`
+- Parceiro identificado pelo número remetente mapeado em `IntegrationConfig { adapter: MANUAL, credentials: { whatsappNumber } }`
+- Fila de aprovação: `/gestao/inventory?status=INCOMING` (UI já existe)
+
+> ✅ **Sessão 11** — TypeScript 0 erros. Não commitada ainda (aguardando decisão de Pedro).
+
 ### ✅ Sessão 6 — SEO/GEO + Performance + Segurança Admin
 
 **Performance (causa do travamento resolvida):**
@@ -180,6 +213,117 @@
 - Middleware com 2 camadas: autenticação (→ /login) + autorização por email allowlist (→ / silencioso)
 - `requireAuth()` atualizado: retorna 403 se email não está na `ADMIN_EMAILS`
 - `ADMIN_EMAILS=pedrosampaio11@icloud.com` adicionado ao `.env.local` e documentado em `.env.example`
+
+---
+
+## 🔒 Segurança — Checklist Go-Live
+
+> Auditoria cruzada entre o código real e o checklist de pré-produção (2026-05-13).
+> Cada item tem: **risco**, **arquivo/linha** e **fix**.
+
+---
+
+### 🚨 Nível 0 — Nunca suba um cliente real sem isso
+
+#### SEC-01 · IDOR — Mutations sem verificação de ownership
+**Risco**: qualquer admin autenticado pode arquivar/editar veículo de outra store passando um `vehicleId` válido.
+**Onde**:
+- `src/lib/vehicle-actions.ts` — `updateVehicleStatus()`, `archiveVehicle()` usam `vehicleId` direto sem checar `storeId`
+- `src/app/api/gestao/vehicles/[id]/route.ts` — PATCH/DELETE idem
+**Fix**: criar helper `assertOwnership(vehicleId, storeId)` que faz `prisma.vehicle.findFirst({ where: { id, storeId } })` e lança 403 se null. Aplicar em toda mutation.
+
+#### SEC-02 · storeId vindo do request body
+**Risco**: cliente malicioso manda `storeId` de outra loja no body do POST e acessa dados de terceiros.
+**Onde**: `src/lib/vehicle-actions.ts` — `createVehicle()` e `createVehicleFull()` aceitam `storeId` como parâmetro livre; `src/app/api/gestao/vehicles/route.ts` idem.
+**Fix**: remover `storeId` dos inputs externos. Injetar sempre via `getActiveStore()` no servidor. ADR-005 já documenta esta invariante — falta enforcar no código.
+
+#### SEC-03 · Fallback de storeId por user_metadata (legado)
+**Risco**: qualquer conta com `user_metadata.storeId` setado manualmente no Supabase tem acesso admin à loja — sem auditoria.
+**Onde**: `src/lib/get-store.ts` linhas 23–27.
+**Fix**: remover o fallback assim que todos os usuários tiverem `Store.ownerId` preenchido. Adicionar log de warning enquanto o fallback existir.
+
+#### SEC-04 · Credenciais DMS em logs de erro
+**Risco**: stack traces de adapters podem imprimir `credentials` decriptadas (clientId, clientSecret, tokens).
+**Onde**: `src/lib/inventory-sync/` — blocos `catch` dos adapters, `engine.ts`.
+**Fix**: sanitizar antes de logar — `const safe = { ...err, credentials: '[REDACTED]' }`. Nunca passar o objeto `credentials` diretamente para `console.error`.
+
+#### SEC-05 · Rate limit em memória (reinicia a cada deploy)
+**Risco**: proteção de endpoints públicos (`/api/leads`, `/api/simulations`) é resetada a cada re-deploy na Vercel.
+**Onde**: qualquer rate limiter baseado em `Map` ou variável de módulo.
+**Fix**: Upstash Redis (plano grátis cobre o MVP) ou `@vercel/kv`. Interface: `ratelimit(ip, { max: 10, window: '1m' })`.
+
+---
+
+### 🔴 Nível 1 — Antes do 1º cliente pagar
+
+#### SEC-06 · Permissões por perfil, não só por email
+**Risco**: sem distinção entre admin total, operador de estoque e visualizador. Todos ou nenhum.
+**Onde**: `src/middleware.ts` — valida apenas `ADMIN_EMAILS`.
+**Fix**: `UserRole enum { OWNER | OPERATOR | VIEWER }` no banco (tabela `StoreUser` ou campo em `Store`). Middleware consulta role e bloqueia rotas por escopo. Ex: operador acessa `/gestao/inventory` mas não `/gestao/financeiro`.
+
+#### SEC-07 · RLS Supabase — ativo mas não testado por tenant
+**Risco**: `prisma-rls.ts` existe e o RLS foi executado no Dashboard (Sessão 6), mas nunca foi testado com dois tenants simultâneos.
+**Fix**: criar teste manual — logar com conta de store B e tentar `GET /api/gestao/vehicles?storeId=<id-da-store-A>`. Esperar 0 resultados. Documentar o teste.
+
+#### SEC-08 · Separação de dados de demo vs produção
+**Risco**: 15 carros DEMO-HUB-* vivem no mesmo banco de produção. Se um cliente real acessar a vitrine, verá dados falsos.
+**Onde**: banco de produção — `externalId LIKE 'DEMO-HUB-%'`.
+**Fix**: antes de onboarding do 1º cliente, rodar:
+```sql
+DELETE FROM "Vehicle" WHERE "externalId" LIKE 'DEMO-HUB-%';
+DELETE FROM "Partner" WHERE document = '12897456000183';
+```
+Ou: usar um `storeId` separado para demos e filtrar na vitrine.
+
+#### SEC-09 · Upload sem limite de storage por loja
+**Risco**: parceiro mal intencionado sobe GBs de imagens sem custo — bucket `vehicles` não tem quota por store.
+**Onde**: `src/app/api/gestao/vehicles/upload/route.ts`.
+**Fix**: antes de fazer upload, consultar total de bytes já usados pela store (via `supabase.storage.list()` com prefix `partnerId/`) e rejeitar se > limite configurado (ex: 500 MB por partner).
+
+#### SEC-10 · Endpoint de sync sem validação de storeId
+**Risco**: `/api/gestao/sync` pode ser chamado com `storeId` arbitrário.
+**Onde**: verificar `src/app/api/gestao/sync/route.ts`.
+**Fix**: `storeId` deve vir de `getActiveStore()`, não do body. Verificar ownership antes de iniciar sync.
+
+---
+
+### 🟡 Nível 2 — Primeiros 30 dias em produção
+
+#### SEC-11 · Audit log de mutations críticas
+**Risco**: sem registro de quem arquivou, editou preço ou deletou um veículo. Impossível investigar incidentes.
+**Fix**: tabela `AuditLog { id, storeId, userId, action, entityType, entityId, diff Json, createdAt }`. Logar em: `archiveVehicle`, `updateVehicleStatus`, `createVehicleFull`, deleção de parceiro.
+
+#### SEC-12 · Headers de segurança HTTP
+**Risco**: sem CSP, sem X-Frame-Options — vitrine vulnerável a clickjacking e XSS via iframe.
+**Onde**: `next.config.mjs` — headers já configurados parcialmente (Sessão 6).
+**Fix**: revisar e completar:
+```
+Content-Security-Policy: default-src 'self'; img-src 'self' *.supabase.co data:; ...
+X-Frame-Options: DENY
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+```
+
+#### SEC-13 · Variáveis de ambiente no cliente
+**Risco**: qualquer `NEXT_PUBLIC_*` é exposta no bundle JS do browser.
+**Verificar**: `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` são seguros de expor (design do Supabase). Garantir que `SUPABASE_SERVICE_ROLE_KEY`, `CREDENTIALS_ENCRYPTION_KEY` e `CRON_SECRET` nunca tenham prefixo `NEXT_PUBLIC_`.
+
+#### SEC-14 · Webhook do cron sem replay protection
+**Risco**: `/api/cron/sync` valida `Authorization: Bearer CRON_SECRET` mas não tem proteção contra replay de requests antigas.
+**Fix**: adicionar validação de timestamp na Vercel — o header `x-vercel-signature` já cobre isso se habilitado. Ou validar `Date` header com tolerância de ±5 min.
+
+---
+
+### ✅ Já resolvido
+
+| Item | Sessão |
+|---|---|
+| Auth guard em `/api/leads` e `/api/simulations` | Sessão 1–2 |
+| Credenciais DMS encriptadas com AES-256-GCM | Sessão 3 |
+| Middleware allowlist por email + 403 silencioso | Sessão 6 |
+| RLS executado no Supabase Dashboard | Sessão 6 |
+| `robots.ts` bloqueia `/admin/` e `/api/` para crawlers | Sessão 6 |
+| `CRON_SECRET` como variável sensitiva na Vercel | Sessão 10 |
+| Bucket `vehicles` criado como PUBLIC (Storage) | Sessão 11 |
 
 ---
 
@@ -261,6 +405,15 @@
 
 ## 🟢 Fase 3 — Lead Engine & IA (pausado, não priorizar)
 
+**WhatsApp → Estoque (arquitetura pronta, aguarda chip SIM):**
+- `POST /api/whatsapp/intake` — webhook Evolution, identifica mensagens de estoque por parceiro
+- `src/lib/whatsapp-intake/parser.ts` — Claude API extrai brand/model/year/km/price de texto livre
+- `src/lib/whatsapp-intake/media.ts` — baixa mídias da Evolution → Supabase Storage bucket `vehicles`
+- Parceiro mapeado via `IntegrationConfig { adapter: MANUAL, credentials: { whatsappNumber } }`
+- Fila de aprovação: `/gestao/inventory?status=INCOMING` (UI já existe)
+- Botão "Aprovar" em `/gestao/inventory/[id]` — muda INCOMING → AVAILABLE
+
+**Lead Engine existente:**
 - Evolution API webhook WhatsApp (`POST /api/webhooks/whatsapp`)
 - Agente de qualificação Claude com RAG no estoque
 - Funil de leads: métricas de conversão
