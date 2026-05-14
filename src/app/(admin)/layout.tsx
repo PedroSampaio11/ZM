@@ -5,6 +5,7 @@ import "./globals.css";
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { prisma } from "@/lib/prisma";
 import { getActiveStore } from "@/lib/get-store";
+import { COMMISSION_PER_VEHICLE } from "@/lib/constants";
 
 const onest = Onest({
   subsets: ['latin'],
@@ -42,15 +43,13 @@ async function getSidebarMeta() {
         select: { monthlyGoal: true },
       }),
       prisma.vehicle.findMany({
-        where:   { storeId: store.id, status: "SOLD", updatedAt: { gte: startOfMonth } },
-        select:  { price: true, partner: { select: { commission: true } } },
+        where:  { storeId: store.id, status: "SOLD", updatedAt: { gte: startOfMonth } },
+        select: { id: true },
       }),
     ]);
 
     const goalTotal = partners.reduce((s, p) => s + Number(p.monthlyGoal ?? 0), 0);
-    const revenue   = soldThisMonth.reduce((s, v) => {
-      return s + Number(v.price) * (Number(v.partner.commission) / 100);
-    }, 0);
+    const revenue   = soldThisMonth.length * COMMISSION_PER_VEHICLE;
 
     return { goalTotal, revenue };
   } catch {

@@ -22,13 +22,11 @@ const navigation = [
   { name: 'Leads',       href: '/gestao/leads',       icon: MessageSquare },
 ]
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('pt-BR', {
-    style:              'currency',
-    currency:           'BRL',
-    notation:           'compact',
-    maximumFractionDigits: 1,
-  }).format(n)
+const fmt = (n: number): string => {
+  if (n >= 1_000_000) return `R$ ${(n / 1_000_000).toFixed(1).replace('.', ',')}M`
+  if (n >= 1_000)     return `R$ ${(n / 1_000).toFixed(1).replace('.', ',')}k`
+  return `R$ ${Math.round(n)}`
+}
 
 interface SidebarMeta {
   goalTotal: number

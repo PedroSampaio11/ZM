@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getActiveStore } from '@/lib/get-store'
 import { updatePartnerFinancial } from '@/lib/partner-actions'
 import { revalidatePath } from 'next/cache'
+import { COMMISSION_PER_VEHICLE } from '@/lib/constants'
 
 async function savePartnerFinancial(formData: FormData) {
   'use server'
@@ -12,8 +13,8 @@ async function savePartnerFinancial(formData: FormData) {
   revalidatePath('/gestao/financeiro')
 }
 
-const fmt = (n: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n)
+const fmt = (n: number): string =>
+  'R$ ' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
 const pct = (n: number) => `${n.toFixed(1)}%`
 
@@ -55,16 +56,13 @@ export default async function FinanceiroPage() {
   // ── Calcular métricas por parceiro ──────────────────────────────────────────
   const enriched = partners.map((p) => {
     const portfolioValue    = p.vehicles.reduce((s, v) => s + Number(v.price), 0)
-    const projectedRevenue  = portfolioValue * (p.commission / 100)
-    const revenueThisMonth  = p.leads
-      .filter((l) => l.vehicle?.price)
-      .reduce((s, l) => s + Number(l.vehicle!.price) * (p.commission / 100), 0)
+    const projectedRevenue  = p._count.vehicles * COMMISSION_PER_VEHICLE
+    const revenueThisMonth  = p.leads.length * COMMISSION_PER_VEHICLE
     const goal              = p.monthlyGoal ? Number(p.monthlyGoal) : null
     const remainingGoal     = goal !== null ? Math.max(0, goal - revenueThisMonth) : null
     const goalProgress      = goal ? Math.min(100, (revenueThisMonth / goal) * 100) : null
-    const avgVehicleRevenue = p._count.vehicles > 0 ? projectedRevenue / p._count.vehicles : 0
-    const carsNeeded        = remainingGoal && avgVehicleRevenue > 0
-      ? Math.ceil(remainingGoal / avgVehicleRevenue)
+    const carsNeeded        = remainingGoal !== null && remainingGoal > 0
+      ? Math.ceil(remainingGoal / COMMISSION_PER_VEHICLE)
       : null
 
     return { ...p, portfolioValue, projectedRevenue, revenueThisMonth, goal, remainingGoal, goalProgress, carsNeeded }
@@ -207,8 +205,8 @@ export default async function FinanceiroPage() {
 
                     {/* Comissão */}
                     <div className="text-center w-16">
-                      <p className="font-black text-primary text-sm">{p.commission}%</p>
-                      <p className="text-[9px] text-zinc-600 uppercase tracking-wide">Comissão</p>
+                      <p className="font-black text-primary text-sm">R$ 1.000</p>
+                      <p className="text-[9px] text-zinc-600 uppercase tracking-wide">/ veículo</p>
                     </div>
 
                     {/* Receita projetada */}
@@ -275,23 +273,10 @@ export default async function FinanceiroPage() {
 
                     {/* Formulário de edição */}
                     <div>
-                      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">Editar meta e comissão</p>
+                      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">Editar meta</p>
                       <form action={savePartnerFinancial} className="space-y-3">
                         <input type="hidden" name="partnerId" value={p.id} />
-                        <div>
-                          <label className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
-                            Comissão (%)
-                          </label>
-                          <input
-                            name="commission"
-                            type="number"
-                            step="0.1"
-                            min="0"
-                            max="100"
-                            defaultValue={p.commission}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
-                          />
-                        </div>
+                        <input type="hidden" name="commission" value={p.commission} />
                         <div>
                           <label className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">
                             Meta mensal (R$)
