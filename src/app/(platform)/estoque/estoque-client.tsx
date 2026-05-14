@@ -32,6 +32,16 @@ const BRAND_ALIASES: Record<string, string> = {
   'caoa': 'CAOA', 'byd': 'BYD', 'volvo': 'Volvo',
 };
 
+// Normaliza valores de câmbio do banco (ex: 'Automático', 'AUTO', 'PDK') para o enum semântico
+function normalizeTransmission(t: string | null | undefined): 'AUTOMATIC' | 'MANUAL' | 'CVT' | null {
+  if (!t) return null
+  const v = t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  if (v === 'cvt') return 'CVT'
+  if (/automat|auto$|pdk|semi/.test(v)) return 'AUTOMATIC'
+  if (/manual/.test(v)) return 'MANUAL'
+  return null
+}
+
 function parseQuery(raw: string, knownBrands: string[]): SemanticFilters | null {
   if (raw.trim().length < 8 || !raw.includes(' ')) return null;
 
@@ -163,7 +173,7 @@ function EstoqueInner({ vehicles, totalVehicles, brands, cities }: Props) {
       if (sf.priceMax    && v.price > sf.priceMax)   return false;
       if (sf.priceMin    && v.price < sf.priceMin)   return false;
       if (sf.fuel        && v.fuel !== sf.fuel)        return false;
-      if (sf.transmission && v.transmission !== sf.transmission) return false;
+      if (sf.transmission && normalizeTransmission(v.transmission) !== sf.transmission) return false;
       if (sf.keywords?.length) {
         const haystack = `${v.brand} ${v.model} ${v.version} ${v.description}`.toLowerCase();
         if (!sf.keywords.every(k => haystack.includes(k.toLowerCase()))) return false;

@@ -4,6 +4,18 @@ import { getAdapter } from './adapter-registry';
 import { decryptCredentials } from './credentials';
 import type { AdapterType } from '@prisma/client';
 
+// SEC-04: remove chaves sensíveis de objetos antes de logar
+function sanitizeForLog(err: unknown): unknown {
+  if (err && typeof err === 'object') {
+    const safe: Record<string, unknown> = { ...err as Record<string, unknown> }
+    for (const key of Object.keys(safe)) {
+      if (/cred|pass|key|token|secret/i.test(key)) safe[key] = '[REDACTED]'
+    }
+    return safe
+  }
+  return err
+}
+
 export interface SyncResult {
   provider: string;
   partnerId: string;
@@ -114,7 +126,7 @@ export async function syncPartner(
       });
       result.upserted++;
     } catch (err) {
-      console.error(`[SyncEngine] Erro upsert externalId=${d.externalId}:`, err);
+      console.error(`[SyncEngine] Erro upsert externalId=${d.externalId}:`, sanitizeForLog(err));
       result.errors++;
     }
   }
@@ -178,7 +190,7 @@ export async function syncStore(
       );
       results.push(result);
     } catch (err) {
-      console.error(`[SyncStore] Erro no parceiro ${integration.partnerId}:`, err);
+      console.error(`[SyncStore] Erro no parceiro ${integration.partnerId}:`, sanitizeForLog(err));
       results.push({
         provider:    String(integration.adapter),
         partnerId:   integration.partnerId,

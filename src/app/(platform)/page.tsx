@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     title: 'Motorz — O Marketplace Automotivo do ABCD Paulista',
     description: 'Centenas de veículos curados em Santo André, São Bernardo, São Caetano e Diadema. Compre com segurança e tecnologia.',
     url: 'https://motorz.com.br',
+    images: [{ url: '/assets/brand/banners/OG.png', width: 1200, height: 630, alt: 'Motorz — Marketplace Automotivo ABCD Paulista' }],
   },
 };
 
@@ -25,7 +26,7 @@ const localBusinessSchema = {
   description: 'Marketplace automotivo premium do ABCD Paulista com curadoria de veículos, tecnologia e transparência.',
   url: 'https://motorz.com.br',
   logo: 'https://motorz.com.br/assets/brand/logos/logo1.png',
-  image: 'https://motorz.com.br/assets/brand/og-image.png',
+  image: 'https://motorz.com.br/assets/brand/banners/OG.png',
   priceRange: 'R$ 30.000 – R$ 500.000',
   address: {
     '@type': 'PostalAddress',

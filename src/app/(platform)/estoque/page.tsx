@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     title: 'Estoque Completo — Veículos no ABCD Paulista | Motorz',
     description: 'Centenas de veículos curados no ABCD Paulista. Filtre por marca, preço e muito mais.',
     url: 'https://motorz.com.br/estoque',
+    images: [{ url: '/assets/brand/banners/OG.png', width: 1200, height: 630, alt: 'Motorz — Estoque ABCD Paulista' }],
   },
 };
 

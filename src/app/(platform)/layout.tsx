@@ -45,13 +45,13 @@ export const metadata: Metadata = {
     url: 'https://motorz.com.br',
     title: 'Motorz — Marketplace Automotivo do ABCD Paulista',
     description: 'Encontre o carro ideal em Santo André, São Bernardo, São Caetano e Diadema. Curadoria premium, tecnologia e transparência total.',
-    images: [{ url: '/assets/brand/og-image.png', width: 1200, height: 630, alt: 'Motorz Marketplace Automotivo ABCD Paulista' }],
+    images: [{ url: '/assets/brand/banners/OG.png', width: 1200, height: 630, alt: 'Motorz Marketplace Automotivo ABCD Paulista' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Motorz — Marketplace Automotivo do ABCD Paulista',
     description: 'Encontre o carro ideal em Santo André, São Bernardo, São Caetano e Diadema.',
-    images: ['/assets/brand/og-image.png'],
+    images: ['/assets/brand/banners/OG.png'],
   },
   alternates: {
     canonical: 'https://motorz.com.br',
@@ -60,6 +60,10 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
+  icons: {
+    icon: '/assets/images/MZAPP.png',
+    apple: '/assets/images/MZAPP.png',
   },
 };
 

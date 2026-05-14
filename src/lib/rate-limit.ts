@@ -1,3 +1,7 @@
+// SEC-05: rate limiter em memória — resetado a cada deploy na Vercel.
+// Antes do 1º cliente pagar, migrar para Upstash Redis:
+//   npm i @upstash/ratelimit @upstash/redis
+//   https://upstash.com (plano grátis cobre o MVP)
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -8,7 +12,6 @@ interface Window {
 
 const store = new Map<string, Window>();
 
-// Cleans keys older than 10 minutes to prevent unbounded memory growth
 function pruneStore() {
   const now = Date.now();
   for (const [key, win] of store) {

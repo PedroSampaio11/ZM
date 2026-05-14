@@ -3,109 +3,132 @@
 @tailwind utilities;
 
 :root {
-  /* Motorz Official Palette */
-  --motorz-gold:    #FFC107;
-  --motorz-blue:    #2D5BFF;
-  --motorz-cyan:    #00F0FF;
-  --motorz-carbon:  #020202;
+  --motorz-gold:     #FFC107;
+  --motorz-blue:     #2D5BFF;
+  --motorz-carbon:   #09090b;
   --motorz-platinum: #F1F1F1;
   --motorz-silver:   #A9ADC1;
-  
-  --background: var(--motorz-carbon);
-  --foreground: var(--motorz-platinum);
-  
-  --card: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.08);
-  
-  --primary: var(--motorz-blue);
+
+  --background:         var(--motorz-carbon);
+  --foreground:         var(--motorz-platinum);
+  --card:               rgba(255, 255, 255, 0.03);
+  --card-border:        rgba(255, 255, 255, 0.07);
+  --primary:            var(--motorz-blue);
   --primary-foreground: white;
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[#09090b] text-zinc-100;
     font-family: var(--font-onest), system-ui, sans-serif;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-cal), sans-serif;
     @apply tracking-tight;
   }
 }
 
-/* ── VISUAL IDENTITY ELEMENTS ──────────────────────── */
-
-.mesh-bg {
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(18, 67, 178, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(45, 91, 255, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(255, 193, 7, 0.08) 0%, transparent 60%);
-  filter: blur(100px);
-  animation: mesh-float 20s ease-in-out infinite alternate;
-}
-
-@keyframes mesh-float {
-  0% { transform: scale(1) translate(0, 0); }
-  100% { transform: scale(1.2) translate(5%, 5%); }
-}
-
-.tech-grid {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
-}
-
-.noise::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.05;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-/* ── SHADCN OVERRIDES FOR GLASSMORPHISM ────────────── */
-
+/* ── SHADCN dark-mode tokens ────────────────────────── */
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 221 100% 58%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --background:          240 6% 4%;
+  --foreground:          0 0% 98%;
+  --card:                240 6% 6%;
+  --card-foreground:     0 0% 98%;
+  --popover:             240 6% 5%;
+  --popover-foreground:  0 0% 98%;
+  --primary:             221 100% 58%;
+  --primary-foreground:  210 40% 98%;
+  --secondary:           240 4% 12%;
+  --secondary-foreground:0 0% 90%;
+  --muted:               240 4% 14%;
+  --muted-foreground:    240 5% 55%;
+  --accent:              240 4% 14%;
+  --accent-foreground:   0 0% 98%;
+  --destructive:         0 62% 40%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
-  --radius: 1rem;
+  --border:              240 4% 12%;
+  --input:               240 4% 12%;
+  --ring:                221 100% 58%;
+  --radius:              0.75rem;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* ── Scrollbar ──────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* ── Admin card surface ─────────────────────────────── */
+.admin-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+}
+
+.admin-card-sm {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+/* ── Stat label / value pair ────────────────────────── */
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(82, 82, 91); /* zinc-600 */
+}
+
+.stat-value {
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: white;
+}
+
+/* ── Thin progress bar ──────────────────────────────── */
+.progress-track {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.7s ease-out;
+  background: #2D5BFF;
+}
+
+.progress-fill.success { background: #4ade80; }
+
+/* ── Badge ──────────────────────────────────────────── */
+.badge-muted {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgb(161, 161, 170); /* zinc-400 */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ── Table row hover ────────────────────────────────── */
+.table-row-hover {
+  transition: background 150ms ease;
   border-radius: 10px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+.table-row-hover:hover {
+  background: rgba(255, 255, 255, 0.03);
 }

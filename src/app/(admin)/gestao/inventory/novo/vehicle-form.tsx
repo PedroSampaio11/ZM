@@ -13,7 +13,6 @@ import Link from 'next/link'
 interface Partner { id: string; name: string; city: string }
 
 interface VehicleFormProps {
-  storeId:  string
   partners: Partner[]
 }
 
@@ -45,7 +44,7 @@ const select = [input, 'cursor-pointer'].join(' ')
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function VehicleForm({ storeId, partners }: VehicleFormProps) {
+export function VehicleForm({ partners }: VehicleFormProps) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
 
@@ -95,7 +94,6 @@ export function VehicleForm({ storeId, partners }: VehicleFormProps) {
 
     startTransition(async () => {
       const result = await createVehicleFull({
-        storeId,
         partnerId:    f.partnerId,
         brand:        f.brand.trim(),
         model:        f.model.trim(),

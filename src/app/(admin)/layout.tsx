@@ -26,6 +26,10 @@ const calSans = localFont({
 export const metadata: Metadata = {
   title: "motorz | Gestão",
   description: "Painel de controle da plataforma motorz",
+  icons: {
+    icon: '/assets/images/MZAPP.png',
+    apple: '/assets/images/MZAPP.png',
+  },
 };
 
 async function getSidebarMeta() {
@@ -64,17 +68,10 @@ export default async function AdminLayout({
 
   return (
     <html lang="pt-br" className={`${onest.variable} ${calSans.variable} dark`}>
-      <body className="antialiased bg-[#020202] text-zinc-100 min-h-screen selection:bg-primary/30">
-        <div className="flex relative min-h-screen overflow-hidden">
-          {/* ── BACKGROUND IDV ─────────────────────────────────── */}
-          <div className="fixed inset-0 pointer-events-none z-0">
-            <div className="mesh-bg opacity-40" />
-            <div className="tech-grid opacity-20" />
-            <div className="noise opacity-[0.03]" />
-          </div>
-
+      <body className="antialiased bg-[#09090b] text-zinc-100 min-h-screen selection:bg-primary/20">
+        <div className="flex min-h-screen">
           <AdminSidebar meta={meta} />
-          <main className="flex-1 relative z-10 min-h-screen overflow-y-auto">
+          <main className="flex-1 min-h-screen overflow-y-auto">
             <div className="p-8 max-w-7xl mx-auto">
               {children}
             </div>

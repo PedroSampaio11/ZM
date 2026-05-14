@@ -26,7 +26,7 @@ export default async function NovoVeiculoPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
-      <VehicleForm storeId={store.id} partners={partners} />
+      <VehicleForm partners={partners} />
     </div>
   )
 }

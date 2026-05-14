@@ -1,4 +1,12 @@
 import "@/app/(admin)/globals.css";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  icons: {
+    icon: '/assets/images/MZAPP.png',
+    apple: '/assets/images/MZAPP.png',
+  },
+};
 
 export default function AuthLayout({
   children,

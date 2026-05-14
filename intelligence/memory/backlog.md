@@ -1,5 +1,5 @@
 # Backlog — motorz
-**Sessão**: 11 | **Data**: 2026-05-13 | **TypeScript**: 0 erros ✅
+**Sessão**: 13 | **Data**: 2026-05-14 | **TypeScript**: 0 erros ✅
 
 ---
 
@@ -223,47 +223,30 @@
 
 ---
 
-### 🚨 Nível 0 — Nunca suba um cliente real sem isso
+> **Contexto Sessão 12**: Pedro é o único admin. Parceiros (lojas) não têm acesso ao painel ainda.
+> SEC-06 e SEC-07 entram quando o primeiro parceiro pedir login próprio (Fase 3+).
 
-#### SEC-01 · IDOR — Mutations sem verificação de ownership
-**Risco**: qualquer admin autenticado pode arquivar/editar veículo de outra store passando um `vehicleId` válido.
-**Onde**:
-- `src/lib/vehicle-actions.ts` — `updateVehicleStatus()`, `archiveVehicle()` usam `vehicleId` direto sem checar `storeId`
-- `src/app/api/gestao/vehicles/[id]/route.ts` — PATCH/DELETE idem
-**Fix**: criar helper `assertOwnership(vehicleId, storeId)` que faz `prisma.vehicle.findFirst({ where: { id, storeId } })` e lança 403 se null. Aplicar em toda mutation.
+### 🚨 Nível 0 — ✅ TODOS RESOLVIDOS (Sessão 12)
 
-#### SEC-02 · storeId vindo do request body
-**Risco**: cliente malicioso manda `storeId` de outra loja no body do POST e acessa dados de terceiros.
-**Onde**: `src/lib/vehicle-actions.ts` — `createVehicle()` e `createVehicleFull()` aceitam `storeId` como parâmetro livre; `src/app/api/gestao/vehicles/route.ts` idem.
-**Fix**: remover `storeId` dos inputs externos. Injetar sempre via `getActiveStore()` no servidor. ADR-005 já documenta esta invariante — falta enforcar no código.
+#### ~~SEC-01~~ ✅ IDOR eliminado
+#### ~~SEC-02~~ ✅ storeId injetado server-side
+#### ~~SEC-03~~ ✅ warning no fallback legado
+#### ~~SEC-04~~ ✅ sanitizeForLog() no engine
 
-#### SEC-03 · Fallback de storeId por user_metadata (legado)
-**Risco**: qualquer conta com `user_metadata.storeId` setado manualmente no Supabase tem acesso admin à loja — sem auditoria.
-**Onde**: `src/lib/get-store.ts` linhas 23–27.
-**Fix**: remover o fallback assim que todos os usuários tiverem `Store.ownerId` preenchido. Adicionar log de warning enquanto o fallback existir.
-
-#### SEC-04 · Credenciais DMS em logs de erro
-**Risco**: stack traces de adapters podem imprimir `credentials` decriptadas (clientId, clientSecret, tokens).
-**Onde**: `src/lib/inventory-sync/` — blocos `catch` dos adapters, `engine.ts`.
-**Fix**: sanitizar antes de logar — `const safe = { ...err, credentials: '[REDACTED]' }`. Nunca passar o objeto `credentials` diretamente para `console.error`.
-
-#### SEC-05 · Rate limit em memória (reinicia a cada deploy)
-**Risco**: proteção de endpoints públicos (`/api/leads`, `/api/simulations`) é resetada a cada re-deploy na Vercel.
-**Onde**: qualquer rate limiter baseado em `Map` ou variável de módulo.
-**Fix**: Upstash Redis (plano grátis cobre o MVP) ou `@vercel/kv`. Interface: `ratelimit(ip, { max: 10, window: '1m' })`.
+#### SEC-05 · Rate limit em memória (reinicia a cada deploy) — pendente Upstash
+**Risco**: proteção de `/api/leads` e `/api/simulations` reseta a cada re-deploy na Vercel.
+**Fix**: Upstash Redis plano grátis. Comentário com instrução já adicionado em `src/lib/rate-limit.ts`.
+**Quando**: antes do 1º cliente pagar.
 
 ---
 
 ### 🔴 Nível 1 — Antes do 1º cliente pagar
 
-#### SEC-06 · Permissões por perfil, não só por email
-**Risco**: sem distinção entre admin total, operador de estoque e visualizador. Todos ou nenhum.
-**Onde**: `src/middleware.ts` — valida apenas `ADMIN_EMAILS`.
-**Fix**: `UserRole enum { OWNER | OPERATOR | VIEWER }` no banco (tabela `StoreUser` ou campo em `Store`). Middleware consulta role e bloqueia rotas por escopo. Ex: operador acessa `/gestao/inventory` mas não `/gestao/financeiro`.
+#### SEC-06 · Roles por perfil — FORA DE ESCOPO ATÉ FASE 3
+**Nota**: Pedro é único admin. Não há operador nem visualizador ainda. Revisar quando parceiros pedirem login.
 
-#### SEC-07 · RLS Supabase — ativo mas não testado por tenant
-**Risco**: `prisma-rls.ts` existe e o RLS foi executado no Dashboard (Sessão 6), mas nunca foi testado com dois tenants simultâneos.
-**Fix**: criar teste manual — logar com conta de store B e tentar `GET /api/gestao/vehicles?storeId=<id-da-store-A>`. Esperar 0 resultados. Documentar o teste.
+#### SEC-07 · RLS multi-tenant — FORA DE ESCOPO ATÉ FASE 3
+**Nota**: só existe uma store em produção. Teste de cross-tenant irrelevante agora. Revisar ao onboar segundo parceiro com login próprio.
 
 #### SEC-08 · Separação de dados de demo vs produção
 **Risco**: 15 carros DEMO-HUB-* vivem no mesmo banco de produção. Se um cliente real acessar a vitrine, verá dados falsos.
@@ -324,31 +307,51 @@ Permissions-Policy: camera=(), microphone=(), geolocation=()
 | `robots.ts` bloqueia `/admin/` e `/api/` para crawlers | Sessão 6 |
 | `CRON_SECRET` como variável sensitiva na Vercel | Sessão 10 |
 | Bucket `vehicles` criado como PUBLIC (Storage) | Sessão 11 |
+| **SEC-01** IDOR eliminado: `assertVehicleOwnership()` em todas as mutations e rotas `/[id]` | Sessão 12 |
+| **SEC-02** storeId nunca mais aceito do cliente: injetado via `getActiveStore()` no server | Sessão 12 |
+| **SEC-03** Fallback `user_metadata.storeId` com `console.warn` de rastreamento | Sessão 12 |
+| **SEC-04** `sanitizeForLog()` no engine: credenciais nunca aparecem em logs de erro | Sessão 12 |
+| **SEC-10** Sync route verifica ownership da store antes de executar | Sessão 12 |
+| **SEC-12** CSP completa em `next.config.mjs`: `frame-ancestors`, `form-action`, origens explícitas | Sessão 12 |
 
 ---
 
-## 🔴 Alta Prioridade (próxima sessão)
+## 🔴 Alta Prioridade (próximas sessões)
 
-### ~~1. Adicionar `CRON_SECRET` na Vercel~~ ✅ FEITO (2026-05-12)
-- Adicionada como variável Sensitive no painel Vercel por Pedro
-- Sync automático de estoque (cron diário meia-noite) agora autenticado em produção
+### ~~1. `CRON_SECRET` na Vercel~~ ✅ FEITO
+### ~~2–6. Segurança Nível 0 (SEC-01 a SEC-04, SEC-10, SEC-12)~~ ✅ FEITO (Sessão 12)
 
-### 2. OG Image estática — fallback para páginas sem veículo
-- `/api/og?id=` dinâmica já funciona para veículos (Sessão 9)
-- Falta imagem estática `public/assets/brand/og-image.png` para home, blog index, embaixador, etc.
-- Dimensões: 1200×630px — criar em Canva/Figma
+### 1. Limpar dados de demo antes do 1º cliente real (SEC-08)
+- 15 carros DEMO-HUB-* estão no banco de produção — cliente verá dados falsos na vitrine
+- Rodar no Supabase SQL Editor antes do onboarding:
+```sql
+DELETE FROM "Vehicle" WHERE "externalId" LIKE 'DEMO-HUB-%';
+DELETE FROM "Partner" WHERE document = '12897456000183';
+```
+- **Fazer exatamente antes de onboarding do parceiro 1** — não antes, para não perder a vitrine de demonstração
 
-### 3. Fix filtro de câmbio no Estoque (`estoque-client.tsx`)
-- Mesmo problema do blog: match exato `v.transmission !== 'AUTOMATIC'` falha se DB tem `'Automático'`
-- Correção: normalizar em lowercase no filter, ou adicionar variações
-- Arquivo: `src/app/(platform)/estoque/estoque-client.tsx` linha 166
+### ~~2. Fix filtro de câmbio no Estoque~~ ✅ FEITO (Sessão 13)
+- `normalizeTransmission()` adicionada em `estoque-client.tsx` — converte `'Automático'`, `'PDK'`, `'AUTO'` para enum semântico
 
-### 4. PWA — Instalar como app no celular (quick win)
-- `next-pwa` + `manifest.json` + ícones → usuário instala a vitrine na tela inicial
-- Estimativa: 2–3h. Alto impacto de retenção mobile (foco na audiência ABCD)
+### ~~3. OG Image estática~~ ✅ FEITO (Sessão 13)
+- Arquivo existia em `/assets/brand/banners/OG.png` mas o código apontava para path errado (`og-image.png`)
+- Corrigido em: layout (default global), home, `/estoque`, `/blog`, `/embaixador`, JSON-LD da home
+- Páginas dinâmicas (`/veiculo/[id]`, `/blog/[slug]`, `/comprar/[brand]/[model]`) já tinham OG própria — não alteradas
 
-### 5. Testar adapters Cockpit / Revenda Mais / Motor21
-- Adapters implementados mas nunca testados com API real
+### 4. SEC-05 — Rate limit persistente (Upstash Redis)
+- Cadastrar conta gratuita em upstash.com → criar database Redis
+- `npm i @upstash/ratelimit @upstash/redis`
+- Adicionar `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` no `.env` e Vercel
+- Substituir `src/lib/rate-limit.ts` pela implementação Upstash
+- Estimativa: 1h
+
+### 5. PWA — Instalar como app no celular
+- `next-pwa` + `manifest.json` + ícones → vitrine instalável na tela inicial
+- Alto impacto de retenção mobile (audiência ABCD)
+- Estimativa: 2–3h
+
+### 6. Testar adapters Cockpit / Revenda Mais / Motor21
+- Implementados mas nunca testados com API real
 - Precisa: credenciais de um parceiro com cada DMS
 
 ---

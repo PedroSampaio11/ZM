@@ -22,6 +22,8 @@ export async function getActiveStore(): Promise<Store | null> {
 
   const storeId = user.user_metadata?.storeId as string | undefined
   if (storeId) {
+    // SEC-03: fallback legado — migrar todos os usuários para Store.ownerId e remover este bloco
+    console.warn(`[get-store] LEGACY fallback: user ${user.id} resolveu store via user_metadata.storeId — migrar para Store.ownerId`)
     return prisma.store.findFirst({ where: { id: storeId, isActive: true } })
   }
 

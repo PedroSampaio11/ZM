@@ -1,41 +1,51 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { getActiveStore } from '@/lib/get-store'
 import { CreateVehicleSchema } from '@/lib/schemas'
 import { VehicleStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
+// SEC-01: verifica que o veículo pertence à store do usuário autenticado
+async function assertVehicleOwnership(vehicleId: string, storeId: string): Promise<boolean> {
+  const vehicle = await prisma.vehicle.findFirst({ where: { id: vehicleId, storeId } })
+  return vehicle !== null
+}
+
 // ─── Novo cadastro com imagens e status ────────────────────────────────────────
+// SEC-02: storeId injetado via getActiveStore(), nunca aceito do cliente
 export async function createVehicleFull(data: {
-  storeId:      string
-  partnerId:    string
-  brand:        string
-  model:        string
-  version?:     string
-  year:         number
-  mileage:      number
-  price:        number
-  fuel?:        string
+  partnerId:     string
+  brand:         string
+  model:         string
+  version?:      string
+  year:          number
+  mileage:       number
+  price:         number
+  fuel?:         string
   transmission?: string
-  color?:       string
-  description?: string
-  images:       string[]
-  status:       'AVAILABLE' | 'INCOMING'
+  color?:        string
+  description?:  string
+  images:        string[]
+  status:        'AVAILABLE' | 'INCOMING'
 }) {
+  const store = await getActiveStore()
+  if (!store) return { error: 'Não autenticado' }
+
   try {
-    const input = CreateVehicleSchema.parse({ ...data, images: data.images })
+    const input = CreateVehicleSchema.parse({ ...data, storeId: store.id })
 
     const partner = await prisma.partner.findUnique({
       where:  { id: input.partnerId },
       select: { storeId: true },
     })
-    if (!partner || partner.storeId !== input.storeId) {
+    if (!partner || partner.storeId !== store.id) {
       return { error: 'Parceiro não pertence a esta loja' }
     }
 
     const vehicle = await prisma.vehicle.create({
       data: {
-        storeId:      input.storeId,
+        storeId:      store.id,
         partnerId:    input.partnerId,
         brand:        input.brand,
         model:        input.model,
@@ -61,9 +71,12 @@ export async function createVehicleFull(data: {
 }
 
 export async function createVehicle(formData: FormData) {
+  const store = await getActiveStore()
+  if (!store) return { error: 'Não autenticado' }
+
   try {
     const raw = {
-      storeId:      formData.get('storeId')      as string,
+      storeId:      store.id,
       partnerId:    formData.get('partnerId')    as string,
       brand:        formData.get('brand')        as string,
       model:        formData.get('model')        as string,
@@ -83,13 +96,13 @@ export async function createVehicle(formData: FormData) {
       where:  { id: input.partnerId },
       select: { storeId: true },
     })
-    if (!partner || partner.storeId !== input.storeId) {
+    if (!partner || partner.storeId !== store.id) {
       return { error: 'Parceiro não pertence a esta loja' }
     }
 
     await prisma.vehicle.create({
       data: {
-        storeId:      input.storeId,
+        storeId:      store.id,
         partnerId:    input.partnerId,
         brand:        input.brand,
         model:        input.model,
@@ -114,12 +127,25 @@ export async function createVehicle(formData: FormData) {
   }
 }
 
+// SEC-01: ownership verificado antes de qualquer mutation
 export async function updateVehicleStatus(vehicleId: string, status: VehicleStatus) {
+  const store = await getActiveStore()
+  if (!store) return
+
+  const owned = await assertVehicleOwnership(vehicleId, store.id)
+  if (!owned) return
+
   await prisma.vehicle.update({ where: { id: vehicleId }, data: { status } })
-  revalidatePath('/admin/inventory')
+  revalidatePath('/gestao/inventory')
 }
 
 export async function archiveVehicle(vehicleId: string) {
+  const store = await getActiveStore()
+  if (!store) return
+
+  const owned = await assertVehicleOwnership(vehicleId, store.id)
+  if (!owned) return
+
   await prisma.vehicle.update({ where: { id: vehicleId }, data: { status: 'ARCHIVED' } })
-  revalidatePath('/admin/inventory')
+  revalidatePath('/gestao/inventory')
 }

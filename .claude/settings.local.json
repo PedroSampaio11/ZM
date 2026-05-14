@@ -41,7 +41,11 @@
       "Bash(Get-ChildItem -Path \"src/app/\\(admin\\)/inventory\" -Recurse)",
       "Bash(xargs grep -l \"storage\\\\|upload\\\\|supabase\\\\|bucket\")",
       "Bash(xargs grep -l \"upload\\\\|supabase\\\\|bucket\\\\|storage\")",
-      "Bash(xargs grep -l \"FormData\\\\|FileList\\\\|file\\\\|File\")"
+      "Bash(xargs grep -l \"FormData\\\\|FileList\\\\|file\\\\|File\")",
+      "Skill(ui-ux-pro-max)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\" -Recurse -Filter \"*.tsx\" -o \"*.ts\" -o \"*.css\")",
+      "Bash(Sort-Object FullName)",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)"
     ]
   }
 }

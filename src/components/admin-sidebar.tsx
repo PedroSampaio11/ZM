@@ -2,24 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  LayoutDashboard,
-  Car,
-  LogOut,
-  TrendingUp,
-  MessageSquare,
-  Building2,
-  DollarSign,
-} from 'lucide-react'
+import { LayoutDashboard, Car, LogOut, MessageSquare, Building2, DollarSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logout } from '@/lib/auth-actions'
 
 const navigation = [
-  { name: 'Geral',       href: '/gestao',             icon: LayoutDashboard },
-  { name: 'Estoque',     href: '/gestao/inventory',   icon: Car },
-  { name: 'Lojas',       href: '/gestao/lojas',       icon: Building2 },
-  { name: 'Financeiro',  href: '/gestao/financeiro',  icon: DollarSign },
-  { name: 'Leads',       href: '/gestao/leads',       icon: MessageSquare },
+  { name: 'Geral',      href: '/gestao',            icon: LayoutDashboard },
+  { name: 'Estoque',    href: '/gestao/inventory',  icon: Car },
+  { name: 'Lojas',      href: '/gestao/lojas',      icon: Building2 },
+  { name: 'Financeiro', href: '/gestao/financeiro', icon: DollarSign },
+  { name: 'Leads',      href: '/gestao/leads',      icon: MessageSquare },
 ]
 
 const fmt = (n: number): string => {
@@ -28,80 +20,99 @@ const fmt = (n: number): string => {
   return `R$ ${Math.round(n)}`
 }
 
-interface SidebarMeta {
-  goalTotal: number
-  revenue:   number
-}
+interface SidebarMeta { goalTotal: number; revenue: number }
+interface AdminSidebarProps { meta: SidebarMeta | null }
 
-export function AdminSidebar({ meta }: { meta?: SidebarMeta | null }) {
+export function AdminSidebar({ meta }: AdminSidebarProps) {
   const pathname = usePathname()
-  const hasGoal  = meta && meta.goalTotal > 0
-  const pct      = hasGoal ? Math.min(100, Math.round((meta.revenue / meta.goalTotal) * 100)) : 0
+  const hasGoal  = meta !== null && meta.goalTotal > 0
+  const pct      = hasGoal ? Math.round((meta!.revenue / meta!.goalTotal) * 100) : 0
 
   return (
-    <aside className="w-64 border-r border-white/5 bg-black/20 backdrop-blur-xl flex flex-col h-screen sticky top-0 z-50">
-      <div className="p-8 flex items-center gap-3">
-        <img src="/assets/brand/logos/logo1.png" alt="motorz" className="h-7 w-auto" />
+    <aside className="w-[220px] shrink-0 border-r border-white/[0.06] flex flex-col h-screen sticky top-0 z-50">
+
+      {/* ── Logo ───────────────────────────────────────── */}
+      <div className="px-5 pt-7 pb-8">
+        <img src="/assets/brand/logos/logo1.png" alt="motorz" className="h-[22px] w-auto" />
       </div>
 
-      <nav className="flex-1 px-4 space-y-1.5 mt-2">
+      {/* ── Navigation ─────────────────────────────────── */}
+      <nav className="flex-1 px-2 space-y-px overflow-y-auto">
         {navigation.map((item) => {
-          const isActive = item.href === '/gestao' ? pathname === item.href : pathname.startsWith(item.href)
+          const isActive =
+            pathname === item.href ||
+            (item.href !== '/gestao' && pathname.startsWith(item.href))
+
           return (
             <Link
-              key={item.name}
+              key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-2.5 rounded-2xl text-[13px] font-bold transition-all group relative overflow-hidden",
+                'relative flex items-center gap-2.5 px-3 py-[9px] rounded-lg text-[13px] font-medium transition-all duration-150',
                 isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
+                  ? 'text-white bg-white/[0.07]'
+                  : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04]'
               )}
             >
               {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary rounded-r-full" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[18px] bg-[#2D5BFF] rounded-r-full" />
               )}
-              <item.icon className={cn(
-                "w-4 h-4 transition-colors",
-                isActive ? "text-primary" : "text-zinc-600 group-hover:text-zinc-400"
-              )} />
+              <item.icon
+                size={14}
+                className={cn(
+                  'shrink-0 transition-colors duration-150',
+                  isActive ? 'text-[#2D5BFF]' : 'text-zinc-600'
+                )}
+              />
               {item.name}
             </Link>
           )
         })}
       </nav>
 
-      <div className="p-6 border-t border-white/5 bg-white/[0.02]">
+      {/* ── Bottom ─────────────────────────────────────── */}
+      <div className="px-3 pb-5 pt-3 space-y-1">
+
+        {/* Goal card */}
         {hasGoal && (
-          <div className="bg-white/[0.03] border border-white/5 rounded-[24px] p-5 mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <div className={cn("p-1 rounded-md", pct >= 100 ? "bg-green-500/10" : "bg-primary/10")}>
-                <TrendingUp size={12} className={pct >= 100 ? 'text-green-400' : 'text-primary'} />
-              </div>
-              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.15em]">Meta Mensal</span>
-            </div>
-            <div className="flex justify-between items-end mb-2">
-              <span className="text-lg font-black text-white tracking-tight">{fmt(meta.revenue)}</span>
-              <span className={cn('text-[10px] font-black', pct >= 100 ? 'text-green-400' : 'text-zinc-500')}>
-                {pct}%
-              </span>
-            </div>
-            <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+          <div className="rounded-xl border border-white/[0.06] p-4 mb-2">
+            <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.12em] mb-3">
+              Receita do mês
+            </p>
+
+            <p className={cn(
+              'text-[22px] font-black tracking-tight leading-none mb-1',
+              pct >= 100 ? 'text-green-400' : 'text-white'
+            )}>
+              {fmt(meta!.revenue)}
+            </p>
+            <p className="text-[11px] text-zinc-600 mb-3">de {fmt(meta!.goalTotal)}</p>
+
+            <div className="w-full h-[2px] bg-white/[0.06] rounded-full overflow-hidden">
               <div
-                className={cn('h-full rounded-full transition-all duration-1000', pct >= 100 ? 'bg-green-400' : 'bg-primary')}
-                style={{ width: `${pct}%` }}
+                className={cn(
+                  'h-full rounded-full transition-all duration-700 ease-out',
+                  pct >= 100 ? 'bg-green-400' : 'bg-[#2D5BFF]'
+                )}
+                style={{ width: `${Math.min(100, pct)}%` }}
               />
             </div>
-            <p className="text-[9px] text-zinc-600 mt-2 font-bold uppercase tracking-wider">meta: {fmt(meta.goalTotal)}</p>
+            <p className={cn(
+              'text-[10px] font-medium mt-1.5',
+              pct >= 100 ? 'text-green-400' : 'text-zinc-600'
+            )}>
+              {pct >= 100 ? '✓ meta atingida' : `${pct}% da meta`}
+            </p>
           </div>
         )}
 
+        {/* Logout */}
         <form action={logout}>
           <button
             type="submit"
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-[13px] font-bold text-zinc-500 hover:text-red-400 hover:bg-red-400/5 transition-all group"
+            className="flex items-center gap-2.5 px-3 py-2 w-full rounded-lg text-[13px] font-medium text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.04] transition-all duration-150 group"
           >
-            <LogOut className="w-4 h-4 text-zinc-600 group-hover:text-red-400/70" />
+            <LogOut size={13} className="shrink-0 group-hover:text-zinc-300 transition-colors duration-150" />
             Sair
           </button>
         </form>

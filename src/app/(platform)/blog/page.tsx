@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Blog Motorz — Guias de Compra Automotiva',
     description: 'Encontre o carro ideal com guias curados pela equipe Motorz.',
     url: 'https://motorz.com.br/blog',
-    images: [{ url: 'https://motorz.com.br/api/og', width: 1200, height: 630 }],
+    images: [{ url: '/assets/brand/banners/OG.png', width: 1200, height: 630, alt: 'Blog Motorz — Guias de Compra Automotiva' }],
   },
 };
 

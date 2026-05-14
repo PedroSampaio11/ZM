@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { getActiveStore } from '@/lib/get-store';
 import { prisma } from '@/lib/prisma';
 import { CreateVehicleSchema } from '@/lib/schemas';
 import { VehicleStatus } from '@prisma/client';
@@ -7,21 +8,20 @@ import { ZodError, z } from 'zod';
 
 const vehicleStatusSchema = z.nativeEnum(VehicleStatus);
 
-// GET /api/admin/vehicles?storeId=xxx&partnerId=xxx&status=xxx&page=1&limit=20
+// GET /api/gestao/vehicles?partnerId=xxx&status=xxx&page=1&limit=20
+// SEC-02: storeId vem do getActiveStore(), nunca do query param
 export async function GET(req: NextRequest) {
   const { error } = await requireAuth();
   if (error) return error;
 
+  const store = await getActiveStore();
+  if (!store) return NextResponse.json({ error: 'Store não encontrada' }, { status: 403 });
+
   const { searchParams } = req.nextUrl;
-  const storeId   = searchParams.get('storeId');
   const partnerId = searchParams.get('partnerId');
   const statusRaw = searchParams.get('status');
   const page      = parseInt(searchParams.get('page')  ?? '1');
   const limit     = parseInt(searchParams.get('limit') ?? '20');
-
-  if (!storeId) {
-    return NextResponse.json({ error: 'storeId é obrigatório' }, { status: 400 });
-  }
 
   let statusFilter: VehicleStatus | undefined;
   if (statusRaw) {
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   }
 
   const where = {
-    storeId,
+    storeId: store.id,
     ...(partnerId    ? { partnerId }            : {}),
     ...(statusFilter ? { status: statusFilter } : {}),
   };
@@ -54,16 +54,19 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ vehicles, total, page, limit });
 }
 
-// POST /api/admin/vehicles — cadastro manual
+// POST /api/gestao/vehicles — cadastro manual
+// SEC-02: storeId injetado do servidor, nunca do body
 export async function POST(req: NextRequest) {
   const { error } = await requireAuth();
   if (error) return error;
 
+  const store = await getActiveStore();
+  if (!store) return NextResponse.json({ error: 'Store não encontrada' }, { status: 403 });
+
   try {
     const body  = await req.json();
-    const input = CreateVehicleSchema.parse(body);
+    const input = CreateVehicleSchema.parse({ ...body, storeId: store.id });
 
-    // Verifica que o parceiro pertence à store
     const partner = await prisma.partner.findUnique({
       where:  { id: input.partnerId },
       select: { id: true, storeId: true },
@@ -71,7 +74,7 @@ export async function POST(req: NextRequest) {
     if (!partner) {
       return NextResponse.json({ error: 'Parceiro não encontrado' }, { status: 404 });
     }
-    if (partner.storeId !== input.storeId) {
+    if (partner.storeId !== store.id) {
       return NextResponse.json({ error: 'Parceiro não pertence a esta store' }, { status: 403 });
     }
 
@@ -84,7 +87,7 @@ export async function POST(req: NextRequest) {
 
     const vehicle = await prisma.vehicle.create({
       data: {
-        storeId:      input.storeId,
+        storeId:      store.id,
         partnerId:    input.partnerId,
         brand:        input.brand,
         model:        input.model,
@@ -109,7 +112,7 @@ export async function POST(req: NextRequest) {
     if (err instanceof ZodError) {
       return NextResponse.json({ error: 'Dados inválidos', details: err.errors }, { status: 400 });
     }
-    console.error('[POST /api/admin/vehicles]', err);
+    console.error('[POST /api/gestao/vehicles]', err);
     return NextResponse.json({ error: 'Erro ao criar veículo' }, { status: 500 });
   }
 }
