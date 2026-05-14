@@ -149,7 +149,22 @@ export function LiveActivity({ vehicles }: Props) {
         <div style={{ width: '48px', height: '48px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#f1f5f9', position: 'relative' }}>
           {current.image
             ? <Image src={current.image} alt={current.model} fill sizes="48px" style={{ objectFit: 'cover' }} unoptimized />
-            : <div style={{ width: '100%', height: '100%', background: '#e2e8f0' }} />
+            : (
+              <div style={{ 
+                width: '100%', 
+                height: '100%', 
+                background: 'rgba(18, 67, 178, 0.1)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                color: '#1243B2', 
+                fontWeight: 800, 
+                fontSize: '18px',
+                textTransform: 'uppercase'
+              }}>
+                {current.name[0]}
+              </div>
+            )
           }
         </div>
 
