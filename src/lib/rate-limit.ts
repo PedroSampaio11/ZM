@@ -1,50 +1,72 @@
-// SEC-05: rate limiter em memória — resetado a cada deploy na Vercel.
-// Antes do 1º cliente pagar, migrar para Upstash Redis:
-//   npm i @upstash/ratelimit @upstash/redis
-//   https://upstash.com (plano grátis cobre o MVP)
+// SEC-05: rate limiter com Upstash Redis (persistente entre deploys).
+// Se UPSTASH_REDIS_REST_URL não estiver configurado, cai no fallback em memória (dev).
+// Setup: upstash.com → criar Redis DB → copiar URL e TOKEN para .env.local e Vercel.
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-interface Window {
-  count: number;
-  resetAt: number;
-}
-
-const store = new Map<string, Window>();
-
-function pruneStore() {
-  const now = Date.now();
-  for (const [key, win] of store) {
-    if (win.resetAt < now - 10 * 60_000) store.delete(key);
-  }
-}
 
 export interface RateLimitOptions {
   maxRequests: number;
   windowMs: number;
 }
 
-export function rateLimit(req: NextRequest, opts: RateLimitOptions): NextResponse | null {
+// ── Fallback em memória (dev / Upstash não configurado) ────────────────────────
+interface MemWindow { count: number; resetAt: number }
+const memStore = new Map<string, MemWindow>();
+
+function memLimit(ip: string, max: number, windowMs: number): boolean {
+  const now = Date.now();
+  const win = memStore.get(ip);
+  if (!win || win.resetAt <= now) {
+    memStore.set(ip, { count: 1, resetAt: now + windowMs });
+    // limpa entradas antigas a cada novo registro
+    for (const [k, w] of memStore) {
+      if (w.resetAt < now - 10 * 60_000) memStore.delete(k);
+    }
+    return true;
+  }
+  win.count++;
+  return win.count <= max;
+}
+
+// ── Upstash (sliding window, persistente) ─────────────────────────────────────
+async function upstashLimit(ip: string, max: number, windowSec: number): Promise<boolean> {
+  const { Ratelimit } = await import('@upstash/ratelimit');
+  const { Redis }     = await import('@upstash/redis');
+
+  const rl = new Ratelimit({
+    redis:   Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(max, `${windowSec}s`),
+    prefix:  'mz_rl',
+  });
+
+  const { success } = await rl.limit(ip);
+  return success;
+}
+
+// ── Exportação principal ───────────────────────────────────────────────────────
+export async function rateLimit(req: NextRequest, opts: RateLimitOptions): Promise<NextResponse | null> {
   const ip =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     req.headers.get('x-real-ip') ??
     'unknown';
 
-  const now = Date.now();
-  const win = store.get(ip);
+  let allowed: boolean;
 
-  if (!win || win.resetAt <= now) {
-    store.set(ip, { count: 1, resetAt: now + opts.windowMs });
-    pruneStore();
-    return null;
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    try {
+      allowed = await upstashLimit(ip, opts.maxRequests, Math.ceil(opts.windowMs / 1000));
+    } catch {
+      // Upstash indisponível → fallback silencioso, não bloqueia tráfego legítimo
+      allowed = memLimit(ip, opts.maxRequests, opts.windowMs);
+    }
+  } else {
+    allowed = memLimit(ip, opts.maxRequests, opts.windowMs);
   }
 
-  win.count++;
-  if (win.count > opts.maxRequests) {
-    const retryAfter = Math.ceil((win.resetAt - now) / 1000);
+  if (!allowed) {
     return NextResponse.json(
       { error: 'Muitas requisições. Tente novamente em breve.' },
-      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+      { status: 429, headers: { 'Retry-After': '60' } }
     );
   }
 

@@ -10,7 +10,7 @@ const leadStatusSchema = z.nativeEnum(LeadStatus);
 
 // POST /api/leads — Captura um novo lead
 export async function POST(req: NextRequest) {
-  const limited = rateLimit(req, { maxRequests: 10, windowMs: 60_000 });
+  const limited = await rateLimit(req, { maxRequests: 10, windowMs: 60_000 });
   if (limited) return limited;
 
   try {

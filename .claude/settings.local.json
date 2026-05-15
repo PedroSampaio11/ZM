@@ -45,7 +45,8 @@
       "Skill(ui-ux-pro-max)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\" -Recurse -Filter \"*.tsx\" -o \"*.ts\" -o \"*.css\")",
       "Bash(Sort-Object FullName)",
-      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)"
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
+      "Bash(npm i *)"
     ]
   }
 }

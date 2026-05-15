@@ -1,0 +1,46 @@
+{
+  "name": "Motorz",
+  "short_name": "Motorz",
+  "description": "Marketplace Automotivo do ABCD Paulista — Encontre seu próximo carro com curadoria premium.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#1243B2",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "categories": ["shopping", "automotive"],
+  "icons": [
+    {
+      "src": "/assets/images/MZAPP.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/MZAPP.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/brand/banners/OG.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Motorz — Catálogo de veículos do ABCD Paulista"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ver estoque",
+      "short_name": "Estoque",
+      "url": "/estoque",
+      "icons": [{ "src": "/assets/images/MZAPP.png", "sizes": "96x96" }]
+    }
+  ]
+}

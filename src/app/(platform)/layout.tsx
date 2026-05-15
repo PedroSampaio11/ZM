@@ -4,6 +4,7 @@ import localFont from 'next/font/local';
 import './platform.css';
 import { TopNav, BottomNav } from './nav-client';
 import { Footer } from './footer-client';
+import { PWARegister } from '@/components/pwa-register';
 
 const onest = Onest({
   subsets: ['latin'],
@@ -65,12 +66,20 @@ export const metadata: Metadata = {
     icon: '/assets/images/MZAPP.png',
     apple: '/assets/images/MZAPP.png',
   },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Motorz',
+  },
+  themeColor: '#1243B2',
 };
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${onest.variable} ${calSans.variable}`}>
       <body>
+        <PWARegister />
         <TopNav />
         <main className="main-content">{children}</main>
         <Footer />
