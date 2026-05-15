@@ -75,6 +75,7 @@ export function LiveActivity({ vehicles }: Props) {
   const activities = useRef<ActivityItem[]>([]);
   const [current, setCurrent] = useState<ActivityItem | null>(null);
   const [visible, setVisible] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false);
   const indexRef = useRef(0);
   const lastNameRef = useRef('');
 
@@ -112,6 +113,7 @@ export function LiveActivity({ vehicles }: Props) {
     if (items.length === 0) return;
 
     const item = nextItem();
+    setImgFailed(false);
     setCurrent(item);
     setVisible(true);
 
@@ -147,25 +149,33 @@ export function LiveActivity({ vehicles }: Props) {
         gap: '12px',
       }}>
         <div style={{ width: '48px', height: '48px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#f1f5f9', position: 'relative' }}>
-          {current.image
-            ? <Image src={current.image} alt={current.model} fill sizes="48px" style={{ objectFit: 'cover' }} unoptimized />
-            : (
-              <div style={{ 
-                width: '100%', 
-                height: '100%', 
-                background: 'rgba(18, 67, 178, 0.1)', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                color: '#1243B2', 
-                fontWeight: 800, 
-                fontSize: '18px',
-                textTransform: 'uppercase'
-              }}>
-                {current.name[0]}
-              </div>
-            )
-          }
+          {current.image && !imgFailed ? (
+            <Image
+              src={current.image}
+              alt={current.model}
+              fill
+              sizes="48px"
+              style={{ objectFit: 'cover' }}
+              unoptimized
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            <div style={{
+              width: '100%',
+              height: '100%',
+              background: 'rgba(18, 67, 178, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#1243B2',
+              fontWeight: 900,
+              fontSize: '16px',
+              letterSpacing: '0.02em',
+              textTransform: 'uppercase',
+            }}>
+              {current.brand.slice(0, 2)}
+            </div>
+          )}
         </div>
 
         <div style={{ minWidth: 0 }}>

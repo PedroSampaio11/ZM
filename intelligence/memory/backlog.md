@@ -1,5 +1,5 @@
 # Backlog — motorz
-**Sessão**: 13 | **Data**: 2026-05-14 | **TypeScript**: 0 erros ✅
+**Sessão**: 14 | **Data**: 2026-05-15 | **TypeScript**: 0 erros ✅
 
 ---
 
@@ -337,6 +337,12 @@ DELETE FROM "Partner" WHERE document = '12897456000183';
 - Arquivo existia em `/assets/brand/banners/OG.png` mas o código apontava para path errado (`og-image.png`)
 - Corrigido em: layout (default global), home, `/estoque`, `/blog`, `/embaixador`, JSON-LD da home
 - Páginas dinâmicas (`/veiculo/[id]`, `/blog/[slug]`, `/comprar/[brand]/[model]`) já tinham OG própria — não alteradas
+
+### ~~Blindagem de imagens e error boundaries~~ ✅ FEITO (Sessão 14)
+- CSP `img-src` estava bloqueando imagens de parceiros externos (viabrasil etc.) → corrigido para `img-src https:`
+- `live-activity.tsx`: `imgFailed` state + `onError` → fallback para iniciais da marca (`"HO"`, `"VW"`)
+- `vehicle-details-client.tsx`: `failedImages: Set<number>` + `onError` em imagem principal e thumbnails → fallback `VehiclePlaceholder`
+- `src/app/(admin)/gestao/error.tsx`: error boundary do painel admin criado (digest + reset sem reload)
 
 ### 4. SEC-05 — Rate limit persistente (Upstash Redis)
 - Cadastrar conta gratuita em upstash.com → criar database Redis

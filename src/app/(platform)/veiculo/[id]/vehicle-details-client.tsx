@@ -218,7 +218,12 @@ function seededViews(id: string, featured: boolean): number {
 export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: Props) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const [copied, setCopied] = useState(false);
+
+  function markFailed(idx: number) {
+    setFailedImages(prev => new Set(prev).add(idx));
+  }
   const { toggle, isFav } = useFavorites();
   const { items: recentItems, track } = useRecentlyViewed();
 
@@ -247,7 +252,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
   }
 
   const images = vehicle.images ?? [];
-  const hasImages = images.length > 0;
+  const hasImages = images.length > 0 && !failedImages.has(activeImage);
 
   return (
     <div className={`platform-container pb-24 ${isFeatured ? 'featured-product-theme' : ''}`}>
@@ -287,6 +292,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
                 unoptimized={!images[activeImage].includes('supabase.co')}
+                onError={() => markFailed(activeImage)}
               />
             ) : (
               <VehiclePlaceholder brand={vehicle.brand} model={vehicle.model} />
@@ -313,7 +319,9 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
                     onClick={() => setActiveImage(idx)}
                     className={`relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? (isFeatured ? 'border-motorz-gold opacity-100' : 'border-mz-royal opacity-100') : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
-                    <Image src={img} alt={`Foto ${idx + 1}`} fill sizes="96px" className="object-cover" unoptimized={!img.includes('unsplash.com') && !img.includes('supabase.co')} />
+                    {!failedImages.has(idx) && (
+                      <Image src={img} alt={`Foto ${idx + 1}`} fill sizes="96px" className="object-cover" unoptimized={!img.includes('unsplash.com') && !img.includes('supabase.co')} onError={() => markFailed(idx)} />
+                    )}
                   </button>
                 ))}
               </div>
