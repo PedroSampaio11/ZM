@@ -12,6 +12,7 @@ import { useFavorites } from '@/hooks/use-favorites';
 import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
 import { computeMotorzScore, getScoreDisplay } from '@/lib/motorz-score';
 import { VehiclePlaceholder } from '@/components/vehicle-placeholder';
+import { sanitizeImages, sanitizeImageUrl } from '@/lib/utils';
 import type { RelatedVehicle } from './page';
 
 interface Props {
@@ -194,7 +195,7 @@ function RecentlyViewedSection({ current, items }: { current: string; items: Rec
         {visible.map(v => (
           <Link key={v.id} href={`/veiculo/${v.id}`} style={{ textDecoration: 'none', flexShrink: 0, width: '160px', background: 'white', borderRadius: '16px', border: '1px solid var(--border)', overflow: 'hidden', display: 'block' }}>
             <div style={{ aspectRatio: '16/10', position: 'relative', background: 'var(--mz-ash)' }}>
-              {v.image && <Image src={v.image} alt={`${v.brand} ${v.model}`} fill sizes="160px" style={{ objectFit: 'cover' }} unoptimized={!v.image.includes('supabase.co')} />}
+              {(() => { const imgUrl = sanitizeImageUrl(v.image); return imgUrl ? <Image src={imgUrl} alt={`${v.brand} ${v.model}`} fill sizes="160px" style={{ objectFit: 'cover' }} /> : null; })()}
             </div>
             <div style={{ padding: '10px 12px' }}>
               <p style={{ fontSize: '9px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '2px' }}>{v.brand}</p>
@@ -221,9 +222,21 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const [copied, setCopied] = useState(false);
 
+  // Sanitize ALL image URLs once: upgrades http→https, drops empty/invalid
+  const images = sanitizeImages(vehicle.images);
+
   function markFailed(idx: number) {
     setFailedImages(prev => new Set(prev).add(idx));
   }
+
+  // When active image fails, auto-advance to next working one
+  useEffect(() => {
+    if (!failedImages.has(activeImage)) return;
+    for (let i = 1; i < images.length; i++) {
+      const next = (activeImage + i) % images.length;
+      if (!failedImages.has(next)) { setActiveImage(next); return; }
+    }
+  }, [failedImages, activeImage, images.length]);
   const { toggle, isFav } = useFavorites();
   const { items: recentItems, track } = useRecentlyViewed();
 
@@ -233,7 +246,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
       sessionStorage.setItem(key, '1');
       fetch(`/api/vehicles/${vehicle.id}/view`, { method: 'POST' }).catch(() => {});
     }
-    track({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?.[0] ?? null });
+    track({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: images[0] ?? null });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicle.id]);
 
@@ -251,8 +264,8 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
     setTimeout(() => setCopied(false), 2500);
   }
 
-  const images = vehicle.images ?? [];
-  const hasImages = images.length > 0 && !failedImages.has(activeImage);
+  // hasImages: true as long as at least one image hasn't failed
+  const hasImages = images.length > 0 && images.some((_, idx) => !failedImages.has(idx));
 
   return (
     <div className={`platform-container pb-24 ${isFeatured ? 'featured-product-theme' : ''}`}>
@@ -291,7 +304,6 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
                 priority
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover"
-                unoptimized={!images[activeImage].includes('supabase.co')}
                 onError={() => markFailed(activeImage)}
               />
             ) : (
@@ -320,7 +332,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
                     className={`relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? (isFeatured ? 'border-motorz-gold opacity-100' : 'border-mz-royal opacity-100') : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
                     {!failedImages.has(idx) && (
-                      <Image src={img} alt={`Foto ${idx + 1}`} fill sizes="96px" className="object-cover" unoptimized={!img.includes('unsplash.com') && !img.includes('supabase.co')} onError={() => markFailed(idx)} />
+                      <Image src={img} alt={`Foto ${idx + 1}`} fill sizes="96px" className="object-cover" onError={() => markFailed(idx)} />
                     )}
                   </button>
                 ))}
@@ -378,7 +390,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
           <div className={`mb-10 p-8 rounded-[32px] border shadow-xl flex flex-col items-start gap-2 relative overflow-hidden transition-all hover:shadow-2xl ${isFeatured ? 'border-motorz-gold/30 bg-motorz-carbon text-white' : 'border-border bg-white'}`}>
             {/* Favorite button — top right of price card */}
             <button
-              onClick={() => toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?. [0] ?? null })}
+              onClick={() => toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: images[0] ?? null })}
               aria-label={isFav(vehicle.id) ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
               style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 2, background: 'transparent', border: 'none', cursor: 'pointer', color: isFav(vehicle.id) ? '#e11d48' : (isFeatured ? 'rgba(255,255,255,0.4)' : 'var(--mz-slate-dim)'), padding: '4px' }}
             >
@@ -618,7 +630,7 @@ export function VehicleDetailsClient({ vehicle, isFeatured, relatedVehicles }: P
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
               >
                 <div style={{ aspectRatio: '16/10', position: 'relative', background: 'var(--mz-ash)' }}>
-                  {r.images?.[0] && <Image src={r.images[0]} alt={`${r.brand} ${r.model}`} fill sizes="280px" style={{ objectFit: 'cover' }} unoptimized={!r.images[0].includes('supabase.co')} />}
+                  {(() => { const imgUrl = sanitizeImageUrl(r.images?.[0]); return imgUrl ? <Image src={imgUrl} alt={`${r.brand} ${r.model}`} fill sizes="280px" style={{ objectFit: 'cover' }} /> : null; })()}
                 </div>
                 <div style={{ padding: '16px' }}>
                   <p style={{ fontSize: '10px', fontWeight: 800, color: 'var(--mz-royal)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>{r.brand}</p>

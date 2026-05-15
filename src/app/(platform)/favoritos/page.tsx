@@ -78,7 +78,7 @@ export default function FavoritosPage() {
                 <Link href={`/veiculo/${v.id}`} style={{ display: 'block', textDecoration: 'none' }}>
                   <div style={{ aspectRatio: '16/10', position: 'relative', background: 'var(--mz-ash)' }}>
                     {v.image ? (
-                      <Image src={v.image} alt={`${v.brand} ${v.model}`} fill style={{ objectFit: 'cover' }} unoptimized={!v.image.includes('supabase.co')} sizes="(max-width: 640px) 100vw, 33vw" />
+                      <Image src={v.image} alt={`${v.brand} ${v.model}`} fill style={{ objectFit: 'cover' }} sizes="(max-width: 640px) 100vw, 33vw" />
                     ) : (
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--mz-slate-dim)', fontSize: '12px', fontWeight: 600 }}>
                         Sem imagem

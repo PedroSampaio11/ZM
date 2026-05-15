@@ -8,6 +8,7 @@ import { MessageCircle, Heart } from 'lucide-react';
 import { useFavorites } from '@/hooks/use-favorites';
 import { computeMotorzScore, getScoreDisplay } from '@/lib/motorz-score';
 import { VehiclePlaceholder } from '@/components/vehicle-placeholder';
+import { sanitizeImageUrl } from '@/lib/utils';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -42,7 +43,8 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
   const age    = daysAgo(vehicle.createdAt);
   const isNew  = age <= 7;
 
-  const hasImage = !imgError && Boolean(vehicle.images?.[0]);
+  const firstImage = sanitizeImageUrl(vehicle.images?.[0]);
+  const hasImage = !imgError && firstImage !== null;
 
   return (
     <div
@@ -59,14 +61,13 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
       <div className="zoom-container" style={{ aspectRatio: '16/10', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         {hasImage ? (
           <Image
-            src={vehicle.images![0]}
+            src={firstImage!}
             alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             loading={index < 4 ? 'eager' : 'lazy'}
             onError={() => setImgError(true)}
             style={{ objectFit: 'cover' }}
-            unoptimized={!vehicle.images![0].includes('supabase.co')}
           />
         ) : (
           <VehiclePlaceholder brand={vehicle.brand} model={vehicle.model} />
@@ -104,7 +105,7 @@ export function VehicleCard({ vehicle, onInterest, index = 0, featured = false }
 
         {/* Top-right: Favorite button */}
         <button
-          onClick={e => { e.preventDefault(); e.stopPropagation(); toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: vehicle.images?.[0] ?? null }); }}
+          onClick={e => { e.preventDefault(); e.stopPropagation(); toggle({ id: vehicle.id, brand: vehicle.brand, model: vehicle.model, year: vehicle.year, price: vehicle.price, image: firstImage }); }}
           aria-label={isFav(vehicle.id) ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
           style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'transform 0.15s', color: isFav(vehicle.id) ? '#e11d48' : 'var(--mz-slate)' }}
         >

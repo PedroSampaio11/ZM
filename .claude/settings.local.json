@@ -46,7 +46,12 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\" -Recurse -Filter \"*.tsx\" -o \"*.ts\" -o \"*.css\")",
       "Bash(Sort-Object FullName)",
       "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
-      "Bash(npm i *)"
+      "Bash(npm i *)",
+      "Bash(npx tsx -e ' *)",
+      "Bash(curl *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('next:', d['dependencies'].get\\('next'\\)\\); print\\('react:', d['dependencies'].get\\('react'\\)\\)\")",
+      "PowerShell(cd \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\"; \\(Get-Content package.json | ConvertFrom-Json\\).dependencies | Select-Object next, react)",
+      "PowerShell(cd \"C:\\\\Users\\\\pedro\\\\Downloads\\\\ZM\"; $pkg = Get-Content package.json | ConvertFrom-Json; Write-Host \"next: $\\($pkg.dependencies.next\\)\"; Write-Host \"react: $\\($pkg.dependencies.react\\)\")"
     ]
   }
 }

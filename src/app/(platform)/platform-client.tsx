@@ -598,7 +598,7 @@ export function PlatformClient({ vehicles, incomingVehicles, totalVehicles, tota
               <div style={{ display: 'flex', position: 'relative' }}>
                 {[1,2,3].map(i => (
                   <div key={i} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid white', background: 'var(--mz-frost)', marginLeft: i === 1 ? 0 : '-12px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-                    <img src={`https://i.pravatar.cc/100?img=${i+25}`} alt="User" />
+                    <img src={`/assets/avatars/${i}.png`} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 ))}
                 <div style={{ position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', background: '#22C55E', borderRadius: '50%', border: '2px solid white' }} />
@@ -1113,7 +1113,7 @@ export function PlatformClient({ vehicles, incomingVehicles, totalVehicles, tota
       />
       
       <ZmChat />
-      <LiveActivity vehicles={vehicles.slice(0, 12).map(v => ({ id: v.id, brand: v.brand, model: v.model, year: v.year, images: v.images ?? [] }))} />
+      <LiveActivity vehicles={vehicles.filter(v => (v.images?.length ?? 0) > 0).map(v => ({ id: v.id, brand: v.brand, model: v.model, year: v.year, images: v.images! }))} />
     </div>
   );
 }

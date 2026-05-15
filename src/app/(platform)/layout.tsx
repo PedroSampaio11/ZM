@@ -4,7 +4,7 @@ import localFont from 'next/font/local';
 import './platform.css';
 import { TopNav, BottomNav } from './nav-client';
 import { Footer } from './footer-client';
-import { PWARegister } from '@/components/pwa-register';
+import { PWARegister } from '@/components/pwa-register'
 
 const onest = Onest({
   subsets: ['latin'],

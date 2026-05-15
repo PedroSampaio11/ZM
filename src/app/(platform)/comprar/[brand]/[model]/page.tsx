@@ -132,7 +132,7 @@ export default async function ComprarModeloPage({ params }: Props) {
                 <Link key={v.id} href={`/veiculo/${v.id}`} style={{ textDecoration: 'none', display: 'block', background: 'white', borderRadius: '24px', border: '1px solid var(--border)', overflow: 'hidden' }}>
                   <div style={{ aspectRatio: '16/10', position: 'relative', background: 'var(--mz-ash)' }}>
                     {v.images?.[0] && (
-                      <Image src={v.images[0]} alt={`${v.brand} ${v.model} ${v.year}`} fill sizes="(max-width: 640px) 100vw, 33vw" style={{ objectFit: 'cover' }} unoptimized={!v.images[0].includes('supabase.co')} />
+                      <Image src={v.images[0]} alt={`${v.brand} ${v.model} ${v.year}`} fill sizes="(max-width: 640px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
                     )}
                     <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(15,23,42,0.8)', backdropFilter: 'blur(8px)', padding: '5px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 800, color: 'white' }}>
                       {v.year}

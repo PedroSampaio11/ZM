@@ -5,21 +5,26 @@ const nextConfig = {
 
   images: {
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 86400, // 24h cache for optimized images
+    minimumCacheTTL: 86400,
+    dangerouslyAllowSVG: false,
     remotePatterns: [
-      { protocol: 'https', hostname: 'images.unsplash.com' },
+      // Supabase Storage (uploads manuais)
       { protocol: 'https', hostname: '*.supabase.co' },
-      // DMS partners CDNs
+      // Integrações DMS — autocerto, cockpit, revenda mais, motor21
+      { protocol: 'https', hostname: 'autocerto.com' },
+      { protocol: 'https', hostname: '*.autocerto.com' },
       { protocol: 'https', hostname: '*.autocerto.com.br' },
       { protocol: 'https', hostname: '*.cockpit.com.br' },
       { protocol: 'https', hostname: '*.revendamais.com.br' },
       { protocol: 'https', hostname: '*.motor21.com.br' },
+      // Catch-all: qualquer CDN externo HTTPS (marketplace multi-integração)
+      // Novo DMS integrado? Funciona automaticamente, sem alterar este arquivo.
+      { protocol: 'https', hostname: '**' },
     ],
   },
 
   async headers() {
     return [
-      // Security headers for all routes
       {
         source: '/(.*)',
         headers: [
@@ -44,19 +49,13 @@ const nextConfig = {
           },
         ],
       },
-      // Aggressive cache for static assets
       {
         source: '/assets/(.*)',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
-      // Font cache
       {
         source: '/fonts/(.*)',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
     ];
   },

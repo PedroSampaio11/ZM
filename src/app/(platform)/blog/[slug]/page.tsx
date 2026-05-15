@@ -319,7 +319,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
                     <Link key={v.id} href={`/veiculo/${v.id}`} className="blc">
                       <div style={{ aspectRatio: '16/10', position: 'relative', background: 'var(--mz-ash)' }}>
                         {v.images?.[0] && (
-                          <Image src={v.images[0]} alt={`${v.brand} ${v.model} ${v.year} — Motorz ABCD`} fill sizes="(max-width: 640px) 100vw, 300px" style={{ objectFit: 'cover' }} unoptimized />
+                          <Image src={v.images[0]} alt={`${v.brand} ${v.model} ${v.year} — Motorz ABCD`} fill sizes="(max-width: 640px) 100vw, 300px" style={{ objectFit: 'cover' }} />
                         )}
                         {/* Score badge */}
                         <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', borderRadius: '20px', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: '5px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
